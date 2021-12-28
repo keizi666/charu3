@@ -1,0 +1,28 @@
+
+□clphistry.dat 履歴ファイル
+
+4byte データ件数
+
+{
+4byte データの長さ
+nbyte テキストデータ
+}繰り返し
+
+
+□tctitle.dat タイトルファイル
+
+4byte データ件数
+{
+4byte データの長さ
+nbyte テキストデータ
+}
+
+
+□tctext.dat 定型文ファイル
+
+4byte データ件数
+{
+4byte データの長さ
+nbyte テキストデータ
+}
+
