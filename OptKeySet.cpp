@@ -314,7 +314,7 @@ void COptKeySet::OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 
 	if(pNMListView->uOldState != 0) return;
-	long lParam;
+	DWORD_PTR lParam;
 
 	lParam = m_ctrlIniList.GetItemData(pNMListView->iItem);//選択データのアドレスを取得
 	memcpy((void*)&m_itSelect,&lParam,sizeof(m_itSelect));

@@ -28,19 +28,19 @@ CMyTreeDialog::CMyTreeDialog(CWnd* pParent /*=NULL*/) : CDialog(CMyTreeDialog::I
 {
 	//{{AFX_DATA_INIT(CMyTreeDialog)
 	//}}AFX_DATA_INIT
-	m_selectIT = NULL;
+	m_selectIT_valid = false;
 	m_brBack.m_hObject = NULL;
 
 	m_isInitOK = false;
 	m_isModal = true;
 	m_isAltDown = false;
-	m_itDbClick = NULL;
-	m_hCopyData = NULL;
+	m_itDbClick_valid = false;
+	m_hCopyData = nullptr;
 	m_dwStartTime = 0;
 
 	m_hDLL = NULL;
 	m_pExStyle = NULL;
-	m_cOlgFont = NULL;
+	m_cOlgFont = nullptr;
 
 	m_strQuickKey = "";
 }
@@ -213,11 +213,11 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelec
 	CGeneral::setAbsoluteForegroundWindow(theApp.m_pMainFrame->m_hWnd);
 	m_pTreeCtrl->SetFocus();
 
-	m_selectIT = NULL;
+	m_selectIT_valid = false;
 	m_isInitOK = true;
 	m_isModal = false;
 	m_isAltDown = false;
-	m_itDbClick = NULL;
+	m_itDbClick_valid = false;
 
 	m_pTreeCtrl->m_ltCheckItems.clear();
 	if(theApp.m_ini.m_visual.m_nToolTip == 2)	m_toolTip.Activate(FALSE);
@@ -315,7 +315,7 @@ void CMyTreeDialog::drawFrame(CDC* pDC, CRect& rect)
 	    drawLline(pDC, point, colRD[i-1]);
 	}
 
-	for(i = 0; i <= 2; i++) {
+	for(int i = 0; i <= 2; i++) {
 		point[0].x = rect.left + i;
 		point[0].y = rect.bottom - i - 1;
 		point[1].x = rect.left + i;
@@ -456,6 +456,7 @@ void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 void CMyTreeDialog::enterData(list<STRING_DATA>::iterator it)
 {		
 	m_selectIT = it;
+	m_selectIT_valid = true;
 	::PostMessage(theApp.getAppWnd(),WM_TREE_CLOSE,IDOK,NULL);
 	m_isInitOK = false;
 	this->KillTimer(CHARU_QUICK_TIMER);
@@ -908,10 +909,11 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			data = m_pTreeCtrl->getData(hTreeItem,&it);
 			if(!(it->m_cKind & KIND_FOLDER_ALL)) {//ƒtƒHƒ‹ƒ_‚¶‚á‚È‚¯‚ê‚ÎŒˆ’è
 				m_itDbClick = it;
+				m_itDbClick_valid = true;
 			}
 		}
 	}
-	else if(pMsg->message == WM_LBUTTONUP && m_itDbClick != NULL && !m_pTreeCtrl->isDrag()) {
+	else if(pMsg->message == WM_LBUTTONUP && m_itDbClick_valid && !m_pTreeCtrl->isDrag()) {
 		enterData(m_itDbClick);
 		return TRUE;
 	}

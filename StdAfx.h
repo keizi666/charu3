@@ -11,6 +11,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#define _USE_32BIT_TIME_T
+
 #define VC_EXTRALEAN		// Windows ヘッダーから殆ど使用されないスタッフを除外します。
 
 #include <afxwin.h>         // MFC のコアおよび標準コンポーネント
@@ -22,7 +24,6 @@
 #include <afxtempl.h>
 //#include <Commctrl.h>
 #include <winuser.h>
-#include <WINABLE.H>
 #include <mmsystem.h>
 #include <imm.h>
 #include <Commctrl.h>

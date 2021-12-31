@@ -32,6 +32,8 @@ public:
 	void closePopup();
 
 	list<STRING_DATA>::iterator m_selectIT;
+	bool m_selectIT_valid;
+
 // ダイアログ データ
 	//{{AFX_DATA(CMyTreeDialog)
 	enum { IDD = IDD_POPUP_DIALOG };
@@ -64,6 +66,7 @@ protected:
 	bool m_isInitOK,m_isModal;
 	bool m_isAltDown;
 	list<STRING_DATA>::iterator m_itDbClick;
+	bool m_itDbClick_valid;
 
 	CBrush m_brBack;
 	CMenu m_PopupMenu;

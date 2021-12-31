@@ -54,7 +54,7 @@ BOOL CClipBord::setClipboardText(const TCHAR *szString)
 
 	hMem = ::GlobalAlloc(GHND,nStrLength * sizeof(WCHAR));
 	pPtr=(TCHAR *)::GlobalLock(hMem);
-	_tcscpy(pPtr,szString);
+	_tcscpy_s(pPtr, nStrLength, szString);
 	::GlobalUnlock(hMem);
 
 	::EmptyClipboard();

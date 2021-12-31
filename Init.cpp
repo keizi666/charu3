@@ -71,11 +71,13 @@ void CInit::initialize()
 	*cpName = NULL;
 	m_strAppPath = strBuff;
 
+#if false
+// TODO
 	//Windowsのバージョンを取得
 	ZeroMemory(&m_osVersion,sizeof(m_osVersion));
 	m_osVersion.dwOSVersionInfoSize = sizeof(m_osVersion);
 	GetVersionEx(&m_osVersion);//OS情報を取得
-
+#endif
 }
 
 //---------------------------------------------------
@@ -173,11 +175,11 @@ void CInit::readAllInitData()
 	m_key.m_defKeySet.m_nPasteWait = setIniFileInt(REGKEY_KEY,_T("PasteWait"),50);		//ペースト待ち時間
 	//メッセージ
 	strKeyBuff = setIniFileString(REGKEY_KEY,_T("CopyMessage"),_T("301,0,0"));
-	_stscanf(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
 	m_key.m_defKeySet.m_copyMessage = winMessage;
 
 	strKeyBuff = setIniFileString(REGKEY_KEY,_T("PasteMessage"),_T("302,0,0"));
-	_stscanf(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
 	m_key.m_defKeySet.m_pasteMessage = winMessage;
 	//クリップボード容量制限
 	m_key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,_T("HistoryLimit"),-1);	
@@ -195,7 +197,7 @@ void CInit::readAllInitData()
 		//キーコード
 		StringBuff.Format(_T("KeySetCode_%d"),i);
 		strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,"");
-		_stscanf(LPCTSTR(strKeyBuff),_T("%d,%d,%d,%d")
+		_stscanf_s(LPCTSTR(strKeyBuff),_T("%d,%d,%d,%d")
 			,&key.m_sCopyPasteKey.m_uMod_Copy,&key.m_sCopyPasteKey.m_uVK_Copy
 			,&key.m_sCopyPasteKey.m_uMod_Paste,&key.m_sCopyPasteKey.m_uVK_Paste);
 		StringBuff.Format(_T("KeyCopyWait_%d"),i);
@@ -209,12 +211,12 @@ void CInit::readAllInitData()
 		//メッセージ
 		StringBuff.Format(_T("CopyMessage_%d"),i);
 		strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("301,0,0"));
-		_stscanf(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+		_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
 		key.m_sCopyPasteKey.m_copyMessage = winMessage;
 	
 		StringBuff.Format(_T("PasteMessage_%d"),i);
 		strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("302,0,0"));
-		_stscanf(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+		_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
 		key.m_sCopyPasteKey.m_pasteMessage = winMessage;
 		//クリップボード容量制限
 		StringBuff.Format(_T("HistoryLimit_%d"),i);
@@ -266,7 +268,7 @@ void CInit::readAllInitData()
 			strRes.LoadString(APP_INF_MACRO_TEMPLATE01 + i -1);
 			writeProfileString(REGKEY_MACRO,StringBuff,strRes);
 			strMacro = strRes;
-			_tcscpy(strBuff,LPCTSTR(strRes));
+			_tcscpy_s(strBuff,LPCTSTR(strRes));
 		}
 		if(_tcsclen(strBuff) == 0) break;
 		if(UStringWork::splitString(strBuff,_T('@'),&szName,&szKind,&szMacro,NULL) == 3) {
@@ -294,7 +296,7 @@ void CInit::readAllInitData()
 			strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01 + i -1);
 			writeProfileString(REGKEY_MACRO,StringBuff,strRes);
 			strMacro = strRes;
-			_tcscpy(strBuff,LPCTSTR(strRes));
+			_tcscpy_s(strBuff,LPCTSTR(strRes));
 		}
 		if(_tcsclen(strBuff) == 0) break;
 		if(UStringWork::splitString(strBuff,'@',&szName,&szKind,&szMacro,NULL) == 3) {
@@ -513,7 +515,7 @@ CString CInit::setIniFileString(const TCHAR* szSection,const TCHAR* szKey,CStrin
 void CInit::writeProfileInt(const TCHAR* szSection,const TCHAR* szKey,int nValue)
 {
 	TCHAR strBuff[1024];
-	_stprintf(strBuff,_T("%d"),nValue);	
+	_stprintf_s(strBuff,_T("%d"),nValue);	
 	WritePrivateProfileString(szSection,szKey,strBuff,m_strIniFile);
 }
 

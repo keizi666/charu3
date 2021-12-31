@@ -39,8 +39,8 @@ struct STRING_DATA
 	char	m_cIcon;		//アイコン種別
 	int		m_nMyID;		//データのID
 	int		m_nParentID;	//親データのID
-	time_t	m_timeCreate;	//作成日時
-	time_t	m_timeEdit;		//変更日時
+	time_t	m_timeCreate;	//作成日時 32bit
+	time_t	m_timeEdit;		//変更日時 32bit
 	CString  m_strTitle;	//設定データタイトル
 	CString  m_strData;		//設定データ文字列
 	CString  m_strMacro;	//拡張用文字列データ

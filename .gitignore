@@ -1,0 +1,13 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/c3langu/Debug
+/c3langu/Release
+/C3Simple/Debug
+/C3Simple/Release
+/Debug
+/Release
+*.aps
+*~

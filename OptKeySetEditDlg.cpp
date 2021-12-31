@@ -90,11 +90,11 @@ void COptKeySetEditDlg::DoDataExchange(CDataExchange* pDX)
 		key.m_sCopyPasteKey.m_uMod_Copy = CGeneral::hotkey2MOD(wMod);
 		key.m_sCopyPasteKey.m_uVK_Copy  = wVkCode;
 
-		_stscanf(m_pasteMessage,_T("%x,%x,%x"),&key.m_sCopyPasteKey.m_pasteMessage.Msg,
+		_stscanf_s(m_pasteMessage,_T("%x,%x,%x"),&key.m_sCopyPasteKey.m_pasteMessage.Msg,
 			&key.m_sCopyPasteKey.m_pasteMessage.wParam,
 			&key.m_sCopyPasteKey.m_pasteMessage.lParam);
 
-		_stscanf(m_copyMessage,_T("%x,%x,%x"),&key.m_sCopyPasteKey.m_copyMessage.Msg,
+		_stscanf_s(m_copyMessage,_T("%x,%x,%x"),&key.m_sCopyPasteKey.m_copyMessage.Msg,
 			&key.m_sCopyPasteKey.m_copyMessage.wParam,
 			&key.m_sCopyPasteKey.m_copyMessage.lParam);
 

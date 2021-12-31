@@ -66,6 +66,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 	//アイコン処理
+#if false
+// TODO
 	OSVERSIONINFO version = theApp.m_ini.m_osVersion;
 	if(version.dwMajorVersion && version.dwPlatformId == VER_PLATFORM_WIN32_NT &&
 		version.dwMajorVersion == 5 && version.dwMinorVersion >= 1) {
@@ -73,7 +75,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		m_hIcon = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_RUN256),IMAGE_ICON,16,16,0);//スモールアイコン
 		m_hStopIcon  = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_STOP256),IMAGE_ICON,16,16,0);//スモールアイコン
 	}
-	else {
+	else
+#endif
+	{
 		m_hIcon = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_RUN),IMAGE_ICON,16,16,0);//スモールアイコン
 		m_hStopIcon  = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_STOP),IMAGE_ICON,16,16,0);//スモールアイコン
 	}
@@ -86,7 +90,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_nIcon.hIcon = m_hStopIcon;
 	m_nIcon.uCallbackMessage = WM_TASKTRAY;
 
-	_tcscpy(m_nIcon.szTip,_T("Charu3"));
+	_tcscpy_s(m_nIcon.szTip,_T("Charu3"));
 	Shell_NotifyIcon(NIM_ADD,&m_nIcon);
 
 	return 0;
@@ -108,7 +112,7 @@ bool CMainFrame::checkTrayPos()
 
 	// タスクバーのインジケータ領域の矩形を得る
 	hTaskBarWnd = ::FindWindow(_T(SZTASKBAR_CLASS),NULL);
-	hTrayNotifyWnd = FindWindowEx (hTaskBarWnd,NULL,_T(SZTRAY_CLASS),NULL);
+	hTrayNotifyWnd = FindWindowEx(hTaskBarWnd,NULL,_T(SZTRAY_CLASS),NULL)->GetSafeHwnd();
 	if (hTrayNotifyWnd == NULL)	return FALSE;
 
 	ZeroMemory(&rtTrayNotify,sizeof(rtTrayNotify));
@@ -178,7 +182,7 @@ void CMainFrame::changeClip()
 		//タスクトレイのツールヒントを変更
 		strClipBord = strClipBord.Left(1024);
 		strClipBord.Replace(_T("	"),_T("･"));//タブを置換
-		_tcscpy(m_nIcon.szTip,strClipBord.Left(63));
+		_tcscpy_s(m_nIcon.szTip,strClipBord.Left(63));
 		if(!Shell_NotifyIcon(NIM_MODIFY,&m_nIcon)){
 			Shell_NotifyIcon(NIM_ADD,&m_nIcon);
 		}
@@ -341,7 +345,7 @@ void CMainFrame::OnExit()
 	CFrameWnd::DestroyWindow();
 }
 
-void CMainFrame::OnTimer(UINT nIDEvent) 
+void CMainFrame::OnTimer(UINT_PTR nIDEvent) 
 {
 	if(nIDEvent == TIMER_SELF_DIAGNOSIS){
 		if(!Shell_NotifyIcon(NIM_MODIFY,&m_nIcon)){

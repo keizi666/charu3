@@ -150,15 +150,15 @@ BOOL COptVisual::DestroyWindow()
 	CEdit *edit;
 	edit = (CEdit*)GetDlgItem(IDC_OPT__BACK_COLOR);
 	edit->GetWindowText(strBuff);
-	_stscanf(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBackColor);
+	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBackColor);
 	
 	edit = (CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR);
 	edit->GetWindowText(strBuff);
-	_stscanf(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nTextColor);
+	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nTextColor);
 
 	edit = (CEdit*)GetDlgItem(IDC_OPT_BORDER_COLOR);
 	edit->GetWindowText(strBuff);
-	_stscanf(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBorderColor);
+	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBorderColor);
 
 	int nCursel = m_ctrlFontCombo.GetCurSel();
 	if(nCursel == CB_ERR) nCursel = 0; 
@@ -280,7 +280,7 @@ void COptVisual::setTextToPalet(CEdit *edit,CPaletStatic *stPal)
 	if(!edit || !stPal) return;
 	
 	edit->GetWindowText(strBuff);
-	_stscanf(strBuff,_T("%x"),&nColor);
+	_stscanf_s(strBuff,_T("%x"),&nColor);
 
 	stPal->setColor((COLORREF)CGeneral::RGB2BGR(nColor));
 	stPal->Invalidate();

@@ -386,22 +386,23 @@ CString CGeneral::getLastErrorMessage()
 //---------------------------------------------------
 void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSourceFile,int nLine)
 {
-	FILE *outPut = NULL;
+	FILE *outPut = nullptr;
 	CString strWrite,strTest;
 
 #ifdef _UNICODE
 	char *szMbcsBuff = NULL;
 	int nDataSize;
+	errno_t err = -1;
 
 	nDataSize = ::WideCharToMultiByte(CP_ACP, 0, strFileName,-1,NULL,0,NULL,NULL);
 	szMbcsBuff = new char[nDataSize+1];
 	if(szMbcsBuff) {
 		::WideCharToMultiByte(CP_ACP,0,strFileName,-1,szMbcsBuff,nDataSize,"",NULL);
 		szMbcsBuff[nDataSize] = NULL;
-		outPut = fopen(szMbcsBuff, "a");
+		err = fopen_s(&outPut, szMbcsBuff, "a");
 		delete szMbcsBuff;
 	}
-	if(outPut) {
+	if(0 == err) {
 		strWrite.Format(_T("%s %s:%d %s"),getDateTimeString(),strSourceFile,nLine,strLogText);
 		nDataSize = ::WideCharToMultiByte(CP_ACP, 0, strWrite,-1,NULL,0,NULL,NULL);
 		szMbcsBuff = new char[nDataSize + 1];
@@ -494,13 +495,13 @@ CString CGeneral::getDateString()
 {
 	CString strDate;
 
-	struct tm *newtime;
+	struct tm newtime;
 	time_t long_time;
 
 	time( &long_time );
-	newtime = localtime( &long_time );
+	localtime_s(&newtime, &long_time );
 
-	strDate.Format(_T("%04d/%02d/%02d"),newtime->tm_year + 1900,newtime->tm_mon + 1,newtime->tm_mday);
+	strDate.Format(_T("%04d/%02d/%02d"),newtime.tm_year + 1900,newtime.tm_mon + 1,newtime.tm_mday);
 	return strDate;
 }
 
@@ -512,14 +513,14 @@ CString CGeneral::getDateTimeString()
 {
 	CString strDate;
 
-	struct tm *newtime;
+	struct tm newtime;
 	time_t long_time;
 
 	time( &long_time );
-	newtime = localtime( &long_time );
+	localtime_s(&newtime, &long_time);
 
-	strDate.Format(_T("%04d/%02d/%02d-%02d:%02d:%02d"),newtime->tm_year + 1900,newtime->tm_mon + 1,newtime->tm_mday,
-		newtime->tm_hour,newtime->tm_min,newtime->tm_sec);
+	strDate.Format(_T("%04d/%02d/%02d-%02d:%02d:%02d"),newtime.tm_year + 1900,newtime.tm_mon + 1,newtime.tm_mday,
+		newtime.tm_hour,newtime.tm_min,newtime.tm_sec);
 	return strDate;
 }
 

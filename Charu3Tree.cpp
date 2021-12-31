@@ -29,11 +29,11 @@ extern CCharu3App theApp;
 CCharu3Tree::CCharu3Tree()
 {
 	m_MyStringList.clear();
-	m_ImageList = NULL;
+	m_ImageList = nullptr;
 	m_nMaxID = 0;
 	m_nSelectID = 0;
 	m_isDrag = false;
-	m_hPrevTarget = NULL;
+	m_hPrevTarget = nullptr;
 }
 
 //---------------------------------------------------
@@ -141,7 +141,7 @@ bool CCharu3Tree::setPlugin(CString strPath)
 void CCharu3Tree::setImageList(POINT posSize,CString strFileName,CString strPath)
 {
 	//アイコンのイメージリストを作る
-	if(m_ImageList == NULL) {
+	if(m_ImageList == nullptr) {
 		::SetCurrentDirectory(strPath);
 
 		CBitmap Bitmap;
@@ -206,7 +206,7 @@ bool CCharu3Tree::checkMyChild(HTREEITEM hMeItem,HTREEITEM hChildItem)
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::serchMyRoots(HTREEITEM hStartItem)
 {
-	HTREEITEM hRet = NULL,hTmp;
+	HTREEITEM hRet = nullptr,hTmp;
 
 	hTmp = hStartItem;
 	while(hTmp) {
@@ -223,7 +223,7 @@ HTREEITEM CCharu3Tree::serchMyRoots(HTREEITEM hStartItem)
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::serchParentOption(HTREEITEM hStartItem,CString strOption)
 {
-	HTREEITEM hRet = NULL;
+	HTREEITEM hRet = nullptr;
 	STRING_DATA data;
 	int nFound;
 	
@@ -286,7 +286,7 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 	CString strTmp;
 
 	//データを保存する
-	if(!(fFile = _tfopen(strFileName,_T("wb"))))	return isRet;//ファイルを開く
+	if(_tfopen_s(&fFile, strFileName,_T("wb")) != 0)	return isRet;//ファイルを開く
 
 	#ifdef _UNICODE
 		fwrite(DAT_FORMAT2,strlen(DAT_FORMAT2),1,fFile);//データ識別子
@@ -437,13 +437,13 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 
 	if(strExtention != DAT_EXT) return isRet;
 
-	if(!(fFile = _tfopen(strFileName,_T("rb"))))	return isRet;//ファイルを開く
+	if(_tfopen_s(&fFile, strFileName,_T("rb")) != 0)	return isRet;//ファイルを開く
 	if(!fread(strMBCS,strlen(DAT_FORMAT),1,fFile)) {;//データ識別子を取得
 		fclose(fFile);
 		return isRet;
 	}
 
-	strMBCS[strlen(DAT_FORMAT)] = NULL;
+	strMBCS[strlen(DAT_FORMAT)] = '\0';
 	
 	if(strcmp(strMBCS,DAT_FORMAT) != 0) {
 		nVersion = 1;
@@ -476,14 +476,14 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 			if(!fread(&nDataSize,sizeof(nDataSize),1,fFile)) break;
 			szReadBuff = new char[nDataSize+1];
 			fread(szReadBuff,nDataSize,1,fFile);
-			szReadBuff[nDataSize] = NULL;
+			szReadBuff[nDataSize] = '\0';
 			data.m_strTitle = szReadBuff;
 			delete [] szReadBuff;
 			//文章を読み込み
 			if(!fread(&nDataSize,sizeof(nDataSize),1,fFile)) break;
 			szReadBuff = new char[nDataSize+1];
 			fread(szReadBuff,nDataSize,1,fFile);
-			szReadBuff[nDataSize] = NULL;
+			szReadBuff[nDataSize] = '\0';
 			data.m_strData = szReadBuff;
 			delete [] szReadBuff;
 
@@ -491,7 +491,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 			if(!fread(&nDataSize,sizeof(nDataSize),1,fFile)) break;
 			szReadBuff = new char[nDataSize+1];
 			fread(szReadBuff,nDataSize,1,fFile);
-			szReadBuff[nDataSize] = NULL;
+			szReadBuff[nDataSize] = '\0';
 			data.m_strMacro = szReadBuff;
 			delete [] szReadBuff;
 		}
@@ -501,7 +501,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 			if(!fread(&nDataSize,sizeof(nDataSize),1,fFile)) break;
 			szUniReadBuff = new wchar_t[nDataSize+1];
 			fread(szUniReadBuff,nDataSize,1,fFile);
-			szUniReadBuff[nDataSize / sizeof(WCHAR)] = NULL;
+			szUniReadBuff[nDataSize / sizeof(WCHAR)] = '\0';
 #ifdef _UNICODE
 			data.m_strTitle = szUniReadBuff;
 #else
@@ -512,7 +512,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 			if(!fread(&nDataSize,sizeof(nDataSize),1,fFile)) break;
 			szUniReadBuff = new wchar_t[nDataSize+1];
 			fread(szUniReadBuff,nDataSize,1,fFile);
-			szUniReadBuff[nDataSize / sizeof(WCHAR)] = NULL;
+			szUniReadBuff[nDataSize / sizeof(WCHAR)] = '\0';
 #ifdef _UNICODE
 			data.m_strData = szUniReadBuff;
 #else
@@ -524,7 +524,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 			if(!fread(&nDataSize,sizeof(nDataSize),1,fFile)) break;
 			szUniReadBuff = new wchar_t[nDataSize+1];
 			fread(szUniReadBuff,nDataSize,1,fFile);
-			szUniReadBuff[nDataSize / sizeof(WCHAR)] = NULL;
+			szUniReadBuff[nDataSize / sizeof(WCHAR)] = '\0';
 #ifdef _UNICODE
 			data.m_strMacro = szUniReadBuff;
 #else
@@ -636,24 +636,27 @@ bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<
 			//仮リストに登録
 			for(stit = pData->begin(); stit != pData->end(); stit++) {
 				if(stit->m_strTitle != "") {
-					szBuff = new TCHAR[stit->m_strTitle.GetLength()+1];
-					_tcscpy(szBuff,LPCTSTR(stit->m_strTitle));
+					size_t size = stit->m_strTitle.GetLength() + 1;
+					szBuff = new TCHAR[size];
+					_tcscpy_s(szBuff, size, LPCTSTR(stit->m_strTitle));
 					data.m_strTitle = szBuff;
 					delete [] szBuff;
 				}
 				else	data.m_strTitle = "";
 
 				if(stit->m_strData != "") {
-					szBuff = new TCHAR[stit->m_strData.GetLength()+1];
-					_tcscpy(szBuff,LPCTSTR(stit->m_strData));
+					size_t size = stit->m_strData.GetLength() + 1;
+					szBuff = new TCHAR[size];
+					_tcscpy_s(szBuff, size, LPCTSTR(stit->m_strData));
 					data.m_strData = szBuff;
 					delete [] szBuff;
 				}
 				else	data.m_strData = "";
 
 				if(stit->m_strMacro != "") {
-					szBuff = new TCHAR[stit->m_strMacro.GetLength()+1];
-					_tcscpy(szBuff,LPCTSTR(stit->m_strMacro));
+					size_t size = stit->m_strMacro.GetLength() + 1;
+					szBuff = new TCHAR[size];
+					_tcscpy_s(szBuff, size, LPCTSTR(stit->m_strMacro));
 					data.m_strMacro = szBuff;
 					delete [] szBuff;
 				}
@@ -749,7 +752,6 @@ bool CCharu3Tree::convertMacroPlugin(STRING_DATA *SourceData,CString *strRet,CSt
 
 		if(pConvertMacro) {
 			int nSize = SourceData->m_strData.GetLength()*10+10240;
-			szRet = NULL;
 			szRet = new TCHAR[nSize];
 			if(szRet) {
 				isRet = pConvertMacro((TCHAR*)LPCTSTR(SourceData->m_strData),szRet,nSize,
@@ -853,7 +855,7 @@ void CCharu3Tree::copyChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 	if(! hFromItem || !hToItem) return;
 	list<STRING_DATA>::iterator it;
 	hFromItem = GetChildItem(hFromItem);
-	HTREEITEM hAddtItem = NULL;
+	HTREEITEM hAddtItem = nullptr;
 	do {
 		//データを取得
 		STRING_DATA dataF;
@@ -911,7 +913,7 @@ HTREEITEM CCharu3Tree::mergeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pLis
 		if(!isRoot) {//インポートフォルダを作る
 			strRes.LoadString(APP_INF_IMPORT_FOLDERNAME);
 			hTreeItem = addNewFolder(hTreeItem,strRes);//親フォルダを作る
-			if(!hTreeItem) return NULL;
+			if(!hTreeItem) return nullptr;
 			folder = getData(hTreeItem);
 			nParentID = folder.m_nMyID;
 		}
@@ -945,7 +947,7 @@ HTREEITEM CCharu3Tree::mergeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pLis
 		}
 		CWnd::UnlockWindowUpdate();
 	}
-	else hTreeItem = NULL;
+	else hTreeItem = nullptr;
 	return hTreeItem;
 }
 
@@ -1285,7 +1287,7 @@ STRING_DATA CCharu3Tree::getData(HTREEITEM hTreeItem,list<STRING_DATA>::iterator
 	STRING_DATA retData;
 
 	//データのアドレスを設定
-	long lParam = GetItemData(hTreeItem);
+	DWORD_PTR lParam = GetItemData(hTreeItem);
 	memcpy((void*)it,(void*)&lParam,sizeof(lParam));
 
 	retData = **it;
@@ -1377,7 +1379,7 @@ HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM h
 	if(isFound && hTreeItem) {
 		SelectItem(hTreeItem);//見つかったら選択
 	}
-	else hTreeItem = NULL;
+	else hTreeItem = nullptr;
 	return hTreeItem;
 }
 
@@ -1387,9 +1389,9 @@ HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM h
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::serchTitle(HTREEITEM hStartItem,CString strKey,int isLower)
 {
-	HTREEITEM hRetItem = NULL;
+	HTREEITEM hRetItem = nullptr;
 
-	if(!hStartItem) return NULL;
+	if(!hStartItem) return nullptr;
 	list<STRING_DATA>::iterator it;
 	STRING_DATA data;
 	HTREEITEM hItem = hStartItem;
@@ -1425,7 +1427,7 @@ HTREEITEM CCharu3Tree::getTrueNextItem(HTREEITEM hTreeItem)
 			do {
 				hParentItem = GetParentItem(hParentItem );
 				if(!hParentItem) {
-					hRetTreeItem = NULL;
+					hRetTreeItem = nullptr;
 					break;
 				}
 				hRetTreeItem = GetNextSiblingItem(hParentItem);//兄弟ハンドルを取得
@@ -1448,7 +1450,7 @@ HTREEITEM CCharu3Tree::getTrueNextItem(HTREEITEM hTreeItem)
 HTREEITEM CCharu3Tree::getLastVisibleItem()
 {
 	HTREEITEM hRetTreeItem;
-	HTREEITEM hTreeItemTmp;
+	HTREEITEM hTreeItemTmp = nullptr;
 	hRetTreeItem = GetRootItem();
 	while(hRetTreeItem) {
 		hTreeItemTmp = hRetTreeItem;
@@ -1558,7 +1560,7 @@ HTREEITEM CCharu3Tree::getOneTimeText(int nType)
 {
 	CString strRet;
 	STRING_DATA data;
-	HTREEITEM hRet = NULL;
+	HTREEITEM hRet = nullptr;
 
 	//先入れ先出しの場合 FIFO 一番下の一時項目を探す
 	int nSize = m_MyStringList.size();
@@ -1640,7 +1642,7 @@ DWORD CCharu3Tree::getDataOptionHex(CString strData,CString strKind)
 			strBuff = strData.Mid(nFound+1,nFoundEnd - (nFound+1));
 			strBuff.TrimRight();
 			strBuff.TrimLeft();
-			_stscanf(strBuff,_T("%x"),&dwRet);
+			_stscanf_s(strBuff,_T("%x"),&dwRet);
 		}
 		//デバッグログ処理
 		if(theApp.m_ini.m_nDebug) {
@@ -1697,7 +1699,7 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 	list<STRING_DATA>::iterator it;
 
 	STRING_DATA parentData;
-	HTREEITEM hTreeItem,hStart = NULL;
+	HTREEITEM hTreeItem,hStart = nullptr;
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
@@ -1831,7 +1833,7 @@ void CCharu3Tree::classHistoryFolder(HTREEITEM hTreeItem,int nRirekiCount)
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::getFirstFolder(HTREEITEM hStartItem)
 {
-	if(!hStartItem) return NULL;
+	if(!hStartItem) return nullptr;
 	list<STRING_DATA>::iterator it;
 	HTREEITEM hItem = hStartItem;
 	hItem = GetChildItem(hItem);
@@ -1850,9 +1852,9 @@ HTREEITEM CCharu3Tree::getFirstFolder(HTREEITEM hStartItem)
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::getLastChild(HTREEITEM hStartItem)
 {
-	if(!hStartItem) return NULL;
+	if(!hStartItem) return nullptr;
 	list<STRING_DATA>::iterator it;
-	HTREEITEM hItem = hStartItem,hPrevItem;
+	HTREEITEM hItem = hStartItem, hPrevItem = nullptr;
 	hItem = GetChildItem(hItem);
 	do {
 		getData(hItem,&it);
@@ -1916,7 +1918,7 @@ int CCharu3Tree::getChildCount(HTREEITEM hTreeItem,bool isBrotherOnly)
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::moveFolderTop(HTREEITEM hTreeItem)
 {
-	HTREEITEM hRet = NULL;
+	HTREEITEM hRet = nullptr;
 	if(!hTreeItem) return hRet;
 
 	STRING_DATA dataF;
@@ -2051,7 +2053,7 @@ void CCharu3Tree::OnMouseMove(UINT nFlags, CPoint point)
 			data = getData(m_hDragTarget);
 			//フォルダで子供がいなければ選択、それ以外は挿入マーク
 			if(data.m_cKind & KIND_FOLDER_ALL && !GetChildItem(m_hDragTarget)) {
-				SetInsertMark(NULL);
+				SetInsertMark(nullptr);
 				SelectItem(m_hDragTarget);
 			}
 			else {
@@ -2134,7 +2136,7 @@ void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point)
 	m_pDragImage->EndDrag();
 	delete m_pDragImage;
 	ReleaseCapture();
-	SetInsertMark(NULL);
+	SetInsertMark(nullptr);
 
 	//アイテムの移動処理をする
 	if(m_hDragTarget && m_hDragTarget != m_hDragItem) {

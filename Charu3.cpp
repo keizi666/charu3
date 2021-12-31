@@ -9,7 +9,10 @@
 #include "OptMainDialog.h"
 #include "MyFileDialog.h"
 #include "StringWork.h"
+#if false
+// TODO: Did not handle this well with Visual Studio 2019.
 #include <MULTIMON.H>
+#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,7 +93,7 @@ CCharu3App::CCharu3App()// : m_treeDlg(&m_tree)
 						0x2f,0x6A,0x6B,0x6C,0x6D,0x6E,0x6F,0x90,
 						0x91,0x92,0xBB,0xBC,};
 
-	char *stKeyName[] = {"BS","TAB","CLEAR","ENTER","SHIFT","CTRL","ALT","PAUSE",
+	const char *stKeyName[] = {"BS","TAB","CLEAR","ENTER","SHIFT","CTRL","ALT","PAUSE",
 						"CAPSLOCK","ESC","SPACE","PAGEUP","PAGEDOWN","END","HOME","LEFT",
 						"UP","RIGHT","DOWN","SELECT","EXECUTE","PRINTSCREEN","INSERT","DEL",
 						"HELP","NUM*","NUM+","NUMSEP","NUM-","NUM.","NUM/","NUMLOCK",
@@ -141,7 +144,7 @@ CCharu3App theApp;
 BOOL CCharu3App::InitInstance()
 {
 	//重複起動阻止
-	LPTSTR pszMutexObjectName = _T("Charu3");			//重複起動防止名
+	LPCTSTR pszMutexObjectName = _T("Charu3");			//重複起動防止名
 	m_hMutex = OpenMutex( MUTEX_ALL_ACCESS, FALSE, pszMutexObjectName);
 //	HWND hActiveWnd = ::GetForegroundWindow();
 	CGeneral::getFocusInfo(&m_focusInfo);
@@ -153,17 +156,23 @@ BOOL CCharu3App::InitInstance()
 	}
 	m_hMutex = CreateMutex( FALSE, 0, pszMutexObjectName);
 
+#if false
+// no longer needed (obsolete)
 #ifdef _AFXDLL
 	Enable3dControls();		// 共有 DLL の中で MFC を使用する場合にはここを呼び出してください。
 #else
 	Enable3dControlsStatic();	// MFC と静的にリンクしている場合にはここを呼び出してください。
 #endif
+#endif
 
 	//言語リソースを設定
+#if false
+// TODO: Assertion occurs.
 	m_hLangDll = LoadLibrary(_T("c3language.dll"));
 	if(m_hLangDll) {
 		AfxSetResourceHandle(m_hLangDll);
 	}
+#endif
 
 	//メインフォームの作成
 	CMainFrame* pFrame = new CMainFrame;
@@ -280,10 +289,11 @@ void CCharu3App::init()
 		CString strText;
 		strText.Format(_T("start \"%s\"\n"),ABOUT_NAME);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-
+#if false
+// TODO
 		strText.Format(_T("Windows version %d.%d  %d\n"),m_ini.m_osVersion.dwMajorVersion,m_ini.m_osVersion.dwMinorVersion,m_ini.m_osVersion.dwPlatformId);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-
+#endif
 		strText.Format(_T("ini file name \"%s\"\n"),StringBuff);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
@@ -555,7 +565,7 @@ int CCharu3App::getKeycode(TCHAR *szKeyName)
 	int i,nRet = 0;
 
 	if(strTmp.Find(_T("0X")) >= 0) 
-		_stscanf(szKeyName,_T("0x%2x"),&nRet);
+		_stscanf_s(szKeyName,_T("0x%2x"),&nRet);
 	
 	if(!nRet) {
 		if(_tcsclen(szKeyName) == 1) {
@@ -787,7 +797,7 @@ void CCharu3App::closeTreeWindow(int nRet)
 				}
 			}
 		}
-		else if(m_pTreeDlg->m_selectIT != NULL) {//通常選択データ
+		else if(m_pTreeDlg->m_selectIT_valid) {//通常選択データ
 			strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択テキスト取得
 			data = *(m_pTreeDlg->m_selectIT);
 			//デバッグログ処理
@@ -2445,7 +2455,7 @@ void CCharu3App::OnVisualFile()
 			TCHAR strBuff[256];
 			FILE *inPut;
 
-			if((inPut = _tfopen(strFileName, _T("r"))) != NULL) {
+			if((_tfopen_s(&inPut, strFileName, _T("r"))) == 0) {
 				strIniData = _T("");
 				while(!feof(inPut)) {
 					_fgetts(strBuff,sizeof(strBuff),inPut);
