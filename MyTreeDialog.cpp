@@ -28,13 +28,13 @@ CMyTreeDialog::CMyTreeDialog(CWnd* pParent /*=NULL*/) : CDialog(CMyTreeDialog::I
 {
 	//{{AFX_DATA_INIT(CMyTreeDialog)
 	//}}AFX_DATA_INIT
-	m_selectIT_valid = false;
+	m_selectDataPtr = nullptr;
 	m_brBack.m_hObject = NULL;
 
 	m_isInitOK = false;
 	m_isModal = true;
 	m_isAltDown = false;
-	m_itDbClick_valid = false;
+	m_dataPtrDbClick = nullptr;
 	m_hCopyData = nullptr;
 	m_dwStartTime = 0;
 
@@ -118,11 +118,11 @@ void CMyTreeDialog::pouupMenu(CPoint point)
 	if(hTreeItem) {
 		list<STRING_DATA>::iterator it;
 		m_pTreeCtrl->SelectItem(hTreeItem);
-		m_pTreeCtrl->getData(hTreeItem,&it);
+		STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
 
-		m_PopupMenu.EnableMenuItem(IDML_CHANGE_LOCK,!(it->m_cKind & KIND_ONETIME));
-		m_PopupMenu.EnableMenuItem(IDML_CHANGE_ONETIME,!(it->m_cKind & KIND_LOCK));
-		m_PopupMenu.EnableMenuItem(IDML_FOLDER_CLEAR,!(it->m_cKind & KIND_FOLDER_ALL));
+		m_PopupMenu.EnableMenuItem(IDML_CHANGE_LOCK,!(dataPtr->m_cKind & KIND_ONETIME));
+		m_PopupMenu.EnableMenuItem(IDML_CHANGE_ONETIME,!(dataPtr->m_cKind & KIND_LOCK));
+		m_PopupMenu.EnableMenuItem(IDML_FOLDER_CLEAR,!(dataPtr->m_cKind & KIND_FOLDER_ALL));
 		m_PopupMenu.EnableMenuItem(IDML_EDIT,FALSE);
 		m_PopupMenu.EnableMenuItem(IDML_DELETE,FALSE);
 		m_PopupMenu.EnableMenuItem(IDML_LIST_SERCH,FALSE);
@@ -213,11 +213,11 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelec
 	CGeneral::setAbsoluteForegroundWindow(theApp.m_pMainFrame->m_hWnd);
 	m_pTreeCtrl->SetFocus();
 
-	m_selectIT_valid = false;
+	m_selectDataPtr = nullptr;
 	m_isInitOK = true;
 	m_isModal = false;
 	m_isAltDown = false;
-	m_itDbClick_valid = false;
+	m_dataPtrDbClick = nullptr;
 
 	m_pTreeCtrl->m_ltCheckItems.clear();
 	if(theApp.m_ini.m_visual.m_nToolTip == 2)	m_toolTip.Activate(FALSE);
@@ -453,10 +453,9 @@ void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 //関数名	enterData(list<STRING_DATA>::iterator it)
 //機能		データを決定してダイアログを隠蔽
 //---------------------------------------------------
-void CMyTreeDialog::enterData(list<STRING_DATA>::iterator it)
+void CMyTreeDialog::enterData(STRING_DATA *dataPtr)
 {		
-	m_selectIT = it;
-	m_selectIT_valid = true;
+	m_selectDataPtr = dataPtr;
 	::PostMessage(theApp.getAppWnd(),WM_TREE_CLOSE,IDOK,NULL);
 	m_isInitOK = false;
 	this->KillTimer(CHARU_QUICK_TIMER);
@@ -902,19 +901,16 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 		if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
 		//データ取得
 		HTREEITEM hTreeItem;
-		list<STRING_DATA>::iterator it;
 		hTreeItem = m_pTreeCtrl->GetSelectedItem();
 		if(hTreeItem) {
-			STRING_DATA data;
-			data = m_pTreeCtrl->getData(hTreeItem,&it);
-			if(!(it->m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ決定
-				m_itDbClick = it;
-				m_itDbClick_valid = true;
+			STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
+			if(!(dataPtr->m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ決定
+				m_dataPtrDbClick = dataPtr;
 			}
 		}
 	}
-	else if(pMsg->message == WM_LBUTTONUP && m_itDbClick_valid && !m_pTreeCtrl->isDrag()) {
-		enterData(m_itDbClick);
+	else if(pMsg->message == WM_LBUTTONUP && m_dataPtrDbClick != nullptr && !m_pTreeCtrl->isDrag()) {
+		enterData(m_dataPtrDbClick);
 		return TRUE;
 	}
 	//ALTかメニューキーポップアップメニューを出す
@@ -964,12 +960,11 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			HTREEITEM hTreeItem;
 			hTreeItem = m_pTreeCtrl->GetSelectedItem();
 			if(hTreeItem) {
-				list<STRING_DATA>::iterator it;
-				m_pTreeCtrl->getData(hTreeItem,&it);
+				STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
 
 				//フォルダか確認
-				if(!(it->m_cKind & KIND_FOLDER_ALL) || (m_pTreeCtrl->GetStyle() & TVS_CHECKBOXES && m_pTreeCtrl->GetCheck(hTreeItem))) {
-					enterData(it);//データを決定
+				if(!(dataPtr->m_cKind & KIND_FOLDER_ALL) || (m_pTreeCtrl->GetStyle() & TVS_CHECKBOXES && m_pTreeCtrl->GetCheck(hTreeItem))) {
+					enterData(dataPtr);//データを決定
 				}
 				else 
 					m_pTreeCtrl->Expand(hTreeItem,TVE_TOGGLE);
@@ -1097,10 +1092,9 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			return FALSE;
 		}
 		//データ取得
-		list<STRING_DATA>::iterator it;
-		STRING_DATA data = m_pTreeCtrl->getData(m_hQuickItem,&it);
-		if(!(data.m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ
-			enterData(it);
+		STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(m_hQuickItem);
+		if(!(dataPtr->m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ
+			enterData(dataPtr);
 		}
 		else {
 			m_pTreeCtrl->Expand(m_hQuickItem,TVE_EXPAND);

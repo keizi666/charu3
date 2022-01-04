@@ -45,10 +45,11 @@ public:
 
 // インプリメンテーション
 protected:
-	void SetListData(CHANGE_KEY sKeyData,list<CHANGE_KEY>::iterator it,bool isSet,int nLine);
+	void SetListData(CHANGE_KEY sKeyData, CHANGE_KEY *dataPtr, bool isSet, int nLine);
+	list<CHANGE_KEY>::iterator findData(CHANGE_KEY* dataPtr);
 
 	list<CHANGE_KEY> m_MyKeyList;//キー設定データリスト
-	list<CHANGE_KEY>::iterator m_itSelect;
+	CHANGE_KEY *m_dataPtrSelect;
 	int m_nSelItem;
 
 	// 生成されたメッセージ マップ関数

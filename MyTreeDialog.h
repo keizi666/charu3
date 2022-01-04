@@ -28,11 +28,10 @@ public:
 		m_pTreeCtrl = pTreeCtrl;
 	}
 	BOOL showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelect,HTREEITEM hOpenItem = NULL);
-	void enterData(list<STRING_DATA>::iterator it);
+	void enterData(STRING_DATA *dataPtr);
 	void closePopup();
 
-	list<STRING_DATA>::iterator m_selectIT;
-	bool m_selectIT_valid;
+	STRING_DATA *m_selectDataPtr;
 
 // ダイアログ データ
 	//{{AFX_DATA(CMyTreeDialog)
@@ -65,8 +64,7 @@ protected:
 	CToolTipCtrl m_toolTip;//ツールチップ
 	bool m_isInitOK,m_isModal;
 	bool m_isAltDown;
-	list<STRING_DATA>::iterator m_itDbClick;
-	bool m_itDbClick_valid;
+	STRING_DATA *m_dataPtrDbClick;
 
 	CBrush m_brBack;
 	CMenu m_PopupMenu;

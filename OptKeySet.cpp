@@ -76,7 +76,7 @@ END_MESSAGE_MAP()
 //関数名	SetListData(CHANGE_KEY sKeyData)	[public]
 //機能		リストビューに設定を追加
 //---------------------------------------------------
-void COptKeySet::SetListData(CHANGE_KEY sKeyData,list<CHANGE_KEY>::iterator it,bool isSet,int nLine)
+void COptKeySet::SetListData(CHANGE_KEY sKeyData, CHANGE_KEY *dataPtr, bool isSet, int nLine)
 {
 	LVITEM AddItem;
 	LPTSTR pString[4];
@@ -129,13 +129,13 @@ void COptKeySet::SetListData(CHANGE_KEY sKeyData,list<CHANGE_KEY>::iterator it,b
 
 		//新規
 		if(i == 0 && !isSet) {
-			memcpy((void*)&AddItem.lParam,(void*)&it,sizeof(it));//データのアドレスを設定
+			AddItem.lParam = (LPARAM)dataPtr;//データのアドレスを設定
 			m_ctrlIniList.InsertItem(&AddItem);
 		}
 		//変更
 		else if(i == 0 && isSet){
 			AddItem.mask = LVIF_TEXT;
-			memcpy((void*)&AddItem.lParam,(void*)&it,sizeof(it));//データのアドレスを設定
+			AddItem.lParam = (LPARAM)dataPtr;//データのアドレスを設定
 			m_ctrlIniList.SetItem(&AddItem); // modify existing item (the sub-item text)
 		}
 		else {
@@ -143,6 +143,21 @@ void COptKeySet::SetListData(CHANGE_KEY sKeyData,list<CHANGE_KEY>::iterator it,b
 		}
 		AddItem.mask = LVIF_TEXT;
 	}
+}
+
+//---------------------------------------------------
+//関数名	findData(CHANGE_KEY *ptr)
+//機能		キー設定データリストからptrが指している要素を探す
+//---------------------------------------------------
+list<CHANGE_KEY>::iterator COptKeySet::findData(CHANGE_KEY *dataPtr)
+{
+	list<CHANGE_KEY>::iterator it;
+	for (it = m_MyKeyList.begin(); it != m_MyKeyList.end(); it++) {
+		if (&*it == dataPtr) {
+			break;
+		}
+	}
+	return it;
 }
 
 //---------------------------------------------------
@@ -221,7 +236,7 @@ BOOL COptKeySet::OnInitDialog()
 	}
 
 	for(i = 0,it = m_MyKeyList.begin(); it != m_MyKeyList.end(); it++,i++) {
-		SetListData(*it,it,false,i);
+		SetListData(*it, &*it, false, i);
 	}
 	
 /*	m_ctrlCaptionCombo.ResetContent ();
@@ -263,7 +278,7 @@ void COptKeySet::OnOptKeyAdd()
 	if(nRet == IDOK) {
 		CHANGE_KEY key;
 		key = keySetEditDlg.getKeyInfo();
-		SetListData(key,m_MyKeyList.insert(m_MyKeyList.end(),key),false,m_ctrlIniList.GetItemCount());
+		SetListData(key, &*m_MyKeyList.insert(m_MyKeyList.end(),key), false, m_ctrlIniList.GetItemCount());
 	}
 }
 
@@ -277,10 +292,12 @@ void COptKeySet::OnOptKeyDalete()
 		CString strBuff,strCaption;
 		CString strRes;
 		strRes.LoadString(APP_MES_DELETE_OK);
-		strBuff.Format(strRes,m_itSelect->m_strTitle);
+		strBuff.Format(strRes,m_dataPtrSelect->m_strTitle);
 		int nRet = AfxMessageBox(strBuff,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
 		if(nRet == IDYES) {
-			m_itSelect = m_MyKeyList.erase(m_itSelect);
+			list<CHANGE_KEY>::iterator it = findData(m_dataPtrSelect);
+			it = m_MyKeyList.erase(it);
+			m_dataPtrSelect = it != m_MyKeyList.end() ? &*it : nullptr;
 			m_ctrlIniList.DeleteItem(m_nSelItem);
 
 			if(m_nSelItem == m_ctrlIniList.GetItemCount()) {
@@ -317,7 +334,7 @@ void COptKeySet::OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 	DWORD_PTR lParam;
 
 	lParam = m_ctrlIniList.GetItemData(pNMListView->iItem);//選択データのアドレスを取得
-	memcpy((void*)&m_itSelect,&lParam,sizeof(m_itSelect));
+	m_dataPtrSelect = (CHANGE_KEY*)lParam;
 	m_nSelItem = pNMListView->iItem;
 
 	return;
@@ -408,28 +425,28 @@ void COptKeySet::OnOptKeyEdit()
 
 	if(m_nSelItem > -1) {
 		CString strBuff;
-		keySetEditDlg.setKeyInfo(*m_itSelect);
+		keySetEditDlg.setKeyInfo(*m_dataPtrSelect);
 
-		strBuff.Format(_T("%x,%x,%x"),m_itSelect->m_sCopyPasteKey.m_pasteMessage.Msg,
-			m_itSelect->m_sCopyPasteKey.m_pasteMessage.wParam,
-			m_itSelect->m_sCopyPasteKey.m_pasteMessage.lParam);
+		strBuff.Format(_T("%x,%x,%x"),m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.Msg,
+			m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.wParam,
+			m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.lParam);
 		keySetEditDlg.m_pasteMessage = strBuff;
-		strBuff.Format(_T("%x,%x,%x"),m_itSelect->m_sCopyPasteKey.m_copyMessage.Msg,
-			m_itSelect->m_sCopyPasteKey.m_copyMessage.wParam,
-			m_itSelect->m_sCopyPasteKey.m_copyMessage.lParam);
+		strBuff.Format(_T("%x,%x,%x"),m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.Msg,
+			m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.wParam,
+			m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.lParam);
 		keySetEditDlg.m_copyMessage = strBuff;
 
-		keySetEditDlg.m_keyAction = m_itSelect->m_sCopyPasteKey.m_nMessage;
-		keySetEditDlg.m_matchCombo = m_itSelect->m_nMatch;
-		keySetEditDlg.m_caption = m_itSelect->m_strTitle;
-		keySetEditDlg.m_copyWait = m_itSelect->m_sCopyPasteKey.m_nCopyWait;
-		keySetEditDlg.m_pasteWait = m_itSelect->m_sCopyPasteKey.m_nPasteWait;
-		keySetEditDlg.m_nHistoryLimit = m_itSelect->m_nHistoryLimit;
+		keySetEditDlg.m_keyAction = m_dataPtrSelect->m_sCopyPasteKey.m_nMessage;
+		keySetEditDlg.m_matchCombo = m_dataPtrSelect->m_nMatch;
+		keySetEditDlg.m_caption = m_dataPtrSelect->m_strTitle;
+		keySetEditDlg.m_copyWait = m_dataPtrSelect->m_sCopyPasteKey.m_nCopyWait;
+		keySetEditDlg.m_pasteWait = m_dataPtrSelect->m_sCopyPasteKey.m_nPasteWait;
+		keySetEditDlg.m_nHistoryLimit = m_dataPtrSelect->m_nHistoryLimit;
 
 		int nRet = keySetEditDlg.DoModal();
 		if(nRet == IDOK) {
-			*m_itSelect = keySetEditDlg.getKeyInfo();
-			SetListData(*m_itSelect,m_itSelect,true,m_nSelItem);
+			*m_dataPtrSelect = keySetEditDlg.getKeyInfo();
+			SetListData(*m_dataPtrSelect, m_dataPtrSelect, true, m_nSelItem);
 		}
 	}
 }

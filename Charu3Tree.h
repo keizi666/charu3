@@ -83,9 +83,10 @@ public:
 	void editData(HTREEITEM hTreeItem,STRING_DATA Data);
 	void tree2List(HTREEITEM hStartItem,list<STRING_DATA> *tmplist,bool isAll=false);
 	void data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem,list<STRING_DATA>::iterator it);
+	list<STRING_DATA>::iterator findData(STRING_DATA* dataPtr);
 
 	STRING_DATA getData(HTREEITEM hTreeItem);
-	STRING_DATA getData(HTREEITEM hTreeItem,list<STRING_DATA>::iterator *it);
+	STRING_DATA* getDataPtr(HTREEITEM hTreeItem);
 
 	HTREEITEM serchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem);
 	HTREEITEM serchTitle(HTREEITEM hStartItem,CString strKey,int isLower = 0);

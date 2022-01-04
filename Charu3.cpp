@@ -797,9 +797,9 @@ void CCharu3App::closeTreeWindow(int nRet)
 				}
 			}
 		}
-		else if(m_pTreeDlg->m_selectIT_valid) {//通常選択データ
+		else if(m_pTreeDlg->m_selectDataPtr != nullptr) {//通常選択データ
 			strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択テキスト取得
-			data = *(m_pTreeDlg->m_selectIT);
+			data = *(m_pTreeDlg->m_selectDataPtr);
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
@@ -865,7 +865,6 @@ void CCharu3App::closeTreeWindow(int nRet)
 void CCharu3App::playData(STRING_DATA data,CString strClip,CString strSelect,bool isPaste,bool isChange)
 {
 	CString strMacro,strPaste;
-	list<STRING_DATA>::iterator itMacro;
 	int nIsMove;
 
 	//マクロ処理
@@ -873,8 +872,8 @@ void CCharu3App::playData(STRING_DATA data,CString strClip,CString strSelect,boo
 	HTREEITEM hMacroItem = NULL;
 	if(hSelectItem) hMacroItem = m_pTree->serchParentOption(hSelectItem,_T("macro"));//一番近い親か自分のマクロを調べる
 	if(hMacroItem) {
-		m_pTree->getData(hMacroItem,&itMacro);
-		strMacro = m_pTree->getDataOptionStr(itMacro->m_strMacro,_T("macro"));
+		STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+		strMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("macro"));
 	}
 	else strMacro = m_ini.m_strMacroPluginName;
 	strPaste = convertMacro(&data,strSelect,strClip,strMacro);
@@ -899,8 +898,8 @@ void CCharu3App::playData(STRING_DATA data,CString strClip,CString strSelect,boo
 			if(hSelectItem)	hMacroItem  = m_pTree->serchParentOption(hSelectItem,_T("move"));
 			else			hMacroItem = NULL;
 			if(hMacroItem) {
-				m_pTree->getData(hMacroItem,&itMacro);
-				nIsMove = m_pTree->getDataOption(itMacro->m_strMacro,_T("move"));
+				STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+				nIsMove = m_pTree->getDataOption(macroDataPtr->m_strMacro,_T("move"));
 				if(nIsMove) { 
 					hSelectItem = m_pTree->moveFolderTop(hSelectItem);
 					if(hSelectItem) m_pTree->SelectItem(hSelectItem);
@@ -1001,7 +1000,6 @@ void CCharu3App::playHotItem(int nTarget)
 				keyUpDown(keyData.m_uModKey,keyData.m_uVkCode,KEY_UP);//キーを離す処理（これが無いと選択テキスト取得で失敗）
 
 				HTREEITEM hMacroItem;
-				list<STRING_DATA>::iterator itMacro;
 				int nIsMove;
 
 				//ダイレクトコピー
@@ -1023,8 +1021,8 @@ void CCharu3App::playHotItem(int nTarget)
 					//マクロ処理
 					hMacroItem = m_pTree->serchParentOption(keyData.m_hItem,_T("macro"));//一番近い親か自分のマクロを調べる
 					if(hMacroItem) {
-						m_pTree->getData(hMacroItem,&itMacro);
-						strMacro = m_pTree->getDataOptionStr(itMacro->m_strMacro,_T("macro"));
+						STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+						strMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("macro"));
 					}
 					else strMacro = m_ini.m_strMacroPluginName;
 
@@ -1047,8 +1045,8 @@ void CCharu3App::playHotItem(int nTarget)
 					//貼り付けデータをフォルダの先頭に移動
 					hMacroItem  = m_pTree->serchParentOption(keyData.m_hItem,_T("move"));
 					if(hMacroItem) {
-						m_pTree->getData(hMacroItem,&itMacro);
-						nIsMove = m_pTree->getDataOption(itMacro->m_strMacro,_T("move"));
+						STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+						nIsMove = m_pTree->getDataOption(macroDataPtr->m_strMacro,_T("move"));
 						if(nIsMove) {
 							keyData.m_hItem = m_pTree->moveFolderTop(keyData.m_hItem);
 						}
@@ -1184,7 +1182,6 @@ void CCharu3App::execKeyMacro(CString strKeyMacro)
 void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetItem,HWND hWnd)
 {
 	HTREEITEM hMacroItem;
-	list<STRING_DATA>::iterator itMacro;
 	CString strCut,strKeyMacro;
 	int nStart = 0,nFoundStart,nFoundEnd,nMacroLenS,nMacroLenE;
 
@@ -1192,8 +1189,8 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 	if(hTargetItem)	hMacroItem  = m_pTree->serchParentOption(hTargetItem,_T("beforkey"));
 	else			hMacroItem = NULL;
 	if(hMacroItem) {
-		m_pTree->getData(hMacroItem,&itMacro);
-		strKeyMacro = m_pTree->getDataOptionStr(itMacro->m_strMacro,_T("beforkey"));
+		STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+		strKeyMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("beforkey"));
 		if(strKeyMacro != "") execKeyMacro(strKeyMacro);
 	}
 	
@@ -1252,8 +1249,8 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 	if(hTargetItem)	hMacroItem  = m_pTree->serchParentOption(hTargetItem,_T("afterkey"));
 	else			hMacroItem = NULL;
 	if(hMacroItem) {
-		m_pTree->getData(hMacroItem,&itMacro);
-		strKeyMacro = m_pTree->getDataOptionStr(itMacro->m_strMacro,_T("afterkey"));
+		STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+		strKeyMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("afterkey"));
 		if(strKeyMacro != _T("")) execKeyMacro(strKeyMacro);
 	}
 }

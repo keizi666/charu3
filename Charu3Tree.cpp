@@ -258,7 +258,6 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 	if(theApp.m_ini.m_etc.m_nDontSave) return true;
 
 	list<STRING_DATA> tmplist;
-	list<STRING_DATA>::iterator it;
 	STRING_DATA Data;
 
 	//全データを出力
@@ -269,7 +268,7 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 	}
 	//エクスポートの場合
 	else {
-		Data = getData(hStartItem,&it);
+		Data = getData(hStartItem);
 		Data.m_nParentID = ROOT;
 		tmplist.insert(tmplist.end(),Data);
 		if(ItemHasChildren(hStartItem)) tree2List(GetChildItem(hStartItem),&tmplist);
@@ -293,7 +292,7 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 	#else
 		fwrite(DAT_FORMAT,strlen(DAT_FORMAT),1,fFile);//データ識別子
 	#endif
-	for (it = tmplist.begin(); it != tmplist.end(); it++) {
+	for (list<STRING_DATA>::iterator it = tmplist.begin(); it != tmplist.end(); it++) {
 		
 		if(it->m_cKind & KIND_ONETIME) {//ノーマル項目以外を保存
 			continue;
@@ -977,8 +976,6 @@ int CCharu3Tree::mergeList(list<STRING_DATA> *pMainList,list<STRING_DATA> *pList
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID/* = true*/,bool isChild /*fasle*/)
 {
-	list<STRING_DATA>::iterator it;
-
 	if(isNewID)	data.m_nMyID = makeNewID();
 	data.m_nParentID = ROOT;
 	//NULLでくると親はROOTになる
@@ -987,8 +984,8 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 		if(isChild)	hParentItem = hTreeItem;
 		else		hParentItem = GetParentItem(hTreeItem);
 		if(hParentItem) {
-			getData(hParentItem,&it);
-			data.m_nParentID = it->m_nMyID;
+			STRING_DATA *parentDataPtr = getDataPtr(hParentItem);
+			data.m_nParentID = parentDataPtr->m_nMyID;
 		}
 	}
 
@@ -996,7 +993,7 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 
 	time(&data.m_timeCreate);
 	time(&data.m_timeEdit);
-	it = m_MyStringList.insert(m_MyStringList.end(),data);//リストに追加
+	list<STRING_DATA>::iterator it = m_MyStringList.insert(m_MyStringList.end(),data);//リストに追加
 
 	//ツリーデータ作成
 	TV_INSERTSTRUCT TreeCtrlItem;
@@ -1035,11 +1032,10 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 void CCharu3Tree::tree2List(HTREEITEM hStartItem,list<STRING_DATA> *tmplist,bool isAll/*=false*/)
 {
 	if(!hStartItem) return;
-	list<STRING_DATA>::iterator it;
 	STRING_DATA data;
 	HTREEITEM hItem = hStartItem;
 	do {
-		data = getData(hItem,&it);
+		data = getData(hItem);
 
 		tmplist->insert(tmplist->end(),data);
 		if(ItemHasChildren(hItem) && (getDataOption(data.m_strMacro,"clearrec") != 1 || isAll)) tree2List(GetChildItem(hItem),tmplist);
@@ -1067,7 +1063,22 @@ void CCharu3Tree::data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem,list<STRING_DAT
 	//名前を設定
 	pTreeCtrlItem->item.pszText = (TCHAR*)LPCTSTR(it->m_strTitle);
 	//データのアドレスを設定
-	memcpy((void*)&pTreeCtrlItem->item.lParam,(void*)&it,sizeof(it));
+	pTreeCtrlItem->item.lParam = (LPARAM)&*it;
+}
+
+//---------------------------------------------------
+//関数名	findData(STRING_DATA *ptr)
+//機能		データリストからptrが指している要素を探す
+//---------------------------------------------------
+list<STRING_DATA>::iterator CCharu3Tree::findData(STRING_DATA* dataPtr)
+{
+	list<STRING_DATA>::iterator it;
+	for (it = m_MyStringList.begin(); it != m_MyStringList.end(); it++) {
+		if (&*it == dataPtr) {
+			break;
+		}
+	}
+	return it;
 }
 
 //---------------------------------------------------
@@ -1105,18 +1116,18 @@ int CCharu3Tree::getIconNumber(char cKind,char cIcon)
 //---------------------------------------------------
 void CCharu3Tree::deleteData(HTREEITEM hTreeItem)
 {
-	list<STRING_DATA>::iterator it;
 	//データのアドレスを設定
-	getData(hTreeItem,&it);
+	STRING_DATA *dataPtr = getDataPtr(hTreeItem);
 
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("delete data \"%s\" %d\n"),it->m_strTitle,it->m_cKind);
+		strText.Format(_T("delete data \"%s\" %d\n"),dataPtr->m_strTitle,dataPtr->m_cKind);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
-	if(it->m_cKind & KIND_FOLDER_ALL) {
+	list<STRING_DATA>::iterator it = findData(dataPtr);
+	if (it->m_cKind & KIND_FOLDER_ALL) {
 		//フォルダを再帰で削除
 		clearFolder(GetChildItem(hTreeItem));//フォルダの子を削除
 		m_MyStringList.erase(it);
@@ -1137,13 +1148,13 @@ void CCharu3Tree::deleteData(HTREEITEM hTreeItem)
 void CCharu3Tree::clearFolder(HTREEITEM hStartItem)
 {
 	if(!hStartItem) return;
-	list<STRING_DATA>::iterator it;
 	HTREEITEM hItem = hStartItem,hPrevItem;
 	do {
 		if(ItemHasChildren(hItem)) {
 			clearFolder(GetChildItem(hItem));//再帰で削除
 		}
-		getData(hItem,&it);
+		STRING_DATA *dataPtr = getDataPtr(hItem);
+		list<STRING_DATA>::iterator it = findData(dataPtr);
 		hPrevItem = hItem;
 		hItem = GetNextItem(hItem,TVGN_NEXT);
 		m_MyStringList.erase(it);
@@ -1159,13 +1170,12 @@ void CCharu3Tree::clearFolder(HTREEITEM hStartItem)
 void CCharu3Tree::closeFolder(HTREEITEM hStartItem)
 {
 	if(!hStartItem) return;
-	list<STRING_DATA>::iterator it;
 	HTREEITEM hItem = hStartItem;
 	do {
 		if(ItemHasChildren(hItem)) {
-			getData(hItem,&it);
+			STRING_DATA *dataPtr = getDataPtr(hItem);
 			Expand(hItem,TVE_COLLAPSE);
-			it->m_cKind = it->m_cKind & (FOLDER_OPEN ^ 0xff); 
+			dataPtr->m_cKind &= FOLDER_OPEN ^ 0xff;
 			closeFolder(GetChildItem(hItem));//再帰で閉じる
 		}
 		hItem = GetNextItem(hItem,TVGN_NEXT);
@@ -1210,13 +1220,13 @@ void CCharu3Tree::checkFolder(HTREEITEM hStartItem,bool isCheck,list<HTREEITEM> 
 void CCharu3Tree::clearOneTime(HTREEITEM hStartItem,int nKind/*KIND_LOCKだと削除でなくロック処理*/)
 {
 	if(!hStartItem) return;
-	list<STRING_DATA>::iterator it;
 	HTREEITEM hItem = hStartItem,hPrevItem;
 	do {
 		if(ItemHasChildren(hItem)) {
 			clearOneTime(GetChildItem(hItem),nKind);//再帰で処理
 		}
-		getData(hItem,&it);
+		STRING_DATA *dataPtr = getDataPtr(hItem);
+		list<STRING_DATA>::iterator it = findData(dataPtr);
 		hPrevItem = hItem;
 		hItem = GetNextItem(hItem,TVGN_NEXT);
 		if(it->m_cKind & KIND_ONETIME) {
@@ -1241,13 +1251,11 @@ void CCharu3Tree::clearOneTime(HTREEITEM hStartItem,int nKind/*KIND_LOCKだと削除
 //---------------------------------------------------
 void CCharu3Tree::editData(HTREEITEM hTreeItem,STRING_DATA Data)
 {
-	list<STRING_DATA>::iterator it;
-
 	//データのアドレスを設定
-	getData(hTreeItem,&it);
+	STRING_DATA *dataPtr = getDataPtr(hTreeItem);
 	time(&Data.m_timeEdit);
 
-	*it = Data;
+	*dataPtr = Data;
 	int nIcon = getIconNumber(Data.m_cKind,Data.m_cIcon);
 
 	SetItemImage(hTreeItem,nIcon,nIcon + 1);
@@ -1255,7 +1263,7 @@ void CCharu3Tree::editData(HTREEITEM hTreeItem,STRING_DATA Data)
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("edit data \"%s\" %d\n"),it->m_strTitle,it->m_cKind);
+		strText.Format(_T("edit data \"%s\" %d\n"),dataPtr->m_strTitle,dataPtr->m_cKind);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 }
@@ -1272,28 +1280,12 @@ void CCharu3Tree::changeIcon(HTREEITEM hTreeItem,int nID)
 //---------------------------------------------------
 STRING_DATA CCharu3Tree::getData(HTREEITEM hTreeItem)
 {
-	STRING_DATA retData;
-	list<STRING_DATA>::iterator it;
-
-	//データのアドレスを設定
-	getData(hTreeItem,&it);
-
-	retData = *it;
-	
-	return retData;
+	return *getDataPtr(hTreeItem);
 }
-STRING_DATA CCharu3Tree::getData(HTREEITEM hTreeItem,list<STRING_DATA>::iterator *it)
+STRING_DATA *CCharu3Tree::getDataPtr(HTREEITEM hTreeItem)
 {
-	STRING_DATA retData;
-
-	//データのアドレスを設定
 	DWORD_PTR lParam = GetItemData(hTreeItem);
-	memcpy((void*)it,(void*)&lParam,sizeof(lParam));
-
-	retData = **it;
-	
-	
-	return retData;
+	return (STRING_DATA*)lParam;
 }
 
 //---------------------------------------------------
@@ -1696,7 +1688,6 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 {
 	int nSize = m_MyStringList.size(),nRirekiCount,nIsLock,i,nDoDuplication;
 	int nNumber = *m_nRecNumber;
-	list<STRING_DATA>::iterator it;
 
 	STRING_DATA parentData;
 	HTREEITEM hTreeItem,hStart = nullptr;
@@ -1709,7 +1700,7 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 	}
 //	hTreeItem = (HTREEITEM)::SendMessage(m_hWnd, TVM_GETNEXTITEM, TVGN_ROOT, 0);
 	for(hTreeItem = GetRootItem(),i = 0; i < nSize && hTreeItem && hTreeItem != hStart;i++,hTreeItem = getTrueNextItem(hTreeItem)) {
-		parentData = getData(hTreeItem,&it);
+		parentData = getData(hTreeItem);
 		hStart = GetRootItem();
 		//履歴フォルダか判別
 		if(parentData.m_cKind & KIND_RIREKI) {
@@ -1834,13 +1825,11 @@ void CCharu3Tree::classHistoryFolder(HTREEITEM hTreeItem,int nRirekiCount)
 HTREEITEM CCharu3Tree::getFirstFolder(HTREEITEM hStartItem)
 {
 	if(!hStartItem) return nullptr;
-	list<STRING_DATA>::iterator it;
 	HTREEITEM hItem = hStartItem;
 	hItem = GetChildItem(hItem);
 	do {
-		getData(hItem,&it);
-		STRING_DATA data = *it;
-		if(it->m_cKind & KIND_FOLDER_ALL) 	break;
+		STRING_DATA *dataPtr = getDataPtr(hItem);
+		if(dataPtr->m_cKind & KIND_FOLDER_ALL) 	break;
 		hItem = GetNextItem(hItem,TVGN_NEXT);
 	}while(hItem);
 	return hItem;
@@ -1857,8 +1846,8 @@ HTREEITEM CCharu3Tree::getLastChild(HTREEITEM hStartItem)
 	HTREEITEM hItem = hStartItem, hPrevItem = nullptr;
 	hItem = GetChildItem(hItem);
 	do {
-		getData(hItem,&it);
-		if(it->m_cKind & KIND_DATA_ALL) hPrevItem = hItem;
+		STRING_DATA* dataPtr = getDataPtr(hItem);
+		if(dataPtr->m_cKind & KIND_DATA_ALL) hPrevItem = hItem;
 		hItem = GetNextItem(hItem,TVGN_NEXT);
 	}while(hItem);
 	return hPrevItem;
@@ -1871,10 +1860,9 @@ HTREEITEM CCharu3Tree::getLastChild(HTREEITEM hStartItem)
 void CCharu3Tree::deleteExcessChildren(HTREEITEM hTreeItem,int *nCount)
 {
 	if(!hTreeItem) return;
-	list<STRING_DATA>::iterator it;
 	HTREEITEM hPrevItem;
 	do {
-		getData(hTreeItem,&it);
+		STRING_DATA *dataPtr = getDataPtr(hTreeItem);
 		if(ItemHasChildren(hTreeItem)) {
 			deleteExcessChildren(GetChildItem(hTreeItem),nCount);
 		}
@@ -1883,7 +1871,7 @@ void CCharu3Tree::deleteExcessChildren(HTREEITEM hTreeItem,int *nCount)
 		if(*nCount <= 1 && !ItemHasChildren(hPrevItem)) {//子を消していきます
 			deleteData(hPrevItem);
 		}
-		else if(it->m_cKind & KIND_DATA_ALL)	(*nCount)--;
+		else if(dataPtr->m_cKind & KIND_DATA_ALL)	(*nCount)--;
 	}while(hTreeItem);
 	return;
 }
@@ -1899,11 +1887,11 @@ int CCharu3Tree::getChildCount(HTREEITEM hTreeItem,bool isBrotherOnly)
 	if(!hTreeItem) return nChildren;
 	list<STRING_DATA>::iterator it;
 	do {
-		getData(hTreeItem,&it);
+		STRING_DATA* dataPtr = getDataPtr(hTreeItem);
 		if(!isBrotherOnly && ItemHasChildren(hTreeItem)) {
 			nChildren += getChildCount(hTreeItem);
 		}
-		if(it->m_cKind & KIND_DATA_ALL)	nChildren++;
+		if(dataPtr->m_cKind & KIND_DATA_ALL)	nChildren++;
 		hTreeItem = GetNextItem(hTreeItem,TVGN_NEXT);
 	}while(hTreeItem);
 
@@ -2204,31 +2192,29 @@ void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point)
 //---------------------------------------------------
 void CCharu3Tree::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	list<STRING_DATA>::iterator it;
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 
 	HTREEITEM hItem = pNMTreeView->itemNew.hItem;
 	if(hItem) {
-		getData(hItem,&it);
+		STRING_DATA *dataPtr = getDataPtr(hItem);
 		//閉じる
 		if(pNMTreeView->action == 1)
-			it->m_cKind = it->m_cKind & (FOLDER_OPEN ^ 0xff); 
+			dataPtr->m_cKind &= FOLDER_OPEN ^ 0xff;
 		//開く
 		else if(pNMTreeView->action == 2)
-			it->m_cKind = it->m_cKind | FOLDER_OPEN;
+			dataPtr->m_cKind |= FOLDER_OPEN;
 	}
 	*pResult = 0;
 }
 
 void CCharu3Tree::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	list<STRING_DATA>::iterator it;
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 
 	HTREEITEM hItem = pNMTreeView->itemNew.hItem;
 	if(hItem) {
-		getData(hItem,&it);
-		setSelectID(it->m_nMyID);
+		STRING_DATA *dataPtr = getDataPtr(hItem);
+		setSelectID(dataPtr->m_nMyID);
 	}
 	*pResult = 0;
 }
