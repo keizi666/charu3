@@ -212,28 +212,15 @@ public:
 
 	//OSの種族判別(NT40はfalse)
 	bool isNotNt40() {
-#if false
-// TODO
-		if(m_osVersion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) return true;
+		// Windows 9x and its variants are no longer supported.
 		return false;
-#else
-		return false;
-#endif
 	}
 	bool isNt40() {
-#if false
-// TODO
-		if(m_osVersion.dwPlatformId == VER_PLATFORM_WIN32_NT && m_osVersion.dwMajorVersion >= 4) return true;
-		return false;
-#else
+		// Assume running on Windows NT 4.0 or later.
 		return true;
-#endif
 	}
 	bool isWindows98() {
-#if false
-// TODO
-		if(m_osVersion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) return true;
-#endif
+		// Windows 9x and its variants are no longer supported.
 		return false;
 	}
 
@@ -262,10 +249,6 @@ public:
 	int m_nDebug;
 	CString m_strDebugLog;
 
-#if false
-// TODO
-	OSVERSIONINFO m_osVersion;//OSバージョン構造体
-#endif
 	vector<MACRO_STRUCT>  m_vctMacro;
 	vector<MACRO_STRUCT>  m_vctDataMacro;
 

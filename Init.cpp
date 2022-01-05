@@ -70,14 +70,6 @@ void CInit::initialize()
 	cpName++;
 	*cpName = NULL;
 	m_strAppPath = strBuff;
-
-#if false
-// TODO
-	//Windows‚Ìƒo[ƒWƒ‡ƒ“‚ğæ“¾
-	ZeroMemory(&m_osVersion,sizeof(m_osVersion));
-	m_osVersion.dwOSVersionInfoSize = sizeof(m_osVersion);
-	GetVersionEx(&m_osVersion);//OSî•ñ‚ğæ“¾
-#endif
 }
 
 //---------------------------------------------------

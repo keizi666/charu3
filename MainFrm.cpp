@@ -66,22 +66,13 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 	//アイコン処理
-#if false
-// TODO
-	OSVERSIONINFO version = theApp.m_ini.m_osVersion;
-	if(version.dwMajorVersion && version.dwPlatformId == VER_PLATFORM_WIN32_NT &&
-		version.dwMajorVersion == 5 && version.dwMinorVersion >= 1) {
-
-		m_hIcon = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_RUN256),IMAGE_ICON,16,16,0);//スモールアイコン
-		m_hStopIcon  = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_STOP256),IMAGE_ICON,16,16,0);//スモールアイコン
-	}
-	else
+#if true
+	m_hIcon = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_RUN256),IMAGE_ICON,16,16,0);//スモールアイコン
+	m_hStopIcon  = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_STOP256),IMAGE_ICON,16,16,0);//スモールアイコン
+#else
+	m_hIcon = (HICON)LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_RUN), IMAGE_ICON, 16, 16, 0);//スモールアイコン
+	m_hStopIcon = (HICON)LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_STOP), IMAGE_ICON, 16, 16, 0);//スモールアイコン
 #endif
-	{
-		m_hIcon = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_RUN),IMAGE_ICON,16,16,0);//スモールアイコン
-		m_hStopIcon  = (HICON)LoadImage(theApp.m_hInstance,MAKEINTRESOURCE(IDI_STOP),IMAGE_ICON,16,16,0);//スモールアイコン
-	}
-
 	//タスクトレイアイコンを設定する
 	m_nIcon.cbSize = sizeof(NOTIFYICONDATA);
 	m_nIcon.uID = 4;

@@ -166,13 +166,10 @@ BOOL CCharu3App::InitInstance()
 #endif
 
 	//言語リソースを設定
-#if false
-// TODO: Assertion occurs.
 	m_hLangDll = LoadLibrary(_T("c3language.dll"));
 	if(m_hLangDll) {
 		AfxSetResourceHandle(m_hLangDll);
 	}
-#endif
 
 	//メインフォームの作成
 	CMainFrame* pFrame = new CMainFrame;
@@ -289,11 +286,6 @@ void CCharu3App::init()
 		CString strText;
 		strText.Format(_T("start \"%s\"\n"),ABOUT_NAME);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-#if false
-// TODO
-		strText.Format(_T("Windows version %d.%d  %d\n"),m_ini.m_osVersion.dwMajorVersion,m_ini.m_osVersion.dwMinorVersion,m_ini.m_osVersion.dwPlatformId);
-		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-#endif
 		strText.Format(_T("ini file name \"%s\"\n"),StringBuff);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
