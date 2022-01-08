@@ -166,6 +166,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 void CMainFrame::changeClip()
 {
 	CString strClipBord;
+	Sleep(10); // Give other processes a chance to open the clipboard for a few moments.
 	theApp.m_clipbord.getClipboardText(strClipBord);//クリップボードの内容を取得
 	theApp.changeClipBord(strClipBord);//本体にクリップボードの変更を通知
 
