@@ -20,9 +20,9 @@ In this repository, I made some fixes to make it buildable in Visual Studio 2019
 I have also fixed some issues.  
 
 However, the above issue is currently under investigation.  
-([The contents of data files may be lost - Issue #6 - itagagaki/charu3](https://github.com/itagagaki/charu3/issues/6))
+([The contents of data files may be lost - Issue #6](https://github.com/itagagaki/charu3/issues/6))
 
-In [Discussions - itagagaki/charu3](https://github.com/itagagaki/charu3/discussions), we have suggestions for improvements.
+In [Discussions](https://github.com/itagagaki/charu3/discussions), we have suggestions for improvements.
 I'm looking forward to your feedback.
 
 ---
@@ -46,7 +46,7 @@ Charu3は、キー1発で呼び出すことができて、予め設定した定�
 また、いくつかの問題も修正しています。  
 
 しかし、上記の問題については現在調査中です。  
-([The contents of data files may be lost · Issue #6 · itagagaki/charu3](https://github.com/itagagaki/charu3/issues/6))
+([The contents of data files may be lost · Issue #6](https://github.com/itagagaki/charu3/issues/6))
 
-[Discussions · itagagaki/charu3](https://github.com/itagagaki/charu3/discussions)では改良の提案をしています。
+[Discussions](https://github.com/itagagaki/charu3/discussions)では改良の提案をしています。
 ご意見をお待ちしています。
