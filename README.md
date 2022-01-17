@@ -13,7 +13,7 @@ There is a similar report at the same time on [Vector's comments and ratings](ht
 I thought that there might be some problem between the current Windows 10 and this software.
 
 So I brazenly asked Mr. Matsumoto if he would let me take over the maintenance of this software.
-Mr. Matsumoto graciously released [the source code](https://github.com/keizi666/charu3).
+He graciously released [the source code](https://github.com/keizi666/charu3).
 
 This repository is a forked version of it.
 In this repository, I made some fixes to make it buildable in Visual Studio 2019.
@@ -22,7 +22,7 @@ I have also fixed some issues.
 However, the above issue is currently under investigation.  
 ([The contents of data files may be lost - Issue #6](https://github.com/itagagaki/charu3/issues/6))
 
-In [Discussions](https://github.com/itagagaki/charu3/discussions), we have suggestions for improvements.
+In [Discussions](https://github.com/itagagaki/charu3/discussions), I have suggestions for improvements.
 I'm looking forward to your feedback.
 
 ---
