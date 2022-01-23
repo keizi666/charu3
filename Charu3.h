@@ -34,7 +34,7 @@ using namespace std;
 
 //バージョン表記
 #ifdef _UNICODE
-	#define ABOUT_NAME _T("Charu3 Version 7.06.07 Unicode")
+	#define ABOUT_NAME _T("Charu3 SE Version 7.06.07 Unicode + under development")
 #else
 	#define ABOUT_NAME _T("Charu3 Version 7.06.07")
 #endif

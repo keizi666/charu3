@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 resources
+// Japanese (Japan) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-#ifdef _WIN32
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -27,18 +25,18 @@ LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -66,18 +64,23 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\Charu3.ico"
-IDI_STOP                ICON    DISCARDABLE     "res\\icon1.ico"
-IDI_RUN                 ICON    DISCARDABLE     "res\\ico00001.ico"
-IDI_RUN256              ICON    DISCARDABLE     "res\\c2p256_16_run.ico"
-IDI_STOP256             ICON    DISCARDABLE     "res\\c2p256_16_stop.ico"
+IDR_MAINFRAME           ICON                    "res\\Charu3.ico"
+
+IDI_STOP                ICON                    "res\\icon1.ico"
+
+IDI_RUN                 ICON                    "res\\ico00001.ico"
+
+IDI_RUN256              ICON                    "res\\c2p256_16_run.ico"
+
+IDI_STOP256             ICON                    "res\\c2p256_16_stop.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS
 BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
@@ -98,47 +101,37 @@ END
 //
 
 IDD_POPUP_DIALOG DIALOGEX 0, 0, 62, 97
-STYLE DS_SETFOREGROUND | WS_POPUP | WS_THICKFRAME
-FONT 9, "ＭＳ Ｐゴシック"
+STYLE DS_SETFONT | DS_SETFOREGROUND | WS_POPUP | WS_THICKFRAME
+FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
-    CONTROL         "Tree1",IDC_MY_TREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
-                    TVS_TRACKSELECT | TVS_INFOTIP | WS_TABSTOP,0,0,62,97,
-                    WS_EX_ACCEPTFILES
+    CONTROL         "Tree1",IDC_MY_TREE,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | TVS_TRACKSELECT | TVS_INFOTIP | WS_TABSTOP,0,0,62,97,WS_EX_ACCEPTFILES
 END
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 134, 71
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Charu3のﾊﾞｰｼﾞｮﾝ情報"
-FONT 9, "ＭＳ Ｐゴシック"
+IDD_ABOUTBOX DIALOGEX 0, 0, 210, 82
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Charu3 SE のバージョン情報"
+FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x0
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,7,7,20,20
-    CONTROL         "Charu3",IDC_VERSION_NAME,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,30,15,97,8
-    CTEXT           "Copyright (C) 2000-2004 C+ Factory.",IDC_STATIC,12,33,
-                    110,8
-    DEFPUSHBUTTON   "OK(&O)",IDOK,77,50,50,14,WS_GROUP
-    DEFPUSHBUTTON   "作者Webサイト",IDC_WEB,7,50,50,14,BS_CENTER
+    CONTROL         "Charu3 SE",IDC_VERSION_NAME,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,29,15,167,8
+    CTEXT           "Copyright (C) 2000-2004 C+ Factory",IDC_STATIC,12,33,108,8
+    DEFPUSHBUTTON   "OK(&O)",IDOK,153,61,50,14,WS_GROUP
+    DEFPUSHBUTTON   "リポジトリ",IDC_WEB,7,61,50,14,BS_CENTER
+    CTEXT           "Successor Edition: 2021-2022 Itagaki Fumihiko",IDC_STATIC,12,45,138,8
 END
 
-IDD_ADD_DATA DIALOG DISCARDABLE  0, 0, 331, 281
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_ADD_DATA DIALOG 0, 0, 331, 281
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "テキスト項目追加"
 FONT 9, "ＭＳ Ｐゴシック"
 BEGIN
     EDITTEXT        IDC_ADD_NAME,22,263,57,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_ADD_DATA,4,23,323,174,ES_MULTILINE | ES_AUTOVSCROLL | 
-                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
-    COMBOBOX        IDC_ADD_MACRO_COMBO,164,5,74,130,CBS_DROPDOWN | 
-                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ADD_DATA,4,23,323,174,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    COMBOBOX        IDC_ADD_MACRO_COMBO,164,5,74,130,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "ﾌｧｲﾙ名貼り付け(&F)",IDC_ADD_PASTE_FILE,259,5,62,14
-    COMBOBOX        IDC_EDIT_DATA_MACRO_COMBO,22,243,64,139,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_ADD_MACRO,95,207,232,49,ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
-                    WS_VSCROLL
-    COMBOBOX        IDC_ICON_COMBO,169,264,69,129,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_EDIT_DATA_MACRO_COMBO,22,243,64,139,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_ADD_MACRO,95,207,232,49,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    COMBOBOX        IDC_ICON_COMBO,169,264,69,129,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "追加(&A)",ID_ADD_OK,243,262,38,14
     PUSHBUTTON      "閉じる(&C)",ID_ADD_CLOSE,288,262,39,14
     LTEXT           "名前",IDC_STATIC,5,264,17,12
@@ -150,38 +143,29 @@ BEGIN
     LTEXT           "(登録文の動作を拡張します)",IDC_STATIC,10,215,84,8
 END
 
-IDD_CHECKBOX DIALOG DISCARDABLE  0, 0, 144, 16
-STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
+IDD_CHECKBOX DIALOG 0, 0, 144, 16
+STYLE DS_SETFONT | DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
 FONT 9, "ＭＳ Ｐゴシック"
 BEGIN
-    CONTROL         "マクロプラグインを自動切換えする",IDC_CHECK_MACRO,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,4,117,8
+    CONTROL         "マクロプラグインを自動切換えする",IDC_CHECK_MACRO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,4,117,8
 END
 
-IDD_EDIT DIALOG DISCARDABLE  0, 0, 331, 277
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_EDIT DIALOG 0, 0, 331, 277
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "編集"
 FONT 9, "ＭＳ Ｐゴシック"
 BEGIN
     EDITTEXT        IDC_NAME,22,260,54,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT_DATA,6,20,318,176,ES_MULTILINE | ES_AUTOVSCROLL | 
-                    ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
-    COMBOBOX        IDC_EDIT_MACRO_COMBO,170,3,74,139,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_DATA,6,20,318,176,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    COMBOBOX        IDC_EDIT_MACRO_COMBO,170,3,74,139,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "ﾌｧｲﾙ名貼り付け(&F)",IDC_EDIT_PASTE_FILE,262,3,62,14
-    COMBOBOX        IDC_EDIT_DATA_MACRO_COMBO,23,239,64,139,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_EDIT_MACRO,97,204,227,49,ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | 
-                    WS_VSCROLL
-    CONTROL         "履歴フォルダとして使う",IDC_RIREKI_CHECK,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,122,262,82,10
-    COMBOBOX        IDC_ICON_COMBO,169,260,69,123,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_EDIT_DATA_MACRO_COMBO,23,239,64,139,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_EDIT_MACRO,97,204,227,49,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    CONTROL         "履歴フォルダとして使う",IDC_RIREKI_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,262,82,10
+    COMBOBOX        IDC_ICON_COMBO,169,260,69,123,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "OK(&O)",IDOK,244,258,39,14
     PUSHBUTTON      "ｷｬﾝｾﾙ(&C)",IDCANCEL,287,258,37,14
-    COMBOBOX        IDC_KIND_COMBO,100,260,40,55,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_KIND_COMBO,100,260,40,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "名前",IDC_STATIC,6,262,14,8
     LTEXT           "種類",IDC_STATIC_KIND,81,263,16,8
     LTEXT           "マクロテンプレート",IDC_STATIC,114,6,55,12
@@ -193,68 +177,47 @@ BEGIN
 END
 
 IDD_OPT_ETC DIALOGEX 0, 0, 223, 226
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
-    CONTROL         "ポップアップから選んだ文字列はクリップボードにも入れる",
-                    IDC_OPT_TOCLIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,
-                    183,10
-    CONTROL         "タスクトレイアイコンのツールチップを固定にする",
-                    IDC_OPT_TOOLTIP_TITLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,21,155,10
-    CONTROL         "ペースト後に自分を最小化してメモリを解放する",
-                    IDC_OPT_MINIMIZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    35,153,10
-    CONTROL         "ポップアップを表示する",IDC_OPT_ICON_POP,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,11,97,83,10
-    CONTROL         "ストックモードの切り替え",IDC_OPT_ICON_RIREKI,"Button",
-                    BS_AUTORADIOBUTTON,11,109,110,10
-    GROUPBOX        "タスクトレイアイコンをクリックした時の動作",IDC_STATIC,
-                    7,86,136,38,WS_GROUP
-    CONTROL         "ワード97,98の切り取りバグ、Notes問題に対応する",
-                    IDC_OPT_WORD_BUG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    137,167,9
+    CONTROL         "ポップアップから選んだ文字列はクリップボードにも入れる",IDC_OPT_TOCLIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,183,10
+    CONTROL         "タスクトレイアイコンのツールチップを固定にする",IDC_OPT_TOOLTIP_TITLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,21,155,10
+    CONTROL         "ペースト後に自分を最小化してメモリを解放する",IDC_OPT_MINIMIZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,35,153,10
+    CONTROL         "ポップアップを表示する",IDC_OPT_ICON_POP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,11,97,83,10
+    CONTROL         "ストックモードの切り替え",IDC_OPT_ICON_RIREKI,"Button",BS_AUTORADIOBUTTON,11,109,110,10
+    GROUPBOX        "タスクトレイアイコンをクリックした時の動作",IDC_STATIC,7,86,136,38,WS_GROUP
+    CONTROL         "ワード97,98の切り取りバグ、Notes問題に対応する",IDC_OPT_WORD_BUG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,137,167,9
     LTEXT           "自己診断タイマー",IDC_STATIC,7,167,52,8
     EDITTEXT        IDC_OPT_SELF_TIME,61,165,34,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(他のアプリで不具合が出る可能性があります)",IDC_STATIC,
-                    17,147,137,9
+    LTEXT           "(他のアプリで不具合が出る可能性があります)",IDC_STATIC,17,147,137,9
     LTEXT           "ミリ秒(0にすると自己診断停止)",IDC_STATIC,98,169,91,8
 END
 
 IDD_OPT_KEYSET DIALOGEX 0, 0, 231, 253
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
-    CONTROL         "キーイベント方式",IDC_OPT_KEY_ACTION01,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,9,13,66,10
-    CONTROL         "Charu2Proライク",IDC_OPT_KEY_ACTION02,"Button",
-                    BS_AUTORADIOBUTTON,81,13,63,10
-    CONTROL         "メッセージ方式(WM_COPYとWM_PASTEを使用)",
-                    IDC_OPT_KEY_ACTION03,"Button",BS_AUTORADIOBUTTON,9,40,
-                    151,10
+    CONTROL         "キーイベント方式",IDC_OPT_KEY_ACTION01,"Button",BS_AUTORADIOBUTTON | WS_GROUP,9,13,66,10
+    CONTROL         "Charu2Proライク",IDC_OPT_KEY_ACTION02,"Button",BS_AUTORADIOBUTTON,81,13,63,10
+    CONTROL         "メッセージ方式(WM_COPYとWM_PASTEを使用)",IDC_OPT_KEY_ACTION03,
+                    "Button",BS_AUTORADIOBUTTON,9,40,151,10
     GROUPBOX        "デフォルトキー設定",IDC_STATIC,5,3,221,83,WS_GROUP
     LTEXT           "コピーに使うキー",IDC_STATIC,10,27,51,8
-    CONTROL         "HotKey2",IDC_OPT_COPYKEY,"msctls_hotkey32",WS_BORDER | 
-                    WS_TABSTOP,62,24,46,14
+    CONTROL         "HotKey2",IDC_OPT_COPYKEY,"msctls_hotkey32",WS_BORDER | WS_TABSTOP,62,24,46,14
     LTEXT           "ペーストに使うキー",IDC_STATIC,113,27,56,8
-    CONTROL         "HotKey2",IDC_OPT_PASTKEY,"msctls_hotkey32",WS_BORDER | 
-                    WS_TABSTOP,170,23,46,14
+    CONTROL         "HotKey2",IDC_OPT_PASTKEY,"msctls_hotkey32",WS_BORDER | WS_TABSTOP,170,23,46,14
     LTEXT           "コピー待ち時間",IDC_STATIC,11,54,46,8
     EDITTEXT        IDC_OPT_COPY_WAIT,58,52,34,12,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "ミリ秒",IDC_STATIC,94,54,18,8
     LTEXT           "貼付待ち時間",IDC_STATIC,118,54,41,8
-    EDITTEXT        IDC_OPT_PASTE_WAIT,160,52,34,12,ES_RIGHT | 
-                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_PASTE_WAIT,160,52,34,12,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "ミリ秒",IDC_STATIC,197,54,18,8
     LTEXT           "クリップボード履歴容量制限",IDC_STATIC,11,70,82,8
-    EDITTEXT        IDC_OPT_HISTORY_SIZE_LIMIT,97,66,40,14,ES_RIGHT | 
-                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_HISTORY_SIZE_LIMIT,97,66,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "KB  -1で無制限設定",IDC_STATIC,140,69,62,8
-    CONTROL         "List2",IDC_OPT_KEY_INI_LIST,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
-                    WS_BORDER | WS_TABSTOP,8,100,214,128
+    CONTROL         "List2",IDC_OPT_KEY_INI_LIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,8,100,214,128
     PUSHBUTTON      "変更(&E)",IDC_OPT_KEY_EDIT,96,233,33,12
     PUSHBUTTON      "追加(&P)",IDC_OPT_KEY_ADD,133,233,33,12
     PUSHBUTTON      "削除(&D)",IDC_OPT_KEY_DALETE,189,233,33,12
@@ -262,122 +225,78 @@ BEGIN
 END
 
 IDD_OPT_POPUP DIALOGEX 0, 0, 227, 257
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
-    CONTROL         "ポップアップの選択位置を保持する",IDC_OPT_SELECT_SAVE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,118,10
-    CONTROL         "ポップアップのフォルダ状態を保持する",
-                    IDC_OPT_FOLDER_OPEN,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,21,129,10
-    CONTROL         "ポップアップした時にIMEを自動でOFFにする",
-                    IDC_OPT_IME_AUTO_OFF,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,34,144,10
-    CONTROL         "マウスカーソルが画面の隅に触れたらポップアップする",
-                    IDC_OPT_POPUP_EDGE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,46,174,10
-    CONTROL         "",IDC_OPT_POPUP_EDGE1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,184,43,8,8
-    CONTROL         "",IDC_OPT_POPUP_EDGE2,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,192,43,8,8
-    CONTROL         "",IDC_OPT_POPUP_EDGE3,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,184,51,8,8
-    CONTROL         "",IDC_OPT_POPUP_EDGE4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,192,51,8,8
+    CONTROL         "ポップアップの選択位置を保持する",IDC_OPT_SELECT_SAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,118,10
+    CONTROL         "ポップアップのフォルダ状態を保持する",IDC_OPT_FOLDER_OPEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,21,129,10
+    CONTROL         "ポップアップした時にIMEを自動でOFFにする",IDC_OPT_IME_AUTO_OFF,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,34,144,10
+    CONTROL         "マウスカーソルが画面の隅に触れたらポップアップする",IDC_OPT_POPUP_EDGE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,46,174,10
+    CONTROL         "",IDC_OPT_POPUP_EDGE1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,184,43,8,8
+    CONTROL         "",IDC_OPT_POPUP_EDGE2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,192,43,8,8
+    CONTROL         "",IDC_OPT_POPUP_EDGE3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,184,51,8,8
+    CONTROL         "",IDC_OPT_POPUP_EDGE4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,192,51,8,8
     GROUPBOX        "ポップアップキー設定",IDC_STATIC,7,58,213,34
-    CONTROL         "ホットキー",IDC_OPT_KEYRADIO_POP,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,9,73,42,10
-    CONTROL         "Shift*2",IDC_OPT_KEYRADIO_POP2,"Button",
-                    BS_AUTORADIOBUTTON,106,73,37,10
-    CONTROL         "Ctrl*2",IDC_OPT_KEYRADIO_POP3,"Button",
-                    BS_AUTORADIOBUTTON,145,73,34,10
-    CONTROL         "Alt*2",IDC_OPT_KEYRADIO_POP4,"Button",
-                    BS_AUTORADIOBUTTON,180,73,31,10
-    CONTROL         "HotKey2",IDC_OPT_POPUPKEY,"msctls_hotkey32",WS_BORDER | 
-                    WS_GROUP | WS_TABSTOP,56,70,46,14
+    CONTROL         "ホットキー",IDC_OPT_KEYRADIO_POP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,9,73,42,10
+    CONTROL         "Shift*2",IDC_OPT_KEYRADIO_POP2,"Button",BS_AUTORADIOBUTTON,106,73,37,10
+    CONTROL         "Ctrl*2",IDC_OPT_KEYRADIO_POP3,"Button",BS_AUTORADIOBUTTON,145,73,34,10
+    CONTROL         "Alt*2",IDC_OPT_KEYRADIO_POP4,"Button",BS_AUTORADIOBUTTON,180,73,31,10
+    CONTROL         "HotKey2",IDC_OPT_POPUPKEY,"msctls_hotkey32",WS_BORDER | WS_GROUP | WS_TABSTOP,56,70,46,14
     GROUPBOX        "ストックモード切り替えキー設定",IDC_STATIC,7,97,213,34
-    CONTROL         "ホットキー",IDC_OPT_KEYRADIO_FIFO,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,9,113,42,10
-    CONTROL         "Shift*2",IDC_OPT_KEYRADIO_FIFO2,"Button",
-                    BS_AUTORADIOBUTTON,106,113,37,10
-    CONTROL         "Ctrl*2",IDC_OPT_KEYRADIO_FIFO3,"Button",
-                    BS_AUTORADIOBUTTON,145,113,34,10
-    CONTROL         "Alt*2",IDC_OPT_KEYRADIO_FIFO4,"Button",
-                    BS_AUTORADIOBUTTON,180,113,31,10
-    CONTROL         "HotKey1",IDC_OPT_FIFO_KEY,"msctls_hotkey32",WS_BORDER | 
-                    WS_GROUP | WS_TABSTOP,57,109,46,14
+    CONTROL         "ホットキー",IDC_OPT_KEYRADIO_FIFO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,9,113,42,10
+    CONTROL         "Shift*2",IDC_OPT_KEYRADIO_FIFO2,"Button",BS_AUTORADIOBUTTON,106,113,37,10
+    CONTROL         "Ctrl*2",IDC_OPT_KEYRADIO_FIFO3,"Button",BS_AUTORADIOBUTTON,145,113,34,10
+    CONTROL         "Alt*2",IDC_OPT_KEYRADIO_FIFO4,"Button",BS_AUTORADIOBUTTON,180,113,31,10
+    CONTROL         "HotKey1",IDC_OPT_FIFO_KEY,"msctls_hotkey32",WS_BORDER | WS_GROUP | WS_TABSTOP,57,109,46,14
     LTEXT           "ポップアップ位置",IDC_STATIC,7,137,50,8
-    COMBOBOX        IDC_OPT_POPUP_POS,67,135,84,100,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_OPT_POPUP_POS,67,135,84,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "ポップアップ補正 X",IDC_STATIC,7,155,57,10
     EDITTEXT        IDC_OPT_HoseiX,67,151,33,13,ES_RIGHT | ES_AUTOHSCROLL
     EDITTEXT        IDC_OPT_HoseiY,117,151,33,13,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "(キャレット位置のみ）",IDC_STATIC,152,154,62,8
-    CONTROL         "デスクトップ外にポップアップしたら補正する",
-                    IDC_OPT_OUT_HOSEI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,170,143,10
-    CONTROL         "クイックアクセス確定時に貼り付けを実行する",
-                    IDC_OPT_QUICK_ACCERSS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,187,147,10
+    CONTROL         "デスクトップ外にポップアップしたら補正する",IDC_OPT_OUT_HOSEI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,170,143,10
+    CONTROL         "クイックアクセス確定時に貼り付けを実行する",IDC_OPT_QUICK_ACCERSS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,187,147,10
     EDITTEXT        IDC_QUICK_TIME,184,185,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    CONTROL         "クイックアクセスで大文字小文字を区別しない",
-                    IDC_OPT_QUICK_ACCERSS_CHAR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,201,147,10
-    CONTROL         "シングルクリックでフォルダを開閉（SINGLEEXPAND）",
-                    IDC_OPT_SINGLE_EXPAND,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,216,168,10
+    CONTROL         "クイックアクセスで大文字小文字を区別しない",IDC_OPT_QUICK_ACCERSS_CHAR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,201,147,10
+    CONTROL         "シングルクリックでフォルダを開閉（SINGLEEXPAND）",IDC_OPT_SINGLE_EXPAND,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,216,168,10
     LTEXT           "ミリ秒",IDC_STATIC,162,189,18,8
     LTEXT           "Y",IDC_STATIC,108,155,8,8
 END
 
 IDD_OPT_FIFO DIALOGEX 0, 0, 225, 161
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
-    CONTROL         "なにもしない",IDC_OPT_FIFO_NON,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,10,17,52,10
-    CONTROL         "先入れ先出し",IDC_OPT_FIFO_YES,"Button",
-                    BS_AUTORADIOBUTTON,66,17,55,10
-    CONTROL         "先入れ後出し",IDC_OPT_LIFO_YES,"Button",
-                    BS_AUTORADIOBUTTON,121,17,55,10
+    CONTROL         "なにもしない",IDC_OPT_FIFO_NON,"Button",BS_AUTORADIOBUTTON | WS_GROUP,10,17,52,10
+    CONTROL         "先入れ先出し",IDC_OPT_FIFO_YES,"Button",BS_AUTORADIOBUTTON,66,17,55,10
+    CONTROL         "先入れ後出し",IDC_OPT_LIFO_YES,"Button",BS_AUTORADIOBUTTON,121,17,55,10
     GROUPBOX        "ストックモード中の貼り付け動作",-1,7,7,173,26,WS_GROUP
-    CONTROL         "ストックモード中はコピー時に効果音を鳴らす",
-                    IDC_OPT_FIFO_WAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,55,150,10
+    CONTROL         "ストックモード中はコピー時に効果音を鳴らす",IDC_OPT_FIFO_WAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,55,150,10
     EDITTEXT        IDC_OPT_WAVE_NAME,24,65,141,12,ES_AUTOHSCROLL
     PUSHBUTTON      "参照",IDC_FILE,167,65,27,13
-    CONTROL         "貼り付け時にも音を鳴らす",IDC_OPT_PASTE_SOUND,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,80,92,10
-    CONTROL         "ストックモードOFF時にワンタイム項目をクリアする",
-                    IDC_OPT_CLEAR_ONETIME,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,97,160,10
-    CONTROL         "ストックモードの最後にクリップボードを空にしない",
-                    IDC_OPT_NO_CLEAR_ONETIME,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,111,159,10
-    CONTROL         "ワンタイム項目が無くなったらストックモードをOFFにする",
-                    IDC_ALL_DEL_OFF,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    125,178,10
-    CONTROL         "重複チェックをする",IDC_OPT_DUPLICATION,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,138,70,10
+    CONTROL         "貼り付け時にも音を鳴らす",IDC_OPT_PASTE_SOUND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,80,92,10
+    CONTROL         "ストックモードOFF時にワンタイム項目をクリアする",IDC_OPT_CLEAR_ONETIME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,97,160,10
+    CONTROL         "ストックモードの最後にクリップボードを空にしない",IDC_OPT_NO_CLEAR_ONETIME,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,111,159,10
+    CONTROL         "ワンタイム項目が無くなったらストックモードをOFFにする",IDC_ALL_DEL_OFF,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,125,178,10
+    CONTROL         "重複チェックをする",IDC_OPT_DUPLICATION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,138,70,10
 END
 
 IDD_OPT_VISUAL DIALOGEX 0, 0, 222, 251
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
-    CONTROL         "半透明機能を使う（使う場合動作が遅くなります）",
-                    IDC_OPT_TOUMEI_CHECK,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,7,155,10
+    CONTROL         "半透明機能を使う（使う場合動作が遅くなります）",IDC_OPT_TOUMEI_CHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,155,10
     LTEXT           "不透明度（Windows2000,XP）",IDC_STATIC,7,31,83,8
-    CONTROL         "Slider1",IDC_OPT_TOUMEI_SLIDER,"msctls_trackbar32",
-                    TBS_NOTICKS | WS_TABSTOP,87,31,100,13
+    CONTROL         "Slider1",IDC_OPT_TOUMEI_SLIDER,"msctls_trackbar32",TBS_NOTICKS | WS_TABSTOP,87,31,100,13
     LTEXT           "100%",IDC_STATIC,187,24,15,8
     LTEXT           "フォント名",IDC_STATIC,24,54,30,8
-    COMBOBOX        IDC_OPT_FONT_NAME,59,51,85,126,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_OPT_FONT_NAME,59,51,85,126,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "サイズ",IDC_STATIC,149,53,20,8
     EDITTEXT        IDC_OPT_FONT_SIZE,171,51,26,13,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "アイコンファイル",IDC_STATIC,7,73,48,8
@@ -385,120 +304,90 @@ BEGIN
     PUSHBUTTON      "参照",IDC_OPT_VS_BROWS,175,69,32,15
     LTEXT           "ポップアップ枠色",IDC_STATIC,17,101,50,8
     EDITTEXT        IDC_OPT_BORDER_COLOR,88,97,56,13,ES_AUTOHSCROLL
-    CONTROL         "",IDC_OPT_BORDER_COLOR_PAL,"Static",SS_BLACKRECT | 
-                    SS_NOTIFY,147,97,18,12
+    CONTROL         "",IDC_OPT_BORDER_COLOR_PAL,"Static",SS_BLACKRECT | SS_NOTIFY,147,97,18,12
     LTEXT           "ポップアップ背景色",IDC_STATIC,17,117,57,8
     EDITTEXT        IDC_OPT__BACK_COLOR,88,113,56,13,ES_AUTOHSCROLL
-    CONTROL         "",IDC_OPT__BACK_COLOR_PAL,"Static",SS_BLACKRECT | 
-                    SS_NOTIFY,147,113,18,12
+    CONTROL         "",IDC_OPT__BACK_COLOR_PAL,"Static",SS_BLACKRECT | SS_NOTIFY,147,113,18,12
     LTEXT           "ポップアップ文字色",IDC_STATIC,17,131,57,8
     EDITTEXT        IDC_OPT_TEXT_COLOR,88,129,56,13,ES_AUTOHSCROLL
-    CONTROL         "",IDC_OPT_TEXT_COLOR_PAL,"Static",SS_BLACKRECT | 
-                    SS_NOTIFY,147,129,18,12
+    CONTROL         "",IDC_OPT_TEXT_COLOR_PAL,"Static",SS_BLACKRECT | SS_NOTIFY,147,129,18,12
     GROUPBOX        "色設定",IDC_STATIC,7,86,174,66
-    CONTROL         "チェック使用後やアイコンファイル変更時にツリーを再構築する",
-                    IDC_OPT_RESET_TREE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,159,196,10
+    CONTROL         "チェック使用後やアイコンファイル変更時にツリーを再構築する",IDC_OPT_RESET_TREE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,159,196,10
     LTEXT           "スクロールバー",IDC_STATIC,7,177,46,8
-    CONTROL         "縦スクロールバー",IDC_OPT_SCROLBAR1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,53,176,68,10
-    CONTROL         "横スクロールバー",IDC_OPT_SCROLBAR2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,122,176,68,10
+    CONTROL         "縦スクロールバー",IDC_OPT_SCROLBAR1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,53,176,68,10
+    CONTROL         "横スクロールバー",IDC_OPT_SCROLBAR2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,176,68,10
     GROUPBOX        "ツールチップの設定",IDC_STATIC,7,192,213,31
-    CONTROL         "タイトル、内容、日付",IDC_OPT_TOOLTIP_01,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,13,205,75,10
-    CONTROL         "内容のみ",IDC_OPT_TOOLTIP_02,"Button",
-                    BS_AUTORADIOBUTTON,99,205,43,10
-    CONTROL         "使わない",IDC_OPT_TOOLTIP_03,"Button",
-                    BS_AUTORADIOBUTTON,161,205,42,10
+    CONTROL         "タイトル、内容、日付",IDC_OPT_TOOLTIP_01,"Button",BS_AUTORADIOBUTTON | WS_GROUP,13,205,75,10
+    CONTROL         "内容のみ",IDC_OPT_TOOLTIP_02,"Button",BS_AUTORADIOBUTTON,99,205,43,10
+    CONTROL         "使わない",IDC_OPT_TOOLTIP_03,"Button",BS_AUTORADIOBUTTON,161,205,42,10
 END
 
-IDD_OPTION DIALOG DISCARDABLE  0, 0, 247, 303
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_OPTION DIALOG 0, 0, 247, 303
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "設定"
 FONT 9, "ＭＳ Ｐゴシック"
 BEGIN
     DEFPUSHBUTTON   "OK(&O)",IDOK,137,282,50,14
     PUSHBUTTON      "ｷｬﾝｾﾙ(&C)",IDCANCEL,190,282,50,14
-    CONTROL         "Tab1",IDC_OPT_TAB,"SysTabControl32",WS_TABSTOP,7,7,233,
-                    270
+    CONTROL         "Tab1",IDC_OPT_TAB,"SysTabControl32",WS_TABSTOP,7,7,233,270
 END
 
 IDD_SERCH DIALOGEX 0, 0, 187, 127
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "検索"
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_SERCH_TEXT,15,61,165,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK(&O)",IDOK,71,106,50,14
     PUSHBUTTON      "ｷｬﾝｾﾙ(&C)",IDCANCEL,130,106,50,14
-    CONTROL         "タイトルのみ",IDC_RADIO_NAME,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,7,84,11
-    CONTROL         "内容のみ",IDC_RADIO_TEXT,"Button",BS_AUTORADIOBUTTON,7,
-                    19,84,11
-    CONTROL         "タイトルと内容",IDC_RADIO_ALL,"Button",
-                    BS_AUTORADIOBUTTON,7,32,84,11
-    GROUPBOX        "Static",IDC_STATIC,1,1,118,53,NOT WS_VISIBLE | WS_GROUP | 
-                    WS_TABSTOP,WS_EX_TRANSPARENT
-    CONTROL         "AND検索",IDC_RADIO_AND,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,7,82,40,14
-    CONTROL         "OR検索",IDC_RADIO_OR,"Button",BS_AUTORADIOBUTTON,52,83,
-                    37,12
-    GROUPBOX        "Static",IDC_STATIC,1,78,99,23,NOT WS_VISIBLE | WS_GROUP | 
-                    WS_TABSTOP,WS_EX_TRANSPARENT
-    LTEXT           "検索文字列　空白で区切って複数指定できます",IDC_STATIC,
-                    7,51,155,10
+    CONTROL         "タイトルのみ",IDC_RADIO_NAME,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,7,84,11
+    CONTROL         "内容のみ",IDC_RADIO_TEXT,"Button",BS_AUTORADIOBUTTON,7,19,84,11
+    CONTROL         "タイトルと内容",IDC_RADIO_ALL,"Button",BS_AUTORADIOBUTTON,7,32,84,11
+    GROUPBOX        "Static",IDC_STATIC,1,1,118,53,NOT WS_VISIBLE | WS_GROUP | WS_TABSTOP,WS_EX_TRANSPARENT
+    CONTROL         "AND検索",IDC_RADIO_AND,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,82,40,14
+    CONTROL         "OR検索",IDC_RADIO_OR,"Button",BS_AUTORADIOBUTTON,52,83,37,12
+    GROUPBOX        "Static",IDC_STATIC,1,78,99,23,NOT WS_VISIBLE | WS_GROUP | WS_TABSTOP,WS_EX_TRANSPARENT
+    LTEXT           "検索文字列　空白で区切って複数指定できます",IDC_STATIC,7,51,155,10
 END
 
-IDD_OPT_ADD_KEYSET DIALOG DISCARDABLE  0, 0, 231, 199
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_OPT_ADD_KEYSET DIALOG 0, 0, 231, 199
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "追加キー設定"
 FONT 9, "ＭＳ Ｐゴシック"
 BEGIN
     LTEXT           "ウィンドウキャプション",IDC_STATIC,10,12,63,8
-    COMBOBOX        IDC_OPT_WINCAP_COMBO,78,10,139,110,CBS_DROPDOWN | 
-                    CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
-                    WS_TABSTOP
+    COMBOBOX        IDC_OPT_WINCAP_COMBO,78,10,139,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "マッチ方法",IDC_STATIC,126,29,32,8
-    COMBOBOX        IDC_OPT_MATCH_COMBO,160,26,57,75,CBS_DROPDOWNLIST | 
-                    CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "キーイベント方式",IDC_OPT_KEY_ACTION2_01,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,6,53,66,10
-    CONTROL         "Charu2Proライク",IDC_OPT_KEY_ACTION2_02,"Button",
-                    BS_AUTORADIOBUTTON,82,54,63,10
-    CONTROL         "メッセージ方式(メッセージ,wParam,lParamで指定 例 ""111,fff1,0"")",
-                    IDC_OPT_KEY_ACTION2_03,"Button",BS_AUTORADIOBUTTON,6,89,
-                    203,10
+    COMBOBOX        IDC_OPT_MATCH_COMBO,160,26,57,75,CBS_DROPDOWNLIST | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "キーイベント方式",IDC_OPT_KEY_ACTION2_01,"Button",BS_AUTORADIOBUTTON | WS_GROUP,6,53,66,10
+    CONTROL         "Charu2Proライク",IDC_OPT_KEY_ACTION2_02,"Button",BS_AUTORADIOBUTTON,82,54,63,10
+    CONTROL         "メッセージ方式(メッセージ,wParam,lParamで指定 例 ""111,fff1,0"")",IDC_OPT_KEY_ACTION2_03,
+                    "Button",BS_AUTORADIOBUTTON,6,89,203,10
     GROUPBOX        "ペースト方法の設定",IDC_STATIC,4,44,223,83,WS_GROUP
     LTEXT           "コピーに使うキー",IDC_STATIC,11,67,51,8
-    CONTROL         "HotKey2",IDC_OPT_COPYKEY2,"msctls_hotkey32",WS_BORDER | 
-                    WS_TABSTOP,65,64,46,14
+    CONTROL         "HotKey2",IDC_OPT_COPYKEY2,"msctls_hotkey32",WS_BORDER | WS_TABSTOP,65,64,46,14
     LTEXT           "ペーストに使うキー",IDC_STATIC,115,67,56,8
-    CONTROL         "HotKey2",IDC_OPT_PASTKEY2,"msctls_hotkey32",WS_BORDER | 
-                    WS_TABSTOP,171,64,46,14
+    CONTROL         "HotKey2",IDC_OPT_PASTKEY2,"msctls_hotkey32",WS_BORDER | WS_TABSTOP,171,64,46,14
     LTEXT           "コピーメッセージ",IDC_STATIC,6,105,49,8
     EDITTEXT        IDC_OPT_COPY_MESS,57,102,50,12,ES_AUTOHSCROLL
     LTEXT           "ペーストメッセージ",IDC_STATIC,114,105,55,8
     EDITTEXT        IDC_OPT_PASTE_MESS,170,102,50,12,ES_AUTOHSCROLL
     LTEXT           "待ち時間",IDC_STATIC,8,131,27,8
     LTEXT           "コピー",IDC_STATIC,13,145,19,8
-    EDITTEXT        IDC_OPT_COPY_WAIT2,37,143,34,12,ES_RIGHT | 
-                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_COPY_WAIT2,37,143,34,12,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "ミリ秒",IDC_STATIC,76,146,18,8
     LTEXT           "ペースト",IDC_STATIC,103,145,25,8
-    EDITTEXT        IDC_OPT_PASTE_WAIT2,131,143,34,12,ES_RIGHT | 
-                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_PASTE_WAIT2,131,143,34,12,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "ミリ秒",IDC_STATIC,170,146,18,8
     LTEXT           "クリップボード履歴容量制限",IDC_STATIC,8,165,82,8
-    EDITTEXT        IDC_OPT_HISTORY_SIZE_LIMIT,93,161,40,14,ES_RIGHT | 
-                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_HISTORY_SIZE_LIMIT,93,161,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "KB -1で無制限設定",IDC_STATIC,137,166,59,8
     DEFPUSHBUTTON   "OK(&O)",IDOK,120,181,50,14
     PUSHBUTTON      "ｷｬﾝｾﾙ(&C)",IDCANCEL,177,181,50,14
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -521,18 +410,15 @@ BEGIN
     BEGIN
         BLOCK "041104b0"
         BEGIN
-            VALUE "Comments", "クリップボード入力支援ツール\0"
-            VALUE "CompanyName", "C+ Factory\0"
-            VALUE "FileDescription", "Charu3(Clipbord and High Amenity Routine for Utility 3)\0"
-            VALUE "FileVersion", "3, 7, 5, 1\0"
-            VALUE "InternalName", "Charu3\0"
-            VALUE "LegalCopyright", "Copyright (C) 1998-2003 matsumoto keizi\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "Charu3.EXE\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Charu3\0"
-            VALUE "ProductVersion", "3, 7, 5, 1\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "Comments", "クリップボード入力支援ツール"
+            VALUE "CompanyName", "C+ Factory / Itagaki Fumihiko"
+            VALUE "FileDescription", "Charu3(Clipbord and High Amenity Routine for Utility 3) Successor Edition"
+            VALUE "FileVersion", "3, 7, 5, 1"
+            VALUE "InternalName", "Charu3 SE"
+            VALUE "LegalCopyright", "Copyright (C) 1998-2003 matsumoto keizi, 2021-2022 Itagaki Fumihiko"
+            VALUE "OriginalFilename", "Charu3.EXE"
+            VALUE "ProductName", "Charu3 SE"
+            VALUE "ProductVersion", "3, 7, 5, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -541,8 +427,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -550,14 +434,18 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO
 BEGIN
+    IDD_POPUP_DIALOG, DIALOG
+    BEGIN
+    END
+
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 127
+        RIGHTMARGIN, 203
         TOPMARGIN, 7
-        BOTTOMMARGIN, 64
+        BOTTOMMARGIN, 75
     END
 
     IDD_ADD_DATA, DIALOG
@@ -748,74 +636,74 @@ END
 // Menu
 //
 
-IDR_LISTMENU MENU DISCARDABLE 
+IDR_LISTMENU MENU
 BEGIN
     POPUP "dummy"
     BEGIN
         POPUP "アイコンを変更(&I)"
         BEGIN
-            MENUITEM "ロック項目",                  IDML_ICON_KEY
-            MENUITEM "日付 時間系",                 IDML_ICON_DATE
-            MENUITEM "ファイル実行",                IDML_ICON_EXE
-            MENUITEM "関連付け実行",                IDML_ICON_RELATE
-            MENUITEM "文字列選択",                  IDML_ICON_SELECT
-            MENUITEM "クリップボード",              IDML_ICON_CLIP
-            MENUITEM "プラグイン",                  IDML_ICON_PLUGIN
-            MENUITEM "キー押下",                    IDML_ICON_KEYMACRO
+            MENUITEM "ロック項目",                       IDML_ICON_KEY
+            MENUITEM "日付 時間系",                      IDML_ICON_DATE
+            MENUITEM "ファイル実行",                      IDML_ICON_EXE
+            MENUITEM "関連付け実行",                      IDML_ICON_RELATE
+            MENUITEM "文字列選択",                       IDML_ICON_SELECT
+            MENUITEM "クリップボード",                     IDML_ICON_CLIP
+            MENUITEM "プラグイン",                       IDML_ICON_PLUGIN
+            MENUITEM "キー押下",                        IDML_ICON_KEYMACRO
         END
         POPUP "項目処理(&S)"
         BEGIN
-            MENUITEM "ロックする(&L)",              IDML_CHANGE_LOCK
-            MENUITEM "ワンタイム項目にする(&N)",    IDML_CHANGE_ONETIME
+            MENUITEM "ロックする(&L)",                   IDML_CHANGE_LOCK
+            MENUITEM "ワンタイム項目にする(&N)",              IDML_CHANGE_ONETIME
             MENUITEM SEPARATOR
-            MENUITEM "検索(&F)          Shift+F3",  IDML_LIST_SERCH
+            MENUITEM "検索(&F)          Shift+F3",    IDML_LIST_SERCH
             MENUITEM SEPARATOR
-            MENUITEM "インポート(&I)",              IDML_IMPORT
-            MENUITEM "エクスポート(&X)",            IDML_EXPORT
+            MENUITEM "インポート(&I)",                   IDML_IMPORT
+            MENUITEM "エクスポート(&X)",                  IDML_EXPORT
         END
-        MENUITEM "複数ペースト(&H)",            IDML_CHECK_ITEM
+        MENUITEM "複数ペースト(&H)",                  IDML_CHECK_ITEM
         MENUITEM SEPARATOR
-        MENUITEM "データを追加(&A)",            IDML_ADD
-        MENUITEM "新規フォルダを作る(&N)",      IDML_NEW_FOLDER
-        MENUITEM "データをコピー(&C)",          IDML_COPY_DATA
-        MENUITEM "データを貼り付け(&P)",        IDML_DATA_PASTE
+        MENUITEM "データを追加(&A)",                  IDML_ADD
+        MENUITEM "新規フォルダを作る(&N)",               IDML_NEW_FOLDER
+        MENUITEM "データをコピー(&C)",                 IDML_COPY_DATA
+        MENUITEM "データを貼り付け(&P)",                IDML_DATA_PASTE
         MENUITEM SEPARATOR
-        MENUITEM "削除(&D)",                    IDML_DELETE
-        MENUITEM "フォルダの内容をクリア(&F)",  IDML_FOLDER_CLEAR
+        MENUITEM "削除(&D)",                      IDML_DELETE
+        MENUITEM "フォルダの内容をクリア(&F)",             IDML_FOLDER_CLEAR
         MENUITEM SEPARATOR
-        MENUITEM "設定(&O)",                    IDML_OPTION
-        MENUITEM "プロパティ(&R)",              IDML_EDIT
+        MENUITEM "設定(&O)",                      IDML_OPTION
+        MENUITEM "プロパティ(&R)",                   IDML_EDIT
     END
 END
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU
 BEGIN
     POPUP "dummy"
     BEGIN
-        MENUITEM "ヘルプ(&H)",                  IDM_HELP
+        MENUITEM "ヘルプ(&H)",                     IDM_HELP
         MENUITEM SEPARATOR
-        MENUITEM "バージョン情報(&V)",          IDM_ABOUT
-        MENUITEM "ビジュアル設定読み込み(&F)",  IDM_VISUAL_FILE
-        MENUITEM "設定(&O)",                    IDM_OPTION
+        MENUITEM "バージョン情報(&V)",                 IDM_ABOUT
+        MENUITEM "ビジュアル設定読み込み(&F)",             IDM_VISUAL_FILE
+        MENUITEM "設定(&O)",                      IDM_OPTION
         MENUITEM SEPARATOR
         POPUP "データ処理(&D)"
         BEGIN
-            MENUITEM "データを追加(&A)",            IDM_ADD_DATA
-            MENUITEM "ワンタイム項目をクリア(&C)",  IDM_ONETIME_CLEAR
-            MENUITEM "ワンタイム項目を全てロック(&K)", IDM_ALL_LOCK
-            MENUITEM "アイコンを自動識別(&D)",      IDM_ICON_DECIDE
+            MENUITEM "データを追加(&A)",                  IDM_ADD_DATA
+            MENUITEM "ワンタイム項目をクリア(&C)",             IDM_ONETIME_CLEAR
+            MENUITEM "ワンタイム項目を全てロック(&K)",           IDM_ALL_LOCK
+            MENUITEM "アイコンを自動識別(&D)",               IDM_ICON_DECIDE
         END
-        MENUITEM "ストックモード切り替え（&R)", IDM_STOCK_STOP
-        MENUITEM "ツリーを再構築(&T)",          IDM_RESET_TREE
+        MENUITEM "ストックモード切り替え（&R)",             IDM_STOCK_STOP
+        MENUITEM "ツリーを再構築(&T)",                 IDM_RESET_TREE
         MENUITEM SEPARATOR
-        MENUITEM "データを別名で保存する(&S)",  IDM_DATA_SAVE
-        MENUITEM "データファイル切り替え(&D)",  IDM_CHANG_DATA
+        MENUITEM "データを別名で保存する(&S)",             IDM_DATA_SAVE
+        MENUITEM "データファイル切り替え(&D)",             IDM_CHANG_DATA
         POPUP "マクロプラグインを選択(&M)"
         BEGIN
-            MENUITEM "Charuシリーズ",               IDM_MACRO_CHARU
+            MENUITEM "Charuシリーズ",                   IDM_MACRO_CHARU
         END
         MENUITEM SEPARATOR
-        MENUITEM "終了(&X)",                    IDM_EXIT
+        MENUITEM "終了(&X)",                      IDM_EXIT
     END
 END
 
@@ -825,26 +713,39 @@ END
 // Bitmap
 //
 
-IDB_ICON_BITMAP         BITMAP  DISCARDABLE     "res\\itemIcon.bmp"
-IDB_ICON_BITMAP_PINK    BITMAP  DISCARDABLE     "res\\itemIconPink.bmp"
+IDB_ICON_BITMAP         BITMAP                  "res\\itemIcon.bmp"
+
+IDB_ICON_BITMAP_PINK    BITMAP                  "res\\itemIconPink.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE
 BEGIN
-    IDR_MAINFRAME           "Charu3"
+    IDR_MAINFRAME           "Charu3 SE"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE
 BEGIN
-    AFX_IDS_APP_TITLE       "Charu3"
+    AFX_IDS_APP_TITLE       "Charu3 SE"
     AFX_IDS_IDLEMESSAGE     "ﾚﾃﾞｨ"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -855,24 +756,24 @@ BEGIN
     ID_INDICATOR_KANA       "ｶﾅ"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "ﾌﾟﾛｸﾞﾗﾑの情報、ﾊﾞｰｼﾞｮﾝそして著作権を表示\nﾊﾞｰｼﾞｮﾝ情報"
     ID_APP_EXIT             "ｱﾌﾟﾘｹｰｼｮﾝを終了し、ﾌｧｲﾙの保存を指示\n終了"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_NEXT_PANE            "次のｳｨﾝﾄﾞｳに切り替える\n次のﾍﾟｲﾝ"
     ID_PREV_PANE            "前のｳｨﾝﾄﾞｳに切り替える\n前のﾍﾟｲﾝ"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_SPLIT         "作業中のｳｨﾝﾄﾞｳを分割\n分割"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CLEAR           "選択範囲を消去\n消去"
     ID_EDIT_CLEAR_ALL       "すべて消去\nすべて消去"
@@ -887,7 +788,7 @@ BEGIN
     ID_EDIT_REDO            "直前に行った動作を繰り返す\n繰り返す"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "ｳｨﾝﾄﾞｳのｻｲｽﾞを変更"
     AFX_IDS_SCMOVE          "ｳｨﾝﾄﾞｳの位置を変更"
@@ -898,26 +799,25 @@ BEGIN
     AFX_IDS_SCCLOSE         "作業中のｳｨﾝﾄﾞｳを閉じ、変更したﾌｧｲﾙの保存を指示"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "ｳｨﾝﾄﾞｳを通常のｻｲｽﾞに戻す"
     AFX_IDS_SCTASKLIST      "ｱﾌﾟﾘｹｰｼｮﾝの切り替え"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_MES_FAILURE_HOTKEY  "ホットキーの設定に失敗"
     APP_MES_DELETE_OK       "%sを削除しますか？"
     APP_MES_NO_ENTRY_FUNC   "関数のエントリがありません。"
     APP_MES_NOT_FOUND       "%sが見つかりません。"
-    APP_MES_FAILURE_DATA_SAVE 
-                            "データの保存に失敗しました。ファイルがリードオンリーか確認してください。"
+    APP_MES_FAILURE_DATA_SAVE "データの保存に失敗しました。ファイルがリードオンリーか確認してください。"
     APP_MES_DECIDE_ICONS    "アイコンの自動識別をしますか？"
     APP_MES_UNKNOWN_FORMAT  "未知のデータ形式です。"
     APP_MES_ADD_OK          "%sを追加しますか？"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_MES_ADD_OK2         "%sを追加しました。"
     APP_MES_ALL_EMPTY       "タイトルも登録文も空白です。何か入れてください。"
@@ -934,7 +834,7 @@ BEGIN
     APP_INF_FILE_FILTER4    "WAVEファイル(*.wav)|*.wav||"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_FILE_FILTER5    "ビットマップ(*.bmp)|*.bmp||"
     APP_INF_FILE_FILTER6    "全てのファイル(*.*)|*.*||"
@@ -945,7 +845,7 @@ BEGIN
     APP_INF_TABNAME_05      "キー設定"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_KEY_COMBO01     "前方一致"
     APP_INF_KEY_COMBO02     "後方一致"
@@ -957,7 +857,7 @@ BEGIN
     APP_INF_KEY_LIST_CAPTION04 "ペーストキー"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_IMPORT_FOLDERNAME "インポートデータ"
     APP_INF_2BYTESPACE      "　"
@@ -965,7 +865,7 @@ BEGIN
     APP_INF_TIP_DATA02      "\n拡張マクロ\n  "
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_TIP_DATA03      "\n作成:"
     APP_INF_TIP_DATA04      "\n変更:"
@@ -978,11 +878,10 @@ BEGIN
     APP_INF_CHECKBOX_MACRO  "マクロプラグインを自動切換えする"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_MACRO_TEMPLATE01 "西暦4桁@D@<charuMACRO>$Y/$M/$D</charuMACRO>"
-    APP_INF_MACRO_TEMPLATE02 
-                            "和暦@D@<charuMACRO>平成$WH年$M月$D日</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE02 "和暦@D@<charuMACRO>平成$WH年$M月$D日</charuMACRO>"
     APP_INF_MACRO_TEMPLATE03 "曜日@D@<charuMACRO>$d曜日</charuMACRO>"
     APP_INF_MACRO_TEMPLATE04 "曜日(英語)@D@<charuMACRO>$ddd</charuMACRO>"
     APP_INF_MACRO_TEMPLATE05 
@@ -1005,7 +904,7 @@ BEGIN
                             "入力プラグイン@D@<charuMACRO>$PLUG-IN<.\\plugin\\input.dll,タイトル>$PLUG-IN</charuMACRO>"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_MACRO_TEMPLATE15 "end"
     APP_INF_EXMACRO_TEMPLATE01 "履歴数@R@Count="
@@ -1020,7 +919,7 @@ BEGIN
     APP_INF_EXMACRO_TEMPLATE10 "階層履歴@R@ClassHistory=個数"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
     APP_INF_EXMACRO_TEMPLATE11 "タイトルの長さ@F@TitleLen="
     APP_INF_EXMACRO_TEMPLATE12 "ダイレクトコピー@A@DirectCopyKey="
@@ -1028,7 +927,7 @@ BEGIN
     APP_INF_EXMACRO_TEMPLATE14 "end"
 END
 
-#endif    // 日本語 resources
+#endif    // Japanese (Japan) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

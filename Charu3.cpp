@@ -242,7 +242,7 @@ void CCharu3App::OnAppAbout()
 }
 void CAboutDlg::OnWeb() 
 {
-	ShellExecute(NULL,NULL,_T("http://keijiweb.com/"),NULL,NULL,SW_SHOWNORMAL);
+	ShellExecute(NULL,NULL,_T("https://github.com/itagagaki/charu3-SE"),NULL,NULL,SW_SHOWNORMAL);
 	EndDialog(IDOK);
 }
 
