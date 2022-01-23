@@ -1,4 +1,4 @@
-# Charu3
+# Charu3 SE
 
 
 Charu3 is a text input support tool for Windows that can be called up with a keystroke and allows you to paste in pre-defined canned text.
@@ -15,7 +15,7 @@ I thought that there might be some problem between the current Windows 10 and th
 So I brazenly asked Mr. Matsumoto if he would let me take over the maintenance of this software.
 He graciously released [the source code](https://github.com/keizi666/charu3).
 
-This repository is a forked version of it.
+This repository, Charl3 SE, is a forked version of it.
 In this repository, I made some fixes to make it buildable in Visual Studio 2019.
 I have also fixed some issues.  
 
@@ -41,7 +41,7 @@ Charu3は、キー1発で呼び出すことができて、予め設定した定�
 そこで私は図々しくも松本氏にこのソフトウェアのメンテナンスを私に引き継がせてもらえないかと打診したところ、
 松本氏は快く[ソースコードを公開](https://github.com/keizi666/charu3)してくださいました。
 
-このリポジトリは、そこからフォークしたものです。
+このリポジトリ Charl3 SE は、そこからフォークしたものです。
 このリポジトリで私は Visual Studio 2019 でビルドできるようにするための修正などを施しました。
 また、いくつかの問題も修正しています。  
 
