@@ -188,10 +188,10 @@ BEGIN
     CONTROL         "ストックモードの切り替え",IDC_OPT_ICON_RIREKI,"Button",BS_AUTORADIOBUTTON,11,109,110,10
     GROUPBOX        "タスクトレイアイコンをクリックした時の動作",IDC_STATIC,7,86,136,38,WS_GROUP
     CONTROL         "ワード97,98の切り取りバグ、Notes問題に対応する",IDC_OPT_WORD_BUG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,137,167,9
-    LTEXT           "自己診断タイマー",IDC_STATIC,7,167,52,8
-    EDITTEXT        IDC_OPT_SELF_TIME,61,165,34,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(他のアプリで不具合が出る可能性があります)",IDC_STATIC,17,147,137,9
-    LTEXT           "ミリ秒(0にすると自己診断停止)",IDC_STATIC,98,169,91,8
+    LTEXT           "自己診断タイマー",IDC_STATIC,7,179,52,8
+    EDITTEXT        IDC_OPT_SELF_TIME,61,177,34,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "他のアプリで HRESULT 0x800401D0 (CLIPBRD_E_CANT_OPEN) エラーなどが出る場合もチェックを入れて試してみてください",IDC_STATIC,17,147,190,16
+    LTEXT           "ミリ秒(0にすると自己診断停止)",IDC_STATIC,98,181,91,8
 END
 
 IDD_OPT_KEYSET DIALOGEX 0, 0, 231, 253
@@ -724,6 +724,11 @@ IDB_ICON_BITMAP_PINK    BITMAP                  "res\\itemIconPink.bmp"
 //
 
 IDD_ABOUTBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPT_ETC AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
