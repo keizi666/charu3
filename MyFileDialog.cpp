@@ -24,8 +24,14 @@ CMyFileDialog::CMyFileDialog(BOOL bOpenFileDialog, LPCTSTR lpszDefExt, LPCTSTR l
 	m_strCheckString = "";
 	m_isAutoMacro = false;
 	m_isDispCheck = isDispCheck;
-	if(isDispCheck)
-		SetTemplate(0,IDD_CHECKBOX);
+	if (isDispCheck) {
+#if (NTDDI_VERSION < NTDDI_VISTA)
+		SetTemplate(0, IDD_CHECKBOX);
+#else
+		IFileDialogCustomize* pfdc = GetIFileDialogCustomize();
+		pfdc->AddCheckButton(IDD_CHECKBOX, L"マクロプラグインを自動切換えする", false);
+#endif
+	}
 }
 
 

@@ -11,6 +11,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#define _WIN32_WINNT 0x0600 // Target platform: Windows Vista
 #define _USE_32BIT_TIME_T
 
 #define VC_EXTRALEAN		// Windows ヘッダーから殆ど使用されないスタッフを除外します。
