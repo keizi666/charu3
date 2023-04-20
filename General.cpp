@@ -338,7 +338,7 @@ CString CGeneral::getKeyName(UINT uVkCode,HKL keyLayout)
 			uVkCode == VK_DOWN || uVkCode == VK_INSERT || uVkCode == VK_DELETE || uVkCode == VK_NUMLOCK)
 				nExtFlag = 1 << 24;
 
-		GetKeyNameText(nScanCode | nExtFlag,strKeyName,sizeof(strKeyName));
+		GetKeyNameText(nScanCode | nExtFlag,strKeyName,_countof(strKeyName));
 		strRet = strKeyName;
 	}
 	return strRet;
@@ -356,7 +356,7 @@ CString CGeneral::getWindowTitle(HWND hWnd)
 	bool isRet = false;
 
 	strWinName = "";
-	if(!GetWindowText(hWnd,strWindowName,sizeof(strWindowName))) return strWinName;//キャプションを取得
+	if(!GetWindowText(hWnd,strWindowName,_countof(strWindowName))) return strWinName;//キャプションを取得
 
 	strWinName = strWindowName;
 	return 	strWinName;

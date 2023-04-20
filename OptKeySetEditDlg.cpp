@@ -119,7 +119,7 @@ BOOL CALLBACK EnumWindowTitle(HWND hwnd, LPARAM lParam)
 	TCHAR WindowName[1024];
 	*WindowName = (char)NULL;
 	if(IsWindowVisible(hwnd)) {
-		int resalt = GetWindowText(hwnd,WindowName,sizeof(WindowName));
+		int resalt = GetWindowText(hwnd,WindowName,_countof(WindowName));
 		if(resalt && _tcsclen(WindowName) > 0) {
 			if(combo)	combo->AddString(WindowName);
 		}

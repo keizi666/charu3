@@ -110,7 +110,7 @@ CCharu3App::CCharu3App()// : m_treeDlg(&m_tree)
 		m_keyStruct[nCount].strName.Format(_T("F%d"),i - 0x6f);
 	}
 
-	nSize = sizeof(stKeycode) / 4;
+	nSize = _countof(stKeycode);
 	//拡張キー
 	for(i = 0; i < nSize; i++,nCount++) {
 		m_keyStruct[nCount].nKeyCode = stKeycode[i];
@@ -588,7 +588,7 @@ bool CCharu3App::setAppendKeyInit(HWND hTopWindow,COPYPASTE_KEY *keySet)
 	bool isRet = false;
 
 	if(!hTopWindow || m_hActiveKeyWnd == hTopWindow) return isRet;//前と同じハンドルなら帰る
-	if(!GetWindowText(hTopWindow,strWindowName,sizeof(strWindowName))) return isRet;//キャプションを取得
+	if(!GetWindowText(hTopWindow,strWindowName,_countof(strWindowName))) return isRet;//キャプションを取得
 
 	strWinName = strWindowName;
 	*keySet = m_ini.getAppendKeyInit(strWinName);
@@ -1076,7 +1076,7 @@ CString CCharu3App::getSelectString(COPYPASTE_KEY key,HWND hWnd)
 	int i;
 	COPYPASTE_KEY keySet;
 
-	GetWindowText(m_focusInfo.m_hActiveWnd,strWindowName,sizeof(strWindowName));
+	GetWindowText(m_focusInfo.m_hActiveWnd,strWindowName,_countof(strWindowName));
 	strWinName = strWindowName;
 
 	keySet.m_nMessage = 0;
@@ -1131,7 +1131,7 @@ void CCharu3App::execKeyMacro(CString strKeyMacro)
 	szKeyMacro  = strKeyMacro.GetBuffer(strKeyMacro.GetLength());
 
 	//貼り付け後のスリープを取得
-	szSplit = UStringWork::awk(szKeyMacro,strKeyCode,sizeof(strKeyCode),3,_T(';'));
+	szSplit = UStringWork::awk(szKeyMacro,strKeyCode,_countof(strKeyCode),3,_T(';'));
 	if(szSplit)  {
 		nSleep = _ttoi(strKeyCode);
 		if(nSleep > 10000) nSleep = 10000;
@@ -1139,7 +1139,7 @@ void CCharu3App::execKeyMacro(CString strKeyMacro)
 	else         nSleep = 0;
 
 	//貼り付け回数を取得
-	szSplit = UStringWork::awk(szKeyMacro,strKeyCode,sizeof(strKeyCode),2,_T(';'));
+	szSplit = UStringWork::awk(szKeyMacro,strKeyCode,_countof(strKeyCode),2,_T(';'));
 	if(szSplit)  {
 		nCount = _ttoi(strKeyCode);
 		if(nCount > 256) nCount = 256;
@@ -1149,7 +1149,7 @@ void CCharu3App::execKeyMacro(CString strKeyMacro)
 
 	//キー配列を取得　最大で16キー
 	for(i = 0; i <= 15; i++) {
-		UStringWork::awk(szKeyMacro,strKeyCode,sizeof(strKeyCode),i+1,_T(','));
+		UStringWork::awk(szKeyMacro,strKeyCode,_countof(strKeyCode),i+1,_T(','));
 		if(_tcsclen(strKeyCode) > 0) nKey[i] = getKeycode(strKeyCode);
 		else break;
 	}
@@ -1218,7 +1218,7 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 			int i;
 			COPYPASTE_KEY keySet;
 
-			GetWindowText(m_focusInfo.m_hActiveWnd,strWindowName,sizeof(strWindowName));
+			GetWindowText(m_focusInfo.m_hActiveWnd,strWindowName,_countof(strWindowName));
 			strWinName = strWindowName;
 
 			keySet.m_nMessage = 0;

@@ -58,14 +58,14 @@ void CInit::initialize()
 	TCHAR *cpName;
 
 	//ユーザー名を取得
-	DWORD dwSize = sizeof(strBuff);
+	DWORD dwSize = _countof(strBuff);
 	m_strUserName = _T("Charu3User");
 	if(::GetUserName(strBuff,&dwSize)) {
 		m_strUserName = strBuff;
 	}
 
 	//実行パスを取得、作成
-	GetModuleFileName(NULL,strBuff,sizeof(strBuff));
+	GetModuleFileName(NULL,strBuff,_countof(strBuff));
 	cpName = _tcsrchr(strBuff,_T('\\'));
 	cpName++;
 	*cpName = NULL;
@@ -255,7 +255,7 @@ void CInit::readAllInitData()
 	m_vctMacro.reserve(99);
 	for(i = 1; i <= 99; i++) {
 		StringBuff.Format(_T("Macro_%02d"),i);
-		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,sizeof(strBuff),m_strIniFile);
+		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
 		if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
 			strRes.LoadString(APP_INF_MACRO_TEMPLATE01 + i -1);
 			writeProfileString(REGKEY_MACRO,StringBuff,strRes);
@@ -283,7 +283,7 @@ void CInit::readAllInitData()
 	m_vctDataMacro.reserve(99);
 	for(i = 1; i <= 99; i++) {
 		StringBuff.Format(_T("DataMacro_%02d"),i);
-		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,sizeof(strBuff),m_strIniFile);
+		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
 		if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
 			strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01 + i -1);
 			writeProfileString(REGKEY_MACRO,StringBuff,strRes);
@@ -490,7 +490,7 @@ CString CInit::setIniFileString(const TCHAR* szSection,const TCHAR* szKey,CStrin
 {
 	TCHAR strBuff[1024];
 	CString strRet;
-	::GetPrivateProfileString(szSection,szKey,_T(""),strBuff,sizeof(strBuff),m_strIniFile);
+	::GetPrivateProfileString(szSection,szKey,_T(""),strBuff,_countof(strBuff),m_strIniFile);
 	strRet = strBuff;
 	if (strRet == "")	{
 		// 設定が無い場合はデフォルト(アプリケーションパス)で作成

@@ -109,7 +109,6 @@ bool CCharu3Tree::setPlugin(CString strPath)
 
 					if(pInitDLL && pEndDLL && pReadData && pWriteData && pGetFormatName && pGetExtension) {
 						TCHAR strBuff[256];
-						int a = sizeof(strBuff);
 						plugin.m_strPluginName = filefind.GetFilePath();
 						pGetExtension(strBuff,sizeof(strBuff));
 						plugin.m_strExtension = strBuff;
