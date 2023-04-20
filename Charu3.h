@@ -40,6 +40,7 @@ using namespace std;
 #endif
 
 //ƒtƒ@ƒCƒ‹–¼İ’è
+#define NAME				_T("Charu3")
 #define INI_FILE			_T("Charu3.ini")
 #define DAT_FILE			_T("Charu3.c3d")
 #define HELP_FILE			_T("Doc\\index.html")

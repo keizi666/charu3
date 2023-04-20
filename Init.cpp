@@ -518,6 +518,7 @@ void CInit::writeProfileInt(const TCHAR* szSection,const TCHAR* szKey,int nValue
 void CInit::writeProfileString(const TCHAR* szSection,const TCHAR* szKey,CString strValue)
 {
 	WritePrivateProfileString(szSection,szKey,_T("\"") + strValue + _T("\""),m_strIniFile);
+	auto err = GetLastError();
 }
 
 //---------------------------------------------------

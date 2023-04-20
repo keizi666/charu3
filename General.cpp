@@ -403,7 +403,7 @@ void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSource
 		delete szMbcsBuff;
 	}
 	if(0 == err) {
-		strWrite.Format(_T("%s %s:%d %s"),getDateTimeString(),strSourceFile,nLine,strLogText);
+		strWrite.Format(_T("%s %s:%d %s"),getDateTimeString().GetString(),strSourceFile.GetString(),nLine,strLogText.GetString());
 		nDataSize = ::WideCharToMultiByte(CP_ACP, 0, strWrite,-1,NULL,0,NULL,NULL);
 		szMbcsBuff = new char[nDataSize + 1];
 		if(szMbcsBuff) {
@@ -418,7 +418,7 @@ void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSource
 	}
 #else
 	if((outPut = fopen(strFileName, "a")) != NULL) {
-		strWrite.Format("%s %s:%d %s",getDateTimeString(),strSourceFile,nLine,strLogText);
+		strWrite.Format("%s %s:%d %s",getDateTimeString().GetString(),strSourceFile.GetString(),nLine,strLogText.GetString());
 		fputs(strWrite,outPut);
 		fflush(outPut);
 		OutputDebugString(strWrite);

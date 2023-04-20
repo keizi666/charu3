@@ -252,41 +252,31 @@ void CAboutDlg::OnWeb()
 //---------------------------------------------------
 void CCharu3App::init()
 {
-	CString StringBuff,StringBuff2;
+	TCHAR wcAppDataPath[MAX_PATH];
+	SHGetSpecialFolderPath(NULL, wcAppDataPath, CSIDL_APPDATA, 0);
+	CString strAppDataPath = CString(wcAppDataPath) + "\\" + NAME;
+	if (!FILEEXIST(strAppDataPath)) {
+		CreateDirectory(strAppDataPath, NULL);
+	}
+	CString strUserIniFile = strAppDataPath + "\\" + INI_FILE;
 
 	//設定クラスを初期化
 	m_ini.initialize();
 
-	//一旦初期INIを読む
-	StringBuff = m_ini.m_strAppPath + INI_FILE;
-	m_ini.setIniFileName(StringBuff);
+	// Read .ini file
+	m_ini.setIniFileName(strUserIniFile);
 	m_ini.readAllInitData();
-	//設定ファイルの名前を設定
-	if(m_ini.m_etc.m_nMulchUser == 1) {
-		StringBuff = m_ini.m_strAppPath + m_ini.m_strUserName + "\\" + INI_FILE;
-		if (!FILEEXIST(StringBuff)) {
-			StringBuff2 = m_ini.m_strAppPath + m_ini.m_strUserName;
-
-			CreateDirectory(StringBuff2,NULL);
-			StringBuff2 = m_ini.m_strAppPath + INI_FILE;
-			CopyFile(StringBuff2,StringBuff,TRUE);
-		}
-		m_ini.setIniFileName(StringBuff);
-	}
-
-	//設定ファイル読み込み
-	m_ini.readAllInitData();
-	m_ini.m_strDebugLog = m_ini.m_strAppPath + m_ini.m_strDebugLog;
 
 	m_pTree->setImageList(theApp.m_ini.m_IconSize,theApp.m_ini.m_visual.m_strResourceName,m_ini.m_strAppPath);
 	m_pTree->setInitInfo(&m_ini.m_nTreeID,&m_ini.m_nSelectID,&m_ini.m_nRecNumber);//ID初期値を設定
 
 	//デバッグログ処理
+	m_ini.m_strDebugLog = strAppDataPath + "\\" + m_ini.m_strDebugLog;
 	if(m_ini.m_nDebug) {
 		CString strText;
 		strText.Format(_T("start \"%s\"\n"),ABOUT_NAME);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-		strText.Format(_T("ini file name \"%s\"\n"),StringBuff);
+		strText.Format(_T("ini file name \"%s\"\n"), strUserIniFile.GetString());
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
@@ -316,7 +306,7 @@ void CCharu3App::init()
 	//デバッグログ処理
 	if(m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("read data file\"%s\" %s\n"),m_ini.m_strDataFile,m_ini.m_strPluginName);
+		strText.Format(_T("read data file\"%s\" %s\n"),m_ini.m_strDataFile.GetString(),m_ini.m_strPluginName.GetString());
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
@@ -453,7 +443,7 @@ void CCharu3App::setAppendHotKey()
 				//デバッグログ処理
 				if(m_ini.m_nDebug) {
 					CString strText;
-					strText.Format(_T("setAppendHotKey hotkey \"%s\" %d\n"),strKey,nret);
+					strText.Format(_T("setAppendHotKey hotkey \"%s\" %d\n"),strKey.GetString(),nret);
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
 			}
@@ -470,7 +460,7 @@ void CCharu3App::setAppendHotKey()
 				//デバッグログ処理
 				if(m_ini.m_nDebug) {
 					CString strText;
-					strText.Format(_T("setAppendHotKey directcopy \"%s\" %d\n"),strKey,nret);
+					strText.Format(_T("setAppendHotKey directcopy \"%s\" %d\n"),strKey.GetString(),nret);
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
 			}
@@ -598,7 +588,7 @@ bool CCharu3App::setAppendKeyInit(HWND hTopWindow,COPYPASTE_KEY *keySet)
 	//デバッグログ処理
 	if(m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("setAppendKeyInit %s %d %d %d %d %d\n"),strWinName,keySet->m_uMod_Copy,keySet->m_uVK_Copy,keySet->m_uMod_Paste,keySet->m_uVK_Paste,keySet->m_nMessage);
+		strText.Format(_T("setAppendKeyInit %s %d %d %d %d %d\n"),strWinName.GetString(),keySet->m_uMod_Copy,keySet->m_uVK_Copy,keySet->m_uMod_Paste,keySet->m_uVK_Paste,keySet->m_nMessage);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	
@@ -760,7 +750,7 @@ void CCharu3App::closeTreeWindow(int nRet)
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
-				strText.Format(_T("closeTreeWindow sel:%s clip:%s\n"),strSelect,strClip);
+				strText.Format(_T("closeTreeWindow sel:%s clip:%s\n"),strSelect.GetString(),strClip.GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 
@@ -771,7 +761,7 @@ void CCharu3App::closeTreeWindow(int nRet)
 					//デバッグログ処理
 					if(m_ini.m_nDebug) {
 						CString strText;
-						strText.Format(_T("closeTreeWindow check paste %s\n"),data.m_strTitle);
+						strText.Format(_T("closeTreeWindow check paste %s\n"),data.m_strTitle.GetString());
 						CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 					}
 					playData(data,strClip,strSelect,isPaste,false);
@@ -795,7 +785,7 @@ void CCharu3App::closeTreeWindow(int nRet)
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
-				strText.Format(_T("closeTreeWindow sel:%s clip:%s title:\n"),strSelect,strClip,data.m_strTitle);
+				strText.Format(_T("closeTreeWindow sel:%s clip:%s title:\n"),strSelect.GetString(),strClip,data.m_strTitle.GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 			playData(data,strClip,strSelect,isPaste);
@@ -915,12 +905,12 @@ void CCharu3App::playData(STRING_DATA data,CString strClip,CString strSelect,boo
 //---------------------------------------------------
 void CCharu3App::playHotItem(int nTarget)
 {
-	if(nTarget >= 0 && nTarget < m_hotkeyVector.size()) {
+	if(nTarget >= 0 && static_cast<size_t>(nTarget) < m_hotkeyVector.size()) {
 		HOT_KEY_CODE keyData;
 		keyData = m_hotkeyVector.at(nTarget);
 		if(!keyData.m_uVkCode) {
 			DWORD dwTime = timeGetTime();
-			if((dwTime - keyData.m_dwDoubleKeyTime) >  m_ini.m_pop.m_nDCKeyPopTime) {
+			if(static_cast<int>(dwTime - keyData.m_dwDoubleKeyTime) >  m_ini.m_pop.m_nDCKeyPopTime) {
 				m_hotkeyVector[nTarget].m_dwDoubleKeyTime = dwTime;
 				return;
 			}
@@ -958,7 +948,7 @@ void CCharu3App::playHotItem(int nTarget)
 						//デバッグログ処理
 						if(m_ini.m_nDebug) {
 							CString strText;
-							strText.Format(_T("Direct copy folder %s\n"),dataChild.m_strTitle);
+							strText.Format(_T("Direct copy folder %s\n"),dataChild.m_strTitle.GetString());
 							CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 						}
 						m_pTree->addData(keyData.m_hItem,dataChild,true,true);
@@ -1004,7 +994,7 @@ void CCharu3App::playHotItem(int nTarget)
 					//デバッグログ処理
 					if(m_ini.m_nDebug) {
 						CString strText;
-						strText.Format(_T("Direct copy data %s\n"),data.m_strTitle);
+						strText.Format(_T("Direct copy data %s\n"),data.m_strTitle.GetString());
 						CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 					}
 				}
@@ -1027,7 +1017,7 @@ void CCharu3App::playHotItem(int nTarget)
 					//デバッグログ処理
 					if(m_ini.m_nDebug) {
 						CString strText;
-						strText.Format(_T("Direct paste data %s active:%x focus:%x\n"),strPaste,m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
+						strText.Format(_T("Direct paste data %s active:%x focus:%x\n"),strPaste.GetString(),m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
 						CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 					}
 
@@ -1108,7 +1098,7 @@ CString CCharu3App::getSelectString(COPYPASTE_KEY key,HWND hWnd)
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
-				strText.Format(_T("getSelectString %d %s\n"),keySet.m_nMessage,strSelect);
+				strText.Format(_T("getSelectString %d %s\n"),keySet.m_nMessage,strSelect.GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 		}
@@ -1273,7 +1263,7 @@ void CCharu3App::pasteData(CString strPaste,COPYPASTE_KEY key,HWND hWnd)
 	//デバッグログ処理
 	if(m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("pasteData %d %s %x %x active:%x focus:%x\n"),key.m_nMessage,strPaste,key.m_uMod_Paste,key.m_uVK_Paste,m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
+		strText.Format(_T("pasteData %d %s %x %x active:%x focus:%x\n"),key.m_nMessage,strPaste.GetString(),key.m_uMod_Paste,key.m_uVK_Paste,m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 }
@@ -1662,7 +1652,7 @@ void CCharu3App::changeClipBord(CString strClipBord)
 	//デバッグログ処理
 	if(m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("changeClipBord \"%s\"\n"),strClipBord);
+		strText.Format(_T("changeClipBord \"%s\"\n"),strClipBord.GetString());
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	//連続で空のクリップボード更新イベントが起こるので対策
@@ -1718,7 +1708,7 @@ void CCharu3App::changeClipBord(CString strClipBord)
 		//デバッグログ処理
 		if(m_ini.m_nDebug) {
 			CString strText;
-			strText.Format(_T("clipboard record \"%s\"\n"),strClipBord);
+			strText.Format(_T("clipboard record \"%s\"\n"),strClipBord.GetString());
 			CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
 		//ストックモード処理
@@ -1769,7 +1759,7 @@ void CCharu3App::fifoClipbord()
 				//デバッグログ処理
 				if(m_ini.m_nDebug) {
 					CString strText;
-					strText.Format(_T("fifoClipbord text:%s\n"),data.m_strData);
+					strText.Format(_T("fifoClipbord text:%s\n"),data.m_strData.GetString());
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
 				if(m_clipbord.setClipboardText(data.m_strData))	break;//クリップボードにセット
@@ -2051,7 +2041,7 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 			}
 			if(m_ini.m_pop.m_nDoubleKeyPOP) {//ダブルキークリック
 				DWORD dwTime = timeGetTime();
-				if((dwTime - m_dwDoubleKeyPopTime) > m_ini.m_pop.m_nDCKeyPopTime) {
+				if(static_cast<int>(dwTime - m_dwDoubleKeyPopTime) > m_ini.m_pop.m_nDCKeyPopTime) {
 					m_dwDoubleKeyPopTime = dwTime;
 					return FALSE;
 				}
@@ -2082,7 +2072,7 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 			}
 			if(m_ini.m_pop.m_nDoubleKeyFIFO) {//ダブルキークリック
 				DWORD dwTime = timeGetTime();
-				if((dwTime - m_dwDoubleKeyFifoTime) > m_ini.m_pop.m_nDCKeyFifoTime) {
+				if(static_cast<int>(dwTime - m_dwDoubleKeyFifoTime) > m_ini.m_pop.m_nDCKeyFifoTime) {
 					m_dwDoubleKeyFifoTime = dwTime;
 					return FALSE;
 				}
@@ -2243,7 +2233,7 @@ void CCharu3App::OnDataSave()
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
-				strText.Format(_T("OnDataSave \"%s\"\n"),pFileDialog->GetPathName());
+				strText.Format(_T("OnDataSave \"%s\"\n"),pFileDialog->GetPathName().GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 			if(!m_pTree->saveDataFile(pFileDialog->GetPathName(),DAT_FORMAT,NULL)) {
@@ -2305,7 +2295,7 @@ void CCharu3App::OnChangData()
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
-				strText.Format(_T("OnChangData \"%s\"\n"),pFileDialog->GetPathName());
+				strText.Format(_T("OnChangData \"%s\"\n"),pFileDialog->GetPathName().GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 			
@@ -2436,7 +2426,7 @@ void CCharu3App::OnVisualFile()
 			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
-				strText.Format(_T("OnVisualFile \"%s\"\n"),pFileDialog->GetPathName());
+				strText.Format(_T("OnVisualFile \"%s\"\n"),pFileDialog->GetPathName().GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 			strFileName = pFileDialog->GetPathName();

@@ -331,7 +331,7 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("wrriten charu3 data \"%s\"\n"),strFileName);
+		strText.Format(_T("wrriten charu3 data \"%s\"\n"),strFileName.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	fclose(fFile);
@@ -372,7 +372,7 @@ bool CCharu3Tree::saveDataFilePlugin(CString strFileName,CString strPlugin,list<
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("wrriten plugin data \"%s\" %s %d\n"),strFileName,strPlugin,isRet);
+		strText.Format(_T("wrriten plugin data \"%s\" %s %d\n"),strFileName.GetString(),strPlugin.GetString(),isRet);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	return isRet;
@@ -558,7 +558,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("read charu3 data \"%s\"\n"),strFileName);
+		strText.Format(_T("read charu3 data \"%s\"\n"),strFileName.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
@@ -689,7 +689,7 @@ bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("read plugin data \"%s\" %s\n"),strFileName,strPlugin);
+		strText.Format(_T("read plugin data \"%s\" %s\n"),strFileName.GetString(),strPlugin.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	isRet = true;
@@ -891,7 +891,7 @@ HTREEITEM CCharu3Tree::addNewFolder(HTREEITEM hTreeItem,CString strName)
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("add new folder \"%s\"\n"),strName);
+		strText.Format(_T("add new folder \"%s\"\n"),strName.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
@@ -1018,7 +1018,7 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("add data %s %s %d\n"),data.m_strTitle,data.m_strData,data.m_cKind);
+		strText.Format(_T("add data %s %s %d\n"),data.m_strTitle.GetString(),data.m_strData.GetString(),data.m_cKind);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	return hTreeItem;
@@ -1121,7 +1121,7 @@ void CCharu3Tree::deleteData(HTREEITEM hTreeItem)
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("delete data \"%s\" %d\n"),dataPtr->m_strTitle,dataPtr->m_cKind);
+		strText.Format(_T("delete data \"%s\" %d\n"),dataPtr->m_strTitle.GetString(),dataPtr->m_cKind);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
@@ -1262,7 +1262,7 @@ void CCharu3Tree::editData(HTREEITEM hTreeItem,STRING_DATA Data)
 	//デバッグログ処理
 	if(theApp.m_ini.m_nDebug) {
 		CString strText;
-		strText.Format(_T("edit data \"%s\" %d\n"),dataPtr->m_strTitle,dataPtr->m_cKind);
+		strText.Format(_T("edit data \"%s\" %d\n"),dataPtr->m_strTitle.GetString(),dataPtr->m_cKind);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 }
@@ -1563,7 +1563,7 @@ HTREEITEM CCharu3Tree::getOneTimeText(int nType)
 				//デバッグログ処理
 				if(theApp.m_ini.m_nDebug) {
 					CString strText;
-					strText.Format(_T("getOneTimeText \"%s\" %s %d\n"),data.m_strTitle,data.m_strData,data.m_cKind);
+					strText.Format(_T("getOneTimeText \"%s\" %s %d\n"),data.m_strTitle.GetString(),data.m_strData.GetString(),data.m_cKind);
 					CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
 
@@ -1604,7 +1604,7 @@ int CCharu3Tree::getDataOption(CString strData,CString strKind)
 		//デバッグログ処理
 		if(theApp.m_ini.m_nDebug) {
 			CString strText;
-			strText.Format(_T("getDataOption \"%s\" %d\n"),strKind,nRet);
+			strText.Format(_T("getDataOption \"%s\" %d\n"),strKind.GetString(),nRet);
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
 	}
@@ -1638,7 +1638,7 @@ DWORD CCharu3Tree::getDataOptionHex(CString strData,CString strKind)
 		//デバッグログ処理
 		if(theApp.m_ini.m_nDebug) {
 			CString strText;
-			strText.Format(_T("getDataOptionHex \"%s\" 0x%x\n"),strKind,dwRet);
+			strText.Format(_T("getDataOptionHex \"%s\" 0x%x\n"),strKind.GetString(),dwRet);
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
 	}
@@ -1672,7 +1672,7 @@ CString CCharu3Tree::getDataOptionStr(CString strData,CString strKind)
 		//デバッグログ処理
 		if(theApp.m_ini.m_nDebug) {
 			CString strText;
-			strText.Format(_T("getDataOptionHex \"%s\" %s\n"),strKind,strRet);
+			strText.Format(_T("getDataOptionHex \"%s\" %s\n"),strKind.GetString(),strRet);
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
 	}
@@ -1709,7 +1709,7 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 				//デバッグログ処理
 				if(theApp.m_ini.m_nDebug) {
 					CString strText;
-					strText.Format(_T("number:%d handle:%d title:%s ID:%d\n"),i,hTreeItem,parentData.m_strTitle,parentData.m_nMyID);
+					strText.Format(_T("number:%d handle:%d title:%s ID:%d\n"),i,hTreeItem,parentData.m_strTitle.GetString(),parentData.m_nMyID);
 					CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
 				nIsLock = getDataOption(parentData.m_strMacro,_T("lock"));//履歴種別を取得
@@ -1731,7 +1731,7 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 				data.m_strTitle = strTitle;
 
 				if(getDataOption(parentData.m_strMacro,_T("number"))) {//番号をつけるかどうか
-					data.m_strTitle.Format(_T("%02d : %s"),*m_nRecNumber,strTitle);
+					data.m_strTitle.Format(_T("%02d : %s"),*m_nRecNumber,strTitle.GetString());
 					if(nNumber > nRirekiCount) nNumber = 0;
 				}
 
@@ -1743,7 +1743,7 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 				//デバッグログ処理
 				if(theApp.m_ini.m_nDebug) {
 					CString strText;
-					strText.Format(_T("addDataToRecordFolder \"%s\" %s %d\n"),data.m_strTitle,data.m_strData,nNumber);
+					strText.Format(_T("addDataToRecordFolder \"%s\" %s %d\n"),data.m_strTitle.GetString(),data.m_strData.GetString(),nNumber);
 					CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
 

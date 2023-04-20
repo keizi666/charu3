@@ -29,7 +29,7 @@ CMyFileDialog::CMyFileDialog(BOOL bOpenFileDialog, LPCTSTR lpszDefExt, LPCTSTR l
 		SetTemplate(0, IDD_CHECKBOX);
 #else
 		IFileDialogCustomize* pfdc = GetIFileDialogCustomize();
-		pfdc->AddCheckButton(IDD_CHECKBOX, L"マクロプラグインを自動切換えする", false);
+		pfdc->AddCheckButton(IDD_CHECKBOX, _T("マクロプラグインを自動切換えする"), false);
 #endif
 	}
 }
