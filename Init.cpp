@@ -88,7 +88,7 @@ void CInit::readAllInitData()
 	TCHAR strBuff[1024],*szName,*szKind,*szMacro;
 
 	//一般設定	
-	m_etc.m_nMulchUser    = setIniFileInt(REGKEY_ETC,_T("MulchUser"),1);//マルチユーザーで使うかどうか
+	m_etc.m_nMulchUser    = setIniFileInt(REGKEY_ETC,_T("MulchUser"),1);//マルチユーザーで使うかどうか // No longer used
 
 	m_etc.m_nToClip    = setIniFileInt(REGKEY_ETC,_T("ToClipBord"),1);//リストから選んだ文字列はクリップボードにも入れる
 	m_etc.m_nToolTip   = setIniFileInt(REGKEY_ETC,_T("FixToolTip"),0);//タスクトレイアイコンのツールチップを固定にする
@@ -218,7 +218,7 @@ void CInit::readAllInitData()
 	}	
 
 	//一般環境設定
-	m_strDataFile = setIniFileString(REGKEY_ENV,_T("DataFile"),m_strAppPath + m_strUserName + _T("\\") + DAT_FILE);
+	m_strDataFile = setIniFileString(REGKEY_ENV,_T("DataFile"),"");
 
 	m_strRwPluginFolder = setIniFileString(REGKEY_ENV,_T("RwPluginFolder"),m_strAppPath + _T("RW_Plugin"));
 	m_strPluginName = setIniFileString(REGKEY_ENV,_T("DataFormat"),DAT_FORMAT);
@@ -493,7 +493,7 @@ CString CInit::setIniFileString(const TCHAR* szSection,const TCHAR* szKey,CStrin
 	::GetPrivateProfileString(szSection,szKey,_T(""),strBuff,_countof(strBuff),m_strIniFile);
 	strRet = strBuff;
 	if (strRet == "")	{
-		// 設定が無い場合はデフォルト(アプリケーションパス)で作成
+		// Use default if empty
 		writeProfileString(szSection,szKey,strDefault);
 		strRet = strDefault;
 	}

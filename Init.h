@@ -36,7 +36,7 @@ using namespace std;
 //---------------------------------------------------
 struct OPTION_ETC
 {
-	int m_nMulchUser;//マルチユーザーで使うかどうか
+	int m_nMulchUser;//マルチユーザーで使うかどうか // No longer used
 
 	int m_nToClip;		//リストから選んだ文字列はクリップボードにも入れる
 	int m_nToolTip;	//タスクトレイアイコンのツールチップを固定にする

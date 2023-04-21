@@ -288,21 +288,8 @@ void CCharu3App::init()
 	}
 
 	//データ読み込み
-	if(!m_pTree->loadDataFileDef(m_ini.m_strDataFile,m_ini.m_strPluginName)) {
-		if(m_ini.m_etc.m_nMulchUser) {
-			m_ini.m_strDataFile = m_ini.m_strAppPath + m_ini.m_strUserName + "\\" + DAT_FILE;
-		}
-		else {
-			m_ini.m_strDataFile = m_ini.m_strAppPath + DAT_FILE;
-		}
-		m_ini.m_strPluginName = DAT_FORMAT;
-		m_ini.writeEnvInitData();
+	(void)m_pTree->loadDataFileDef(m_ini.m_strDataFile, m_ini.m_strPluginName);
 
-		if(!m_pTree->loadDataFileDef(m_ini.m_strDataFile,m_ini.m_strPluginName)) {
-			m_pTree->loadDataFileDef(m_ini.m_strAppPath + DAT_FILE,m_ini.m_strPluginName);
-		}
-		m_pTree->saveDataFile(m_ini.m_strDataFile,m_ini.m_strPluginName,NULL);	
-	}
 	//デバッグログ処理
 	if(m_ini.m_nDebug) {
 		CString strText;
@@ -802,10 +789,12 @@ void CCharu3App::closeTreeWindow(int nRet)
 
 	
 	//データを保存
-	if(!m_pTree->saveDataFile(m_ini.m_strDataFile,m_ini.m_strPluginName,NULL)) {	
-		CString strRes;
-		strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
-		AfxMessageBox(strRes,MB_ICONEXCLAMATION,0);
+	if (!m_ini.m_strDataFile.IsEmpty()) {
+		if (!m_pTree->saveDataFile(m_ini.m_strDataFile, m_ini.m_strPluginName, NULL)) {
+			CString strRes;
+			strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
+			AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
+		}
 	}
 	m_ini.writeEnvInitData();//環境設定を保存
 
