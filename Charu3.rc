@@ -64,11 +64,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\Charu3.ico"
-
-IDI_STOP                ICON                    "res\\icon1.ico"
-
-IDI_RUN                 ICON                    "res\\ico00001.ico"
+IDR_MAINFRAME           ICON                    "res\\Charu3-SE.ico"
 
 IDI_RUN256              ICON                    "res\\c2p256_16_run.ico"
 

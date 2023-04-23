@@ -7,8 +7,6 @@
 #define IDR_MAINFRAME                   128
 #define IDR_CHARU3TYPE                  129
 #define IDD_POPUP_DIALOG                130
-#define IDI_STOP                        130
-#define IDI_RUN                         131
 #define IDB_ICON_BITMAP                 134
 #define IDR_LISTMENU                    136
 #define IDB_ICON_BITMAP_PINK            136

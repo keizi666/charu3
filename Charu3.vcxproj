@@ -23,7 +23,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -143,7 +143,7 @@
     <Image Include="res\c2p256_16_run.ico" />
     <Image Include="res\c2p256_16_stop.ico" />
     <Image Include="res\Charu2_aqua.ico" />
-    <Image Include="res\Charu3.ico" />
+    <Image Include="res\Charu3-SE.ico" />
     <Image Include="res\ico00001.ico" />
     <Image Include="res\icon1.ico" />
     <Image Include="res\itemIcon.bmp" />

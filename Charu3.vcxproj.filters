@@ -195,9 +195,6 @@
     <Image Include="res\Charu2_aqua.ico">
       <Filter>あまり変更しない\Resource Files</Filter>
     </Image>
-    <Image Include="res\Charu3.ico">
-      <Filter>あまり変更しない\Resource Files</Filter>
-    </Image>
     <Image Include="res\ico00001.ico">
       <Filter>あまり変更しない\Resource Files</Filter>
     </Image>
@@ -208,6 +205,9 @@
       <Filter>あまり変更しない\Resource Files</Filter>
     </Image>
     <Image Include="res\itemIconPink.bmp">
+      <Filter>あまり変更しない\Resource Files</Filter>
+    </Image>
+    <Image Include="res\Charu3-SE.ico">
       <Filter>あまり変更しない\Resource Files</Filter>
     </Image>
   </ItemGroup>
