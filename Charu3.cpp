@@ -221,7 +221,23 @@ CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	m_strVersion = ABOUT_NAME;
+	TCHAR fileName[MAX_PATH + 1];
+	::GetModuleFileName(NULL, fileName, sizeof(fileName));
+	DWORD bufSize = ::GetFileVersionInfoSize(fileName, NULL);
+	BYTE* pVersion = new BYTE[bufSize];
+	::GetFileVersionInfo(fileName, NULL, bufSize, pVersion);
+	VS_FIXEDFILEINFO* pFileInfo;
+	UINT queryLen;
+	::VerQueryValue(pVersion, _T("\\"), (void**)&pFileInfo, &queryLen);
+	m_strVersion.Format(_T("%s Version %u.%u (%u.%u.%u.%u)"),
+		ABOUT_NAME,
+		LOWORD(pFileInfo->dwFileVersionMS),
+		LOWORD(pFileInfo->dwFileVersionLS),
+		HIWORD(pFileInfo->dwFileVersionMS),
+		LOWORD(pFileInfo->dwFileVersionMS),
+		HIWORD(pFileInfo->dwFileVersionLS),
+		LOWORD(pFileInfo->dwFileVersionLS));
+	delete[] pVersion;
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAboutDlg)
 	DDX_Text(pDX, IDC_VERSION_NAME, m_strVersion);

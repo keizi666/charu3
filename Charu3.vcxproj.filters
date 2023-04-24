@@ -192,15 +192,6 @@
     <Image Include="res\c2p256_16_stop.ico">
       <Filter>あまり変更しない\Resource Files</Filter>
     </Image>
-    <Image Include="res\Charu2_aqua.ico">
-      <Filter>あまり変更しない\Resource Files</Filter>
-    </Image>
-    <Image Include="res\ico00001.ico">
-      <Filter>あまり変更しない\Resource Files</Filter>
-    </Image>
-    <Image Include="res\icon1.ico">
-      <Filter>あまり変更しない\Resource Files</Filter>
-    </Image>
     <Image Include="res\itemIcon.bmp">
       <Filter>あまり変更しない\Resource Files</Filter>
     </Image>

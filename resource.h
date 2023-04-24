@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by Charu3.rc
+// Microsoft Visual C++ で生成されたインクルード ファイル。
+// Charu3.rc で使用
 //
 #define IDC_WEB                         4
 #define IDD_ABOUTBOX                    100
@@ -9,7 +9,6 @@
 #define IDD_POPUP_DIALOG                130
 #define IDB_ICON_BITMAP                 134
 #define IDR_LISTMENU                    136
-#define IDB_ICON_BITMAP_PINK            136
 #define IDD_EDIT                        137
 #define IDD_OPT_ADD_KEYSET              139
 #define IDD_ADD_DATA                    140

@@ -32,9 +32,9 @@
 #include <list>
 using namespace std;
 
-//バージョン表記
+// App Name
 #ifdef _UNICODE
-	#define ABOUT_NAME _T("Charu3 SE Version 7.06.07 Unicode + under development")
+	#define ABOUT_NAME _T("Charu3 SE")
 #else
 	#define ABOUT_NAME _T("Charu3 Version 7.06.07")
 #endif

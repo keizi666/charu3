@@ -22,13 +22,9 @@
 #ifndef _AFX_NO_AFXCMN_SUPPORT
 #include <afxcmn.h>			// MFC の Windows コモン コントロール サポート
 #endif // _AFX_NO_AFXCMN_SUPPORT
-#include <afxtempl.h>
-//#include <Commctrl.h>
-#include <winuser.h>
+#include <windows.h>
 #include <mmsystem.h>
 #include <imm.h>
-#include <Commctrl.h>
-#include <math.h>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。

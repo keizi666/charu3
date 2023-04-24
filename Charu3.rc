@@ -13,7 +13,216 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Japanese (Japan) resources
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE LANG_JAPANESE, SUBLANG_NEUTRAL
+#pragma code_page(932)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDR_MAINFRAME           "Charu3 SE"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_APP_TITLE       "Charu3 SE"
+    AFX_IDS_IDLEMESSAGE     "ﾚﾃﾞｨ"
+END
+
+STRINGTABLE
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "上書"
+    ID_INDICATOR_REC        "記録"
+    ID_INDICATOR_KANA       "ｶﾅ"
+END
+
+STRINGTABLE
+BEGIN
+    ID_APP_ABOUT            "ﾌﾟﾛｸﾞﾗﾑの情報、ﾊﾞｰｼﾞｮﾝそして著作権を表示\nﾊﾞｰｼﾞｮﾝ情報"
+    ID_APP_EXIT             "ｱﾌﾟﾘｹｰｼｮﾝを終了し、ﾌｧｲﾙの保存を指示\n終了"
+END
+
+STRINGTABLE
+BEGIN
+    ID_NEXT_PANE            "次のｳｨﾝﾄﾞｳに切り替える\n次のﾍﾟｲﾝ"
+    ID_PREV_PANE            "前のｳｨﾝﾄﾞｳに切り替える\n前のﾍﾟｲﾝ"
+END
+
+STRINGTABLE
+BEGIN
+    ID_WINDOW_SPLIT         "作業中のｳｨﾝﾄﾞｳを分割\n分割"
+END
+
+STRINGTABLE
+BEGIN
+    ID_EDIT_CLEAR           "選択範囲を消去\n消去"
+    ID_EDIT_CLEAR_ALL       "すべて消去\nすべて消去"
+    ID_EDIT_COPY            "選択範囲をｺﾋﾟｰしてｸﾘｯﾌﾟﾎﾞｰﾄﾞに保存\nｺﾋﾟｰ"
+    ID_EDIT_CUT             "選択範囲を切り取ってｸﾘｯﾌﾟﾎﾞｰﾄﾞに保存\n切り取り"
+    ID_EDIT_FIND            "指定した文字列の検索\n検索"
+    ID_EDIT_PASTE           "ｸﾘｯﾌﾟﾎﾞｰﾄﾞの内容を貼り付け\n貼り付け"
+    ID_EDIT_REPEAT          "直前に行った動作を繰り返す\n繰り返し"
+    ID_EDIT_REPLACE         "指定した文字列を他の文字列で置換\n置換"
+    ID_EDIT_SELECT_ALL      "ﾌｧｲﾙ内のすべてを選択\nすべて選択"
+    ID_EDIT_UNDO            "直前に行った動作を元に戻す\n元に戻す"
+    ID_EDIT_REDO            "直前に行った動作を繰り返す\n繰り返す"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCSIZE          "ｳｨﾝﾄﾞｳのｻｲｽﾞを変更"
+    AFX_IDS_SCMOVE          "ｳｨﾝﾄﾞｳの位置を変更"
+    AFX_IDS_SCMINIMIZE      "ｳｨﾝﾄﾞｳを最小化する"
+    AFX_IDS_SCMAXIMIZE      "ｳｨﾝﾄﾞｳを最大化する"
+    AFX_IDS_SCNEXTWINDOW    "次のｳｨﾝﾄﾞｳに切り替える"
+    AFX_IDS_SCPREVWINDOW    "前のｳｨﾝﾄﾞｳに切り替える"
+    AFX_IDS_SCCLOSE         "作業中のｳｨﾝﾄﾞｳを閉じ、変更したﾌｧｲﾙの保存を指示"
+END
+
+STRINGTABLE
+BEGIN
+    AFX_IDS_SCRESTORE       "ｳｨﾝﾄﾞｳを通常のｻｲｽﾞに戻す"
+    AFX_IDS_SCTASKLIST      "ｱﾌﾟﾘｹｰｼｮﾝの切り替え"
+END
+
+STRINGTABLE
+BEGIN
+    APP_MES_FAILURE_HOTKEY  "ホットキーの設定に失敗"
+    APP_MES_DELETE_OK       "%sを削除しますか？"
+    APP_MES_NO_ENTRY_FUNC   "関数のエントリがありません。"
+    APP_MES_NOT_FOUND       "%sが見つかりません。"
+    APP_MES_FAILURE_DATA_SAVE "データの保存に失敗しました。ファイルがリードオンリーか確認してください。"
+    APP_MES_DECIDE_ICONS    "アイコンの自動識別をしますか？"
+    APP_MES_UNKNOWN_FORMAT  "未知のデータ形式です。"
+    APP_MES_ADD_OK          "%sを追加しますか？"
+END
+
+STRINGTABLE
+BEGIN
+    APP_MES_ADD_OK2         "%sを追加しました。"
+    APP_MES_ALL_EMPTY       "タイトルも登録文も空白です。何か入れてください。"
+    APP_MES_NOT_FOUND_WRITEPLUGIN "書き込みに適切なプラグインがありません。"
+    APP_MES_NOT_FOUND_READPLUGIN "読み込みに適切なプラグインがありません。"
+    APP_MES_NOT_FOUND_MACROPLUGIN "マクロ処理に適切なプラグインがありません。"
+    APP_MES_CANT_COPY       "自分の子孫にはコピーできません。"
+    APP_MES_DELETE_FOLDER   "フォルダですが、本当に削除しますか？\n削除するとフォルダの内容すべてが失われます。"
+    APP_MES_IMPORT_OK       "%d件をインポートしました。"
+    APP_MES_FOLDER_CLEAR    "フォルダ内のデータは全て失われます。\nよろしいですか？"
+    APP_INF_FILE_FILTER     "Charu3データファイル(*.c3d)|*.c3d"
+    APP_INF_FILE_FILTER2    "%sデータファイル(*.%s)|*.%s|"
+    APP_INF_FILE_FILTER3    "ビジュアルini(*.ini)|*.ini|"
+    APP_INF_FILE_FILTER4    "WAVEファイル(*.wav)|*.wav||"
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_FILE_FILTER5    "ビットマップ(*.bmp)|*.bmp||"
+    APP_INF_FILE_FILTER6    "全てのファイル(*.*)|*.*||"
+    APP_INF_TABNAME_01      "一般"
+    APP_INF_TABNAME_02      "ストックモード"
+    APP_INF_TABNAME_03      "ポップアップ"
+    APP_INF_TABNAME_04      "ビジュアル"
+    APP_INF_TABNAME_05      "キー設定"
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_KEY_COMBO01     "前方一致"
+    APP_INF_KEY_COMBO02     "後方一致"
+    APP_INF_KEY_COMBP03     "インクルード"
+    APP_INF_KEY_COMBO04     "フレーズ"
+    APP_INF_KEY_LIST_CAPTION01 "キャプション"
+    APP_INF_KEY_LIST_CAPTION02 "マッチ方法"
+    APP_INF_KEY_LIST_CAPTION03 "コピーキー"
+    APP_INF_KEY_LIST_CAPTION04 "ペーストキー"
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_IMPORT_FOLDERNAME "インポートデータ"
+    APP_INF_2BYTESPACE      "　"
+    APP_INF_TIP_DATA01      "タイトル: "
+    APP_INF_TIP_DATA02      "\n拡張マクロ\n  "
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_TIP_DATA03      "\n作成:"
+    APP_INF_TIP_DATA04      "\n変更:"
+    APP_INF_COPY_APPEND     "のコピー"
+    APP_INF_NEW_FOLDER      "新規フォルダ"
+    APP_INF_CLASS_HISTORY   "階層履歴"
+    APP_INF_DEF_FONT        "ＭＳ Ｐゴシック"
+    APP_INF_DEF_ICON        "標準リソース"
+    APP_INF_CHECKBOX_IMPORT "ルートにインポートする"
+    APP_INF_CHECKBOX_MACRO  "マクロプラグインを自動切換えする"
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_MACRO_TEMPLATE01 "西暦4桁@D@<charuMACRO>$Y/$M/$D</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE02 "和暦@D@<charuMACRO>平成$WH年$M月$D日</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE03 "曜日@D@<charuMACRO>$d曜日</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE04 "曜日(英語)@D@<charuMACRO>$ddd</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE05 
+                            "時間(23:59:59)@D@<charuMACRO>$H:$m:$s</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE06 
+                            "時間(PM 11:59:59)@D@<charuMACRO>$AMPM $h:$m:$s</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE07 
+                            "時間(午後 11時 59分)@D@<charuMACRO>$ampm $h時 $m分</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE08 
+                            "シェル実行@D@<charuMACRO>$SHELL<実行ファイル名>$SHELL</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE09 
+                            "関連付け実行@D@<charuMACRO>$RELATE<ファイル名>$RELATE</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE10 "選択文字列@D@<charuMACRO>$SEL</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE11 "クリップボード@D@<charuMACRO>$CLIP</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE12 
+                            "プラグイン@D@<charuMACRO>$PLUG-IN<DLL,文字列>$PLUG-IN</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE13 
+                            "キー入力@D@<charuMACRO_KEY>キー;回数;待ち</charuMACRO_KEY>"
+    APP_INF_MACRO_TEMPLATE14 
+                            "入力プラグイン@D@<charuMACRO>$PLUG-IN<.\\plugin\\input.dll,タイトル>$PLUG-IN</charuMACRO>"
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_MACRO_TEMPLATE15 "end"
+    APP_INF_EXMACRO_TEMPLATE01 "履歴数@R@Count="
+    APP_INF_EXMACRO_TEMPLATE02 "先頭に移動@F@Move=yes/no"
+    APP_INF_EXMACRO_TEMPLATE03 "履歴に付番する@R@Number=yes/no"
+    APP_INF_EXMACRO_TEMPLATE04 "履歴タイプ@R@Lock=yes/no"
+    APP_INF_EXMACRO_TEMPLATE05 "履歴を保存しない@R@ClearRec=yes/no"
+    APP_INF_EXMACRO_TEMPLATE06 "マクロ@A@Macro=マクロ名"
+    APP_INF_EXMACRO_TEMPLATE07 "貼り付け前キー@A@BeforKey=キー;回数;待ち"
+    APP_INF_EXMACRO_TEMPLATE08 "貼り付け後キー@A@AfterKey=キー;回数;待ち"
+    APP_INF_EXMACRO_TEMPLATE09 "ホットキー@A@HotKey="
+    APP_INF_EXMACRO_TEMPLATE10 "階層履歴@R@ClassHistory=個数"
+END
+
+STRINGTABLE
+BEGIN
+    APP_INF_EXMACRO_TEMPLATE11 "タイトルの長さ@F@TitleLen="
+    APP_INF_EXMACRO_TEMPLATE12 "ダイレクトコピー@A@DirectCopyKey="
+    APP_INF_EXMACRO_TEMPLATE13 "重複チェック@R@DuplicationCheck="
+    APP_INF_EXMACRO_TEMPLATE14 "end"
+END
+
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 (日本) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
@@ -113,7 +322,7 @@ BEGIN
     CTEXT           "Copyright (C) 2000-2004 C+ Factory",IDC_STATIC,12,33,108,8
     DEFPUSHBUTTON   "OK(&O)",IDOK,153,61,50,14,WS_GROUP
     DEFPUSHBUTTON   "リポジトリ",IDC_WEB,7,61,50,14,BS_CENTER
-    CTEXT           "Successor Edition: 2021-2022 Itagaki Fumihiko",IDC_STATIC,12,45,138,8
+    CTEXT           "Successor Edition: 2021-2023 Itagaki Fumihiko",IDC_STATIC,12,45,138,8
 END
 
 IDD_ADD_DATA DIALOG 0, 0, 331, 281
@@ -390,8 +599,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,7,5,1
- PRODUCTVERSION 3,7,5,1
+ FILEVERSION 3,8,0,0
+ PRODUCTVERSION 3,8,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -409,12 +618,12 @@ BEGIN
             VALUE "Comments", "クリップボード入力支援ツール"
             VALUE "CompanyName", "C+ Factory / Itagaki Fumihiko"
             VALUE "FileDescription", "Charu3(Clipbord and High Amenity Routine for Utility 3) Successor Edition"
-            VALUE "FileVersion", "3, 7, 5, 1"
+            VALUE "FileVersion", "3.8.0.0"
             VALUE "InternalName", "Charu3 SE"
-            VALUE "LegalCopyright", "Copyright (C) 1998-2003 matsumoto keizi, 2021-2022 Itagaki Fumihiko"
+            VALUE "LegalCopyright", "Copyright (C) 1998-2003 matsumoto keizi, 2021-2023 Itagaki Fumihiko"
             VALUE "OriginalFilename", "Charu3.EXE"
             VALUE "ProductName", "Charu3 SE"
-            VALUE "ProductVersion", "3, 7, 5, 1"
+            VALUE "ProductVersion", "3.8.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -676,12 +885,7 @@ IDR_MAINFRAME MENU
 BEGIN
     POPUP "dummy"
     BEGIN
-        MENUITEM "ヘルプ(&H)",                     IDM_HELP
-        MENUITEM SEPARATOR
-        MENUITEM "バージョン情報(&V)",                 IDM_ABOUT
-        MENUITEM "ビジュアル設定読み込み(&F)",             IDM_VISUAL_FILE
-        MENUITEM "設定(&O)",                      IDM_OPTION
-        MENUITEM SEPARATOR
+        MENUITEM "ストックモード切り替え（&R)",             IDM_STOCK_STOP
         POPUP "データ処理(&D)"
         BEGIN
             MENUITEM "データを追加(&A)",                  IDM_ADD_DATA
@@ -689,16 +893,20 @@ BEGIN
             MENUITEM "ワンタイム項目を全てロック(&K)",           IDM_ALL_LOCK
             MENUITEM "アイコンを自動識別(&D)",               IDM_ICON_DECIDE
         END
-        MENUITEM "ストックモード切り替え（&R)",             IDM_STOCK_STOP
         MENUITEM "ツリーを再構築(&T)",                 IDM_RESET_TREE
         MENUITEM SEPARATOR
-        MENUITEM "データを別名で保存する(&S)",             IDM_DATA_SAVE
         MENUITEM "データファイル切り替え(&D)",             IDM_CHANG_DATA
+        MENUITEM "データを別名で保存する(&S)",             IDM_DATA_SAVE
         POPUP "マクロプラグインを選択(&M)"
         BEGIN
             MENUITEM "Charuシリーズ",                   IDM_MACRO_CHARU
         END
         MENUITEM SEPARATOR
+        MENUITEM "ビジュアル設定読み込み(&F)",             IDM_VISUAL_FILE
+        MENUITEM "設定(&O)",                      IDM_OPTION
+        MENUITEM SEPARATOR
+        MENUITEM "ヘルプ(&H)",                     IDM_HELP
+        MENUITEM "バージョン情報(&V)",                 IDM_ABOUT
         MENUITEM "終了(&X)",                      IDM_EXIT
     END
 END
@@ -710,8 +918,6 @@ END
 //
 
 IDB_ICON_BITMAP         BITMAP                  "res\\itemIcon.bmp"
-
-IDB_ICON_BITMAP_PINK    BITMAP                  "res\\itemIconPink.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -729,6 +935,16 @@ BEGIN
     0
 END
 
+#endif    // 日本語 (日本) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 英語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
+#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -743,7 +959,7 @@ END
 STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "Charu3 SE"
-    AFX_IDS_IDLEMESSAGE     "ﾚﾃﾞｨ"
+    AFX_IDS_IDLEMESSAGE     "????"
 END
 
 STRINGTABLE
@@ -752,183 +968,183 @@ BEGIN
     ID_INDICATOR_CAPS       "CAP"
     ID_INDICATOR_NUM        "NUM"
     ID_INDICATOR_SCRL       "SCRL"
-    ID_INDICATOR_OVR        "上書"
-    ID_INDICATOR_REC        "記録"
-    ID_INDICATOR_KANA       "ｶﾅ"
+    ID_INDICATOR_OVR        "??"
+    ID_INDICATOR_REC        "??"
+    ID_INDICATOR_KANA       "??"
 END
 
 STRINGTABLE
 BEGIN
-    ID_APP_ABOUT            "ﾌﾟﾛｸﾞﾗﾑの情報、ﾊﾞｰｼﾞｮﾝそして著作権を表示\nﾊﾞｰｼﾞｮﾝ情報"
-    ID_APP_EXIT             "ｱﾌﾟﾘｹｰｼｮﾝを終了し、ﾌｧｲﾙの保存を指示\n終了"
+    ID_APP_ABOUT            "???????????????????????????\n?????????"
+    ID_APP_EXIT             "????????????????????????\n??"
 END
 
 STRINGTABLE
 BEGIN
-    ID_NEXT_PANE            "次のｳｨﾝﾄﾞｳに切り替える\n次のﾍﾟｲﾝ"
-    ID_PREV_PANE            "前のｳｨﾝﾄﾞｳに切り替える\n前のﾍﾟｲﾝ"
+    ID_NEXT_PANE            "??????????????\n??????"
+    ID_PREV_PANE            "??????????????\n??????"
 END
 
 STRINGTABLE
 BEGIN
-    ID_WINDOW_SPLIT         "作業中のｳｨﾝﾄﾞｳを分割\n分割"
+    ID_WINDOW_SPLIT         "?????????????\n??"
 END
 
 STRINGTABLE
 BEGIN
-    ID_EDIT_CLEAR           "選択範囲を消去\n消去"
-    ID_EDIT_CLEAR_ALL       "すべて消去\nすべて消去"
-    ID_EDIT_COPY            "選択範囲をｺﾋﾟｰしてｸﾘｯﾌﾟﾎﾞｰﾄﾞに保存\nｺﾋﾟｰ"
-    ID_EDIT_CUT             "選択範囲を切り取ってｸﾘｯﾌﾟﾎﾞｰﾄﾞに保存\n切り取り"
-    ID_EDIT_FIND            "指定した文字列の検索\n検索"
-    ID_EDIT_PASTE           "ｸﾘｯﾌﾟﾎﾞｰﾄﾞの内容を貼り付け\n貼り付け"
-    ID_EDIT_REPEAT          "直前に行った動作を繰り返す\n繰り返し"
-    ID_EDIT_REPLACE         "指定した文字列を他の文字列で置換\n置換"
-    ID_EDIT_SELECT_ALL      "ﾌｧｲﾙ内のすべてを選択\nすべて選択"
-    ID_EDIT_UNDO            "直前に行った動作を元に戻す\n元に戻す"
-    ID_EDIT_REDO            "直前に行った動作を繰り返す\n繰り返す"
+    ID_EDIT_CLEAR           "???????\n??"
+    ID_EDIT_CLEAR_ALL       "?????\n?????"
+    ID_EDIT_COPY            "????????????????????????\n????"
+    ID_EDIT_CUT             "???????????????????????\n????"
+    ID_EDIT_FIND            "??????????\n??"
+    ID_EDIT_PASTE           "??????????????????\n????"
+    ID_EDIT_REPEAT          "?????????????\n????"
+    ID_EDIT_REPLACE         "????????????????\n??"
+    ID_EDIT_SELECT_ALL      "????????????\n?????"
+    ID_EDIT_UNDO            "?????????????\n????"
+    ID_EDIT_REDO            "?????????????\n????"
 END
 
 STRINGTABLE
 BEGIN
-    AFX_IDS_SCSIZE          "ｳｨﾝﾄﾞｳのｻｲｽﾞを変更"
-    AFX_IDS_SCMOVE          "ｳｨﾝﾄﾞｳの位置を変更"
-    AFX_IDS_SCMINIMIZE      "ｳｨﾝﾄﾞｳを最小化する"
-    AFX_IDS_SCMAXIMIZE      "ｳｨﾝﾄﾞｳを最大化する"
-    AFX_IDS_SCNEXTWINDOW    "次のｳｨﾝﾄﾞｳに切り替える"
-    AFX_IDS_SCPREVWINDOW    "前のｳｨﾝﾄﾞｳに切り替える"
-    AFX_IDS_SCCLOSE         "作業中のｳｨﾝﾄﾞｳを閉じ、変更したﾌｧｲﾙの保存を指示"
+    AFX_IDS_SCSIZE          "??????????????"
+    AFX_IDS_SCMOVE          "????????????"
+    AFX_IDS_SCMINIMIZE      "????????????"
+    AFX_IDS_SCMAXIMIZE      "????????????"
+    AFX_IDS_SCNEXTWINDOW    "??????????????"
+    AFX_IDS_SCPREVWINDOW    "??????????????"
+    AFX_IDS_SCCLOSE         "????????????????????????????"
 END
 
 STRINGTABLE
 BEGIN
-    AFX_IDS_SCRESTORE       "ｳｨﾝﾄﾞｳを通常のｻｲｽﾞに戻す"
-    AFX_IDS_SCTASKLIST      "ｱﾌﾟﾘｹｰｼｮﾝの切り替え"
+    AFX_IDS_SCRESTORE       "?????????????????"
+    AFX_IDS_SCTASKLIST      "??????????????"
 END
 
 STRINGTABLE
 BEGIN
-    APP_MES_FAILURE_HOTKEY  "ホットキーの設定に失敗"
-    APP_MES_DELETE_OK       "%sを削除しますか？"
-    APP_MES_NO_ENTRY_FUNC   "関数のエントリがありません。"
-    APP_MES_NOT_FOUND       "%sが見つかりません。"
-    APP_MES_FAILURE_DATA_SAVE "データの保存に失敗しました。ファイルがリードオンリーか確認してください。"
-    APP_MES_DECIDE_ICONS    "アイコンの自動識別をしますか？"
-    APP_MES_UNKNOWN_FORMAT  "未知のデータ形式です。"
-    APP_MES_ADD_OK          "%sを追加しますか？"
+    APP_MES_FAILURE_HOTKEY  "???????????"
+    APP_MES_DELETE_OK       "%s????????"
+    APP_MES_NO_ENTRY_FUNC   "??????????????"
+    APP_MES_NOT_FOUND       "%s?????????"
+    APP_MES_FAILURE_DATA_SAVE "????????????????????????????????????"
+    APP_MES_DECIDE_ICONS    "???????????????"
+    APP_MES_UNKNOWN_FORMAT  "???????????"
+    APP_MES_ADD_OK          "%s????????"
 END
 
 STRINGTABLE
 BEGIN
-    APP_MES_ADD_OK2         "%sを追加しました。"
-    APP_MES_ALL_EMPTY       "タイトルも登録文も空白です。何か入れてください。"
-    APP_MES_NOT_FOUND_WRITEPLUGIN "書き込みに適切なプラグインがありません。"
-    APP_MES_NOT_FOUND_READPLUGIN "読み込みに適切なプラグインがありません。"
-    APP_MES_NOT_FOUND_MACROPLUGIN "マクロ処理に適切なプラグインがありません。"
-    APP_MES_CANT_COPY       "自分の子孫にはコピーできません。"
-    APP_MES_DELETE_FOLDER   "フォルダですが、本当に削除しますか？\n削除するとフォルダの内容すべてが失われます。"
-    APP_MES_IMPORT_OK       "%d件をインポートしました。"
-    APP_MES_FOLDER_CLEAR    "フォルダ内のデータは全て失われます。\nよろしいですか？"
-    APP_INF_FILE_FILTER     "Charu3データファイル(*.c3d)|*.c3d"
-    APP_INF_FILE_FILTER2    "%sデータファイル(*.%s)|*.%s|"
-    APP_INF_FILE_FILTER3    "ビジュアルini(*.ini)|*.ini|"
-    APP_INF_FILE_FILTER4    "WAVEファイル(*.wav)|*.wav||"
+    APP_MES_ADD_OK2         "%s????????"
+    APP_MES_ALL_EMPTY       "????????????????????????"
+    APP_MES_NOT_FOUND_WRITEPLUGIN "????????????????????"
+    APP_MES_NOT_FOUND_READPLUGIN "????????????????????"
+    APP_MES_NOT_FOUND_MACROPLUGIN "?????????????????????"
+    APP_MES_CANT_COPY       "????????????????"
+    APP_MES_DELETE_FOLDER   "??????????????????\n??????????????????????"
+    APP_MES_IMPORT_OK       "%d????????????"
+    APP_MES_FOLDER_CLEAR    "??????????????????\n????????"
+    APP_INF_FILE_FILTER     "Charu3???????(*.c3d)|*.c3d"
+    APP_INF_FILE_FILTER2    "%s???????(*.%s)|*.%s|"
+    APP_INF_FILE_FILTER3    "?????ini(*.ini)|*.ini|"
+    APP_INF_FILE_FILTER4    "WAVE????(*.wav)|*.wav||"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_FILE_FILTER5    "ビットマップ(*.bmp)|*.bmp||"
-    APP_INF_FILE_FILTER6    "全てのファイル(*.*)|*.*||"
-    APP_INF_TABNAME_01      "一般"
-    APP_INF_TABNAME_02      "ストックモード"
-    APP_INF_TABNAME_03      "ポップアップ"
-    APP_INF_TABNAME_04      "ビジュアル"
-    APP_INF_TABNAME_05      "キー設定"
+    APP_INF_FILE_FILTER5    "??????(*.bmp)|*.bmp||"
+    APP_INF_FILE_FILTER6    "???????(*.*)|*.*||"
+    APP_INF_TABNAME_01      "??"
+    APP_INF_TABNAME_02      "???????"
+    APP_INF_TABNAME_03      "??????"
+    APP_INF_TABNAME_04      "?????"
+    APP_INF_TABNAME_05      "????"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_KEY_COMBO01     "前方一致"
-    APP_INF_KEY_COMBO02     "後方一致"
-    APP_INF_KEY_COMBP03     "インクルード"
-    APP_INF_KEY_COMBO04     "フレーズ"
-    APP_INF_KEY_LIST_CAPTION01 "キャプション"
-    APP_INF_KEY_LIST_CAPTION02 "マッチ方法"
-    APP_INF_KEY_LIST_CAPTION03 "コピーキー"
-    APP_INF_KEY_LIST_CAPTION04 "ペーストキー"
+    APP_INF_KEY_COMBO01     "????"
+    APP_INF_KEY_COMBO02     "????"
+    APP_INF_KEY_COMBP03     "??????"
+    APP_INF_KEY_COMBO04     "????"
+    APP_INF_KEY_LIST_CAPTION01 "??????"
+    APP_INF_KEY_LIST_CAPTION02 "?????"
+    APP_INF_KEY_LIST_CAPTION03 "?????"
+    APP_INF_KEY_LIST_CAPTION04 "??????"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_IMPORT_FOLDERNAME "インポートデータ"
-    APP_INF_2BYTESPACE      "　"
-    APP_INF_TIP_DATA01      "タイトル: "
-    APP_INF_TIP_DATA02      "\n拡張マクロ\n  "
+    APP_INF_IMPORT_FOLDERNAME "????????"
+    APP_INF_2BYTESPACE      " "
+    APP_INF_TIP_DATA01      "????: "
+    APP_INF_TIP_DATA02      "\n?????\n  "
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_TIP_DATA03      "\n作成:"
-    APP_INF_TIP_DATA04      "\n変更:"
-    APP_INF_COPY_APPEND     "のコピー"
-    APP_INF_NEW_FOLDER      "新規フォルダ"
-    APP_INF_CLASS_HISTORY   "階層履歴"
-    APP_INF_DEF_FONT        "ＭＳ Ｐゴシック"
-    APP_INF_DEF_ICON        "標準リソース"
-    APP_INF_CHECKBOX_IMPORT "ルートにインポートする"
-    APP_INF_CHECKBOX_MACRO  "マクロプラグインを自動切換えする"
+    APP_INF_TIP_DATA03      "\n??:"
+    APP_INF_TIP_DATA04      "\n??:"
+    APP_INF_COPY_APPEND     "????"
+    APP_INF_NEW_FOLDER      "??????"
+    APP_INF_CLASS_HISTORY   "????"
+    APP_INF_DEF_FONT        "MS P????"
+    APP_INF_DEF_ICON        "??????"
+    APP_INF_CHECKBOX_IMPORT "???????????"
+    APP_INF_CHECKBOX_MACRO  "????????????????"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_MACRO_TEMPLATE01 "西暦4桁@D@<charuMACRO>$Y/$M/$D</charuMACRO>"
-    APP_INF_MACRO_TEMPLATE02 "和暦@D@<charuMACRO>平成$WH年$M月$D日</charuMACRO>"
-    APP_INF_MACRO_TEMPLATE03 "曜日@D@<charuMACRO>$d曜日</charuMACRO>"
-    APP_INF_MACRO_TEMPLATE04 "曜日(英語)@D@<charuMACRO>$ddd</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE01 "??4?@D@<charuMACRO>$Y/$M/$D</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE02 "??@D@<charuMACRO>??$WH?$M?$D?</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE03 "??@D@<charuMACRO>$d??</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE04 "??(??)@D@<charuMACRO>$ddd</charuMACRO>"
     APP_INF_MACRO_TEMPLATE05 
-                            "時間(23:59:59)@D@<charuMACRO>$H:$m:$s</charuMACRO>"
+                            "??(23:59:59)@D@<charuMACRO>$H:$m:$s</charuMACRO>"
     APP_INF_MACRO_TEMPLATE06 
-                            "時間(PM 11:59:59)@D@<charuMACRO>$AMPM $h:$m:$s</charuMACRO>"
+                            "??(PM 11:59:59)@D@<charuMACRO>$AMPM $h:$m:$s</charuMACRO>"
     APP_INF_MACRO_TEMPLATE07 
-                            "時間(午後 11時 59分)@D@<charuMACRO>$ampm $h時 $m分</charuMACRO>"
+                            "??(?? 11? 59?)@D@<charuMACRO>$ampm $h? $m?</charuMACRO>"
     APP_INF_MACRO_TEMPLATE08 
-                            "シェル実行@D@<charuMACRO>$SHELL<実行ファイル名>$SHELL</charuMACRO>"
+                            "?????@D@<charuMACRO>$SHELL<???????>$SHELL</charuMACRO>"
     APP_INF_MACRO_TEMPLATE09 
-                            "関連付け実行@D@<charuMACRO>$RELATE<ファイル名>$RELATE</charuMACRO>"
-    APP_INF_MACRO_TEMPLATE10 "選択文字列@D@<charuMACRO>$SEL</charuMACRO>"
-    APP_INF_MACRO_TEMPLATE11 "クリップボード@D@<charuMACRO>$CLIP</charuMACRO>"
+                            "??????@D@<charuMACRO>$RELATE<?????>$RELATE</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE10 "?????@D@<charuMACRO>$SEL</charuMACRO>"
+    APP_INF_MACRO_TEMPLATE11 "???????@D@<charuMACRO>$CLIP</charuMACRO>"
     APP_INF_MACRO_TEMPLATE12 
-                            "プラグイン@D@<charuMACRO>$PLUG-IN<DLL,文字列>$PLUG-IN</charuMACRO>"
+                            "?????@D@<charuMACRO>$PLUG-IN<DLL,???>$PLUG-IN</charuMACRO>"
     APP_INF_MACRO_TEMPLATE13 
-                            "キー入力@D@<charuMACRO_KEY>キー;回数;待ち</charuMACRO_KEY>"
+                            "????@D@<charuMACRO_KEY>??;??;??</charuMACRO_KEY>"
     APP_INF_MACRO_TEMPLATE14 
-                            "入力プラグイン@D@<charuMACRO>$PLUG-IN<.\\plugin\\input.dll,タイトル>$PLUG-IN</charuMACRO>"
+                            "???????@D@<charuMACRO>$PLUG-IN<.\\plugin\\input.dll,????>$PLUG-IN</charuMACRO>"
 END
 
 STRINGTABLE
 BEGIN
     APP_INF_MACRO_TEMPLATE15 "end"
-    APP_INF_EXMACRO_TEMPLATE01 "履歴数@R@Count="
-    APP_INF_EXMACRO_TEMPLATE02 "先頭に移動@F@Move=yes/no"
-    APP_INF_EXMACRO_TEMPLATE03 "履歴に付番する@R@Number=yes/no"
-    APP_INF_EXMACRO_TEMPLATE04 "履歴タイプ@R@Lock=yes/no"
-    APP_INF_EXMACRO_TEMPLATE05 "履歴を保存しない@R@ClearRec=yes/no"
-    APP_INF_EXMACRO_TEMPLATE06 "マクロ@A@Macro=マクロ名"
-    APP_INF_EXMACRO_TEMPLATE07 "貼り付け前キー@A@BeforKey=キー;回数;待ち"
-    APP_INF_EXMACRO_TEMPLATE08 "貼り付け後キー@A@AfterKey=キー;回数;待ち"
-    APP_INF_EXMACRO_TEMPLATE09 "ホットキー@A@HotKey="
-    APP_INF_EXMACRO_TEMPLATE10 "階層履歴@R@ClassHistory=個数"
+    APP_INF_EXMACRO_TEMPLATE01 "???@R@Count="
+    APP_INF_EXMACRO_TEMPLATE02 "?????@F@Move=yes/no"
+    APP_INF_EXMACRO_TEMPLATE03 "???????@R@Number=yes/no"
+    APP_INF_EXMACRO_TEMPLATE04 "?????@R@Lock=yes/no"
+    APP_INF_EXMACRO_TEMPLATE05 "????????@R@ClearRec=yes/no"
+    APP_INF_EXMACRO_TEMPLATE06 "???@A@Macro=????"
+    APP_INF_EXMACRO_TEMPLATE07 "???????@A@BeforKey=??;??;??"
+    APP_INF_EXMACRO_TEMPLATE08 "???????@A@AfterKey=??;??;??"
+    APP_INF_EXMACRO_TEMPLATE09 "?????@A@HotKey="
+    APP_INF_EXMACRO_TEMPLATE10 "????@R@ClassHistory=??"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_EXMACRO_TEMPLATE11 "タイトルの長さ@F@TitleLen="
-    APP_INF_EXMACRO_TEMPLATE12 "ダイレクトコピー@A@DirectCopyKey="
-    APP_INF_EXMACRO_TEMPLATE13 "重複チェック@R@DuplicationCheck="
+    APP_INF_EXMACRO_TEMPLATE11 "???????@F@TitleLen="
+    APP_INF_EXMACRO_TEMPLATE12 "????????@A@DirectCopyKey="
+    APP_INF_EXMACRO_TEMPLATE13 "??????@R@DuplicationCheck="
     APP_INF_EXMACRO_TEMPLATE14 "end"
 END
 
-#endif    // Japanese (Japan) resources
+#endif    // 英語 resources
 /////////////////////////////////////////////////////////////////////////////
 
 
