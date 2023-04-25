@@ -105,6 +105,7 @@
     <ClCompile Include="SerchDialog.cpp" />
     <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="StringWork.cpp" />
+    <ClCompile Include="Color.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AddDialog.h" />
@@ -112,6 +113,7 @@
     <ClInclude Include="Charu3Tree.h" />
     <ClInclude Include="ChildView.h" />
     <ClInclude Include="ClipBord.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="EditDialog.h" />
     <ClInclude Include="General.h" />
     <ClInclude Include="Init.h" />
@@ -120,6 +122,7 @@
     <ClInclude Include="MyFileDialog.h" />
     <ClInclude Include="MyHotkeyCtrl.h" />
     <ClInclude Include="MyTreeDialog.h" />
+    <ClInclude Include="nlomann\json.hpp" />
     <ClInclude Include="OptEtc.h" />
     <ClInclude Include="OptFifo.h" />
     <ClInclude Include="OptKeySet.h" />

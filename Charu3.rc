@@ -120,7 +120,7 @@ BEGIN
     APP_MES_FOLDER_CLEAR    "フォルダ内のデータは全て失われます。\nよろしいですか？"
     APP_INF_FILE_FILTER     "Charu3データファイル(*.c3d)|*.c3d"
     APP_INF_FILE_FILTER2    "%sデータファイル(*.%s)|*.%s|"
-    APP_INF_FILE_FILTER3    "ビジュアルini(*.ini)|*.ini|"
+    APP_INF_FILE_FILTER_VISUAL_PREF "ビジュアル設定ファイル(*.json)|*.json|"
     APP_INF_FILE_FILTER4    "WAVEファイル(*.wav)|*.wav||"
 END
 

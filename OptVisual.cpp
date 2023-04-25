@@ -29,7 +29,6 @@ COptVisual::COptVisual(CWnd* pParent /*=NULL*/)
 	m_strBorderColor = _T("");
 	m_n = 0;
 	//}}AFX_DATA_INIT
-	m_nMaxFont = 0;
 	m_nScrollH = 0;
 	m_nScrollV = 0;
 
@@ -107,9 +106,7 @@ int CALLBACK EnumFontProc(ENUMLOGFONT *lpelf,NEWTEXTMETRIC *lpntm,int FontType,L
 
 	ThisClass->m_ctrlFontCombo.AddString(lpelf->elfLogFont.lfFaceName);
 	if(_tcscmp(lpelf->elfLogFont.lfFaceName,LPCTSTR(theApp.m_ini.m_visual.m_strFontName)) == 0)
-		ThisClass->m_ctrlFontCombo.SetCurSel(ThisClass->m_nMaxFont);
-	ThisClass->m_nMaxFont++;
-	if(ThisClass->m_nMaxFont >= MAX_FONT) 	return FALSE; // —ñ‹“’†Ž~
+		ThisClass->m_ctrlFontCombo.SetCurSel(ThisClass->m_ctrlFontCombo.GetCount()-1);
 
 	return TRUE; // —ñ‹“Œp‘±
 }
@@ -134,6 +131,7 @@ BOOL COptVisual::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	//ƒtƒHƒ“ƒg–¼‚ð—ñ‹“
+	m_ctrlFontCombo.ResetContent();
 	HDC hDC;
 	hDC = ::GetDC(NULL);
 	EnumFontFamilies(hDC,NULL,(FONTENUMPROC)EnumFontProc,(LPARAM)this);

@@ -264,6 +264,7 @@
 #define APP_INF_FILE_FILTER             62220
 #define APP_INF_FILE_FILTER2            62221
 #define APP_INF_FILE_FILTER3            62222
+#define APP_INF_FILE_FILTER_VISUAL_PREF 62222
 #define APP_INF_FILE_FILTER4            62223
 #define APP_INF_FILE_FILTER5            62224
 #define APP_INF_FILE_FILTER6            62225

@@ -60,10 +60,53 @@ CString CGeneral::wideCharToCString(wchar_t *szUnicodeBuff)
 	if(szMbcsBuff) {
 		::WideCharToMultiByte(CP_ACP,0,szUnicodeBuff,-1,szMbcsBuff,nDataSize,"",NULL);
 		strRet = szMbcsBuff;
-		delete szMbcsBuff;
+		delete[] szMbcsBuff;
 	}
 
 	return strRet;
+}
+
+bool CGeneral::getPrefNumber(nlohmann::json& j, const char* key, double& result)
+{
+	if (j[key].is_number()) {
+		nlohmann::json::iterator it = j.find(key);
+		if (it != j.end() && it.value().is_number()) {
+			result = it.value().get<double>();
+			return true;
+		}
+	}
+	return false;
+}
+
+std::string CGeneral::getPrefString( nlohmann::json& j, const char* key)
+{
+	if (j[key].is_string()) {
+		nlohmann::json::iterator it = j.find(key);
+		if (it != j.end() && it.value().is_string()) {
+			return it.value().get<std::string>();
+		}
+	}
+	return std::string();
+}
+
+CString CGeneral::getPrefCString(nlohmann::json& j, const char* key)
+{
+	if (j[key].is_string()) {
+		nlohmann::json::iterator it = j.find(key);
+		if (it != j.end() && it.value().is_string()) {
+			auto s = it.value().get<std::string>();
+			const char* cptr = s.c_str();
+			int size = MultiByteToWideChar(CP_UTF8, 0, cptr, -1, nullptr, 0);
+			wchar_t* wbuf = new wchar_t[size];
+			if (wbuf) {
+				MultiByteToWideChar(CP_UTF8, 0, cptr, -1, wbuf, size);
+				CString cs = CString(wbuf);
+				delete[] wbuf;
+				return cs;
+			}
+		}
+	}
+	return CString();
 }
 
 void CGeneral::flatSB_UpdateMetrics(HWND hWnd)

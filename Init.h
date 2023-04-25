@@ -115,9 +115,9 @@ struct OPTION_VISUAL
 	int m_nFontSize;		//フォントサイズ
 
 	CString m_strResourceName;//リソース名
-	int m_nBorderColor;		//枠色
-	int m_nBackColor;		//背景色
-	int m_nTextColor;		//テキスト色
+	uint32_t m_nBorderColor;		//枠色
+	uint32_t m_nBackColor;		//背景色
+	uint32_t m_nTextColor;		//テキスト色
 	int m_nResetTree;
 
 	int m_nToolTip;			//ツールチップの表示項目

@@ -11,6 +11,7 @@
 #endif // _MSC_VER > 1000
 
 #include "stdafx.h"
+#include "nlomann/json.hpp"
 
 #if !defined(SPI_GETFOREGROUNDLOCKTIMEOUT) 
    #define SPI_GETFOREGROUNDLOCKTIMEOUT          0x2000 
@@ -48,6 +49,9 @@ public:
 	static bool loadBitmapFile(CString strFileName,CBitmap *BitMap);
 	static CString getLastErrorMessage();
 	static CString wideCharToCString(wchar_t *szUnicodeBuff);
+	static bool getPrefNumber(nlohmann::json& j, const char* key, double& result);
+	static std::string getPrefString(nlohmann::json& j, const char* key);
+	static CString getPrefCString(nlohmann::json& j,  const char* key);
 	static CString getWindowTitle(HWND hWnd);
 
 	static void writeLog(CString strFileName,CString strLogText,CString strSourceFile,int nLine);

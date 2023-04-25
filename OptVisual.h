@@ -54,7 +54,6 @@ public:
 protected:
 	void setPalet(CEdit *edit,CPaletStatic *stPal);
 	void setTextToPalet(CEdit *edit,CPaletStatic *stPal);
-	int m_nMaxFont; 
 
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(COptVisual)

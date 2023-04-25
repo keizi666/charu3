@@ -9,6 +9,10 @@
 #include "OptMainDialog.h"
 #include "MyFileDialog.h"
 #include "StringWork.h"
+#include "General.h"
+#include "Color.h"
+#include "nlomann/json.hpp"
+#include <fstream>
 #if false
 // TODO: Did not handle this well with Visual Studio 2019.
 #include <MULTIMON.H>
@@ -2407,12 +2411,11 @@ void CCharu3App::OnStockStop()
 //---------------------------------------------------
 void CCharu3App::OnVisualFile() 
 {
-	CString strFileName,strIniData;
-
+	CString strFileName;
 	CFileDialog *pFileDialog;
 	CString strRes;
-	strRes.LoadString(APP_INF_FILE_FILTER3);
-	pFileDialog = new CFileDialog(TRUE,_T("ini"),NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,strRes,NULL);
+	strRes.LoadString(APP_INF_FILE_FILTER_VISUAL_PREF);
+	pFileDialog = new CFileDialog(TRUE,_T("json"),NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,strRes,NULL);
 
 	CInit iniBkup;
 	iniBkup = m_ini;
@@ -2420,48 +2423,32 @@ void CCharu3App::OnVisualFile()
 	if(pFileDialog) {
 		pFileDialog->m_ofn.lpstrInitialDir = m_ini.m_strAppPath;
 		if(IDOK == pFileDialog->DoModal()) {
-			//デバッグログ処理
 			if(m_ini.m_nDebug) {
 				CString strText;
 				strText.Format(_T("OnVisualFile \"%s\"\n"),pFileDialog->GetPathName().GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 			strFileName = pFileDialog->GetPathName();
-
-			TCHAR strBuff[256];
-			FILE *inPut;
-
-			if((_tfopen_s(&inPut, strFileName, _T("r"))) == 0) {
-				strIniData = _T("");
-				while(!feof(inPut)) {
-					_fgetts(strBuff,sizeof(strBuff),inPut);
-					strIniData = strIniData + strBuff;
-				}
-				fclose(inPut);
-
-				CString strTmp;
-				int nValue;
-				strTmp = m_pTree->getDataOptionStr(strIniData,_T("iconfile"));//アイコンファイル名
-				if(strTmp != "") m_ini.m_visual.m_strResourceName = strTmp;
-
-				strTmp = m_pTree->getDataOptionStr(strIniData,_T("fontname"));//フォント名
-				if(strTmp != "") m_ini.m_visual.m_strFontName = strTmp;
-				nValue = m_pTree->getDataOption(strIniData,_T("fontsize"));//フォントサイズ
-				if(nValue > -1) m_ini.m_visual.m_nFontSize = nValue;
-
-				nValue = m_pTree->getDataOptionHex(strIniData,_T("backcolor"));
-				if(nValue > -1) m_ini.m_visual.m_nBackColor = nValue;
-				nValue = m_pTree->getDataOptionHex(strIniData,_T("bordercolor"));
-				if(nValue > -1) m_ini.m_visual.m_nBorderColor = nValue;
-				nValue = m_pTree->getDataOptionHex(strIniData,_T("textcolor"));
-				if(nValue > -1) m_ini.m_visual.m_nTextColor = nValue;
-				m_ini.writeAllInitData();
-			}
+			nlohmann::json j = nlohmann::json::parse(std::ifstream(strFileName));
+			double n;
+			std::string s;
+			CString cs;
+			cs = CGeneral::getPrefCString(j, "IconFile");
+			if (!cs.IsEmpty()) m_ini.m_visual.m_strResourceName = cs;
+			cs = CGeneral::getPrefCString(j, "FontName");
+			if (!cs.IsEmpty()) m_ini.m_visual.m_strFontName = cs;
+			if (CGeneral::getPrefNumber(j, "FontSize", n) && n >= 0) m_ini.m_visual.m_nFontSize = static_cast<int>(n);
+			s = CGeneral::getPrefString(j, "BackColor");
+			if (!s.empty()) m_ini.m_visual.m_nBackColor = Color::parse(s);
+			s = CGeneral::getPrefString(j, "BorderColor");
+			if (!s.empty()) m_ini.m_visual.m_nBorderColor = Color::parse(s);
+			s = CGeneral::getPrefString(j, "TextColor");
+			if (!s.empty()) m_ini.m_visual.m_nTextColor = Color::parse(s);
 		}
 		delete pFileDialog;
 
 		if(m_ini.m_visual.m_nResetTree && iniBkup.m_visual.m_strResourceName != m_ini.m_visual.m_strResourceName)
-			resetTreeDialog();//ツリー再構築
+			resetTreeDialog();
 	}
 }
 

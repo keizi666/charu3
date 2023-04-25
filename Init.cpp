@@ -244,7 +244,7 @@ void CInit::readAllInitData()
 	m_strSerchKey  = setIniFileString(REGKEY_SERCH,_T("SerchKey"),_T(""));	//検索キー
 
 	//マクロテンプレート
-	for(i = 0; i <= 99; i++) {
+	for(i = 0; i <= 99; i++) { // TODO: magic number
 		strRes.LoadString(APP_INF_MACRO_TEMPLATE01+i);
 		if(strRes == _T("end")) break;
 	}
@@ -252,8 +252,8 @@ void CInit::readAllInitData()
 	MACRO_STRUCT macroData;
 	CString strMacro;
 	m_vctMacro.clear();
-	m_vctMacro.reserve(99);
-	for(i = 1; i <= 99; i++) {
+	m_vctMacro.reserve(99); // TODO: magic number
+	for(i = 1; i <= 99; i++) { // TODO: magic number
 		StringBuff.Format(_T("Macro_%02d"),i);
 		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
 		if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
@@ -274,14 +274,14 @@ void CInit::readAllInitData()
 	}
 	
 	//拡張マクロテンプレート R履歴フォルダ Fフォルダ A全て Dデータ
-	for(i = 0; i <= 99; i++) {
+	for(i = 0; i <= 99; i++) { // TODO: magic number
 		strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01+i);
 		if(strRes == "end") break;
 	}
 	nStringCnt = i;
 	m_vctDataMacro.clear();
-	m_vctDataMacro.reserve(99);
-	for(i = 1; i <= 99; i++) {
+	m_vctDataMacro.reserve(99); // TODO: magic number
+	for(i = 1; i <= 99; i++) { // TODO: magic number
 		StringBuff.Format(_T("DataMacro_%02d"),i);
 		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
 		if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
