@@ -243,7 +243,6 @@ public:
 
 public:
 	//{{AFX_MSG(CCharu3App)
-	afx_msg void OnAppAbout();
 	afx_msg void OnAbout();
 	afx_msg void OnHelp();
 	afx_msg void OnExit();

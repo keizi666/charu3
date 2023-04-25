@@ -92,7 +92,9 @@ BEGIN_MESSAGE_MAP(COptVisual, CDialog)
 	ON_EN_CHANGE(IDC_OPT__BACK_COLOR, OnChangeOptBackColor)
 	ON_WM_SHOWWINDOW()
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_OPT_LOAD_VISUAL, &COptVisual::OnBnClickedOptLoadVisual)
 END_MESSAGE_MAP()
+
 
 //---------------------------------------------------
 // フォント列挙コールバック関数
@@ -300,4 +302,12 @@ void COptVisual::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
 	if(bShow)	GetDlgItem(IDC_OPT_TOUMEI_CHECK)->SetFocus();	
+}
+
+
+void COptVisual::OnBnClickedOptLoadVisual()
+{
+	theApp.OnVisualFile();
+	OnInitDialog();
+	InvalidateRect(NULL, false);
 }

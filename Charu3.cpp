@@ -50,7 +50,6 @@ BOOL CALLBACK MonitorEnumFunc(HMONITOR hMonitor,HDC hdc,LPRECT rect,LPARAM lPara
 //---------------------------------------------------
 BEGIN_MESSAGE_MAP(CCharu3App, CWinApp)
 	//{{AFX_MSG_MAP(CCharu3App)
-	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 	ON_COMMAND(IDM_ABOUT, OnAbout)
 	ON_COMMAND(IDM_HELP, OnHelp)
 	ON_COMMAND(IDM_EXIT, OnExit)
@@ -63,7 +62,6 @@ BEGIN_MESSAGE_MAP(CCharu3App, CWinApp)
 	ON_COMMAND(IDM_ICON_DECIDE, OnIconDecide)
 	ON_COMMAND(IDM_BBS_OPEN, OnBbsOpen)
 	ON_COMMAND(IDM_STOCK_STOP, OnStockStop)
-	ON_COMMAND(IDM_VISUAL_FILE, OnVisualFile)
 	ON_COMMAND(IDM_RESET_TREE, OnResetTree)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -242,24 +240,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CAboutDlg)
 	DDX_Text(pDX, IDC_VERSION_NAME, m_strVersion);
 	//}}AFX_DATA_MAP
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-	ON_BN_CLICKED(IDC_WEB, OnWeb)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-// ダイアログを実行するためのアプリケーション コマンド
-void CCharu3App::OnAppAbout()
-{
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
-}
-void CAboutDlg::OnWeb() 
-{
-	ShellExecute(NULL,NULL,_T("https://github.com/itagagaki/charu3-SE"),NULL,NULL,SW_SHOWNORMAL);
-	EndDialog(IDOK);
 }
 
 //---------------------------------------------------
@@ -2127,6 +2107,18 @@ void CCharu3App::OnAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+	//{{AFX_MSG_MAP(CAboutDlg)
+	ON_BN_CLICKED(IDC_WEB, OnWeb)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+void CAboutDlg::OnWeb()
+{
+	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE"), NULL, NULL, SW_SHOWNORMAL);
+	EndDialog(IDOK);
 }
 
 //---------------------------------------------------

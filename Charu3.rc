@@ -215,6 +215,7 @@ BEGIN
     APP_INF_EXMACRO_TEMPLATE12 "ダイレクトコピー@A@DirectCopyKey="
     APP_INF_EXMACRO_TEMPLATE13 "重複チェック@R@DuplicationCheck="
     APP_INF_EXMACRO_TEMPLATE14 "end"
+    IDS_PREFERENCE_LOAD_VISUAL "ビジュアル設定ファイルを読み込む"
 END
 
 #endif    // 日本語 resources
@@ -321,7 +322,7 @@ BEGIN
     CONTROL         "Charu3 SE",IDC_VERSION_NAME,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,29,15,167,8
     CTEXT           "Copyright (C) 2000-2004 C+ Factory",IDC_STATIC,12,33,108,8
     DEFPUSHBUTTON   "OK(&O)",IDOK,153,61,50,14,WS_GROUP
-    DEFPUSHBUTTON   "リポジトリ",IDC_WEB,7,61,50,14,BS_CENTER
+    DEFPUSHBUTTON   "リポジトリ(&R)",IDC_WEB,7,61,50,14,BS_CENTER
     CTEXT           "Successor Edition: 2021-2023 Itagaki Fumihiko",IDC_STATIC,12,45,138,8
 END
 
@@ -526,6 +527,7 @@ BEGIN
     CONTROL         "タイトル、内容、日付",IDC_OPT_TOOLTIP_01,"Button",BS_AUTORADIOBUTTON | WS_GROUP,13,205,75,10
     CONTROL         "内容のみ",IDC_OPT_TOOLTIP_02,"Button",BS_AUTORADIOBUTTON,99,205,43,10
     CONTROL         "使わない",IDC_OPT_TOOLTIP_03,"Button",BS_AUTORADIOBUTTON,161,205,42,10
+    DEFPUSHBUTTON   "ビジュアル設定ファイルを読み込む",IDC_OPT_LOAD_VISUAL,50,230,120,14,BS_CENTER
 END
 
 IDD_OPTION DIALOG 0, 0, 247, 303
@@ -902,11 +904,12 @@ BEGIN
             MENUITEM "Charuシリーズ",                   IDM_MACRO_CHARU
         END
         MENUITEM SEPARATOR
-        MENUITEM "ビジュアル設定読み込み(&F)",             IDM_VISUAL_FILE
         MENUITEM "設定(&O)",                      IDM_OPTION
-        MENUITEM SEPARATOR
-        MENUITEM "ヘルプ(&H)",                     IDM_HELP
-        MENUITEM "バージョン情報(&V)",                 IDM_ABOUT
+        POPUP "ヘルプ(&H)"
+        BEGIN
+            MENUITEM "ヘルプ(&H)",                     IDM_HELP
+            MENUITEM "バージョン情報(&V)",                 IDM_ABOUT
+        END
         MENUITEM "終了(&X)",                      IDM_EXIT
     END
 END
@@ -931,6 +934,11 @@ BEGIN
 END
 
 IDD_OPT_ETC AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPT_VISUAL AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

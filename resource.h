@@ -71,6 +71,7 @@
 #define IDC_OPT_SCROLBAR1               1014
 #define IDC_OPT_SCROLBAR2               1015
 #define IDC_OPT_HISTORY_SIZE_LIMIT      1016
+#define IDC_OPT_LOAD_VISUAL             1017
 #define IDC_KIND_COMBO                  1019
 #define IDC_ICON_COMBO                  1020
 #define IDC_RIREKIKEY                   1020
@@ -215,6 +216,10 @@
 #define IDML_CHECK_ITEM                 32780
 #define IDML_OPTION                     32781
 #define IDM_RESET_TREE                  32781
+#define ID_APP                          32782
+#define ID_32783                        32783
+#define ID_32784                        32784
+#define ID_                             32785
 #define IDML_ADD                        32795
 #define IDM_HELP                        32796
 #define IDM_ADD_DATA                    32797
@@ -317,15 +322,16 @@
 #define APP_INF_EXMACRO_TEMPLATE12      62321
 #define APP_INF_EXMACRO_TEMPLATE13      62322
 #define APP_INF_EXMACRO_TEMPLATE14      62323
+#define IDS_PREFERENCE_LOAD_VISUAL      62324
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        142
-#define _APS_NEXT_COMMAND_VALUE         32782
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_COMMAND_VALUE         32786
+#define _APS_NEXT_CONTROL_VALUE         1019
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -69,6 +69,8 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedOptLoadVisual();
 };
 
 //{{AFX_INSERT_LOCATION}}
