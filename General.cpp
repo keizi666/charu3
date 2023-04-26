@@ -78,7 +78,7 @@ bool CGeneral::getPrefNumber(nlohmann::json& j, const char* key, double& result)
 	return false;
 }
 
-std::string CGeneral::getPrefString( nlohmann::json& j, const char* key)
+std::string CGeneral::getPrefString(nlohmann::json& j, const char* key)
 {
 	if (j[key].is_string()) {
 		nlohmann::json::iterator it = j.find(key);
@@ -443,7 +443,7 @@ void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSource
 		::WideCharToMultiByte(CP_ACP,0,strFileName,-1,szMbcsBuff,nDataSize,"",NULL);
 		szMbcsBuff[nDataSize] = NULL;
 		err = fopen_s(&outPut, szMbcsBuff, "a");
-		delete szMbcsBuff;
+		delete[] szMbcsBuff;
 	}
 	if(0 == err) {
 		strWrite.Format(_T("%s %s:%d %s"),getDateTimeString().GetString(),strSourceFile.GetString(),nLine,strLogText.GetString());
@@ -453,7 +453,7 @@ void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSource
 			::WideCharToMultiByte(CP_ACP,0,strWrite,-1,szMbcsBuff,nDataSize,"",NULL);
 			szMbcsBuff[nDataSize] = NULL;
 			fputs(szMbcsBuff,outPut);
-			delete szMbcsBuff;
+			delete[] szMbcsBuff;
 		}
 		fflush(outPut);
 		OutputDebugString(strWrite);

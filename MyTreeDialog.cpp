@@ -858,7 +858,7 @@ void CMyTreeDialog::OnShowWindow(BOOL bShow, UINT nStatus)
 	if(bShow) {
 		//”¼“§–¾ˆ—
 		LONG lExStyle = ::GetWindowLong(this->m_hWnd,GWL_EXSTYLE);
-		if(m_pExStyle && theApp.m_ini.m_visual.m_nTransparentSW) {
+		if(m_pExStyle && theApp.m_ini.m_visual.m_nSemitransparent < 100) {
 			SetWindowLong(this->m_hWnd,GWL_EXSTYLE,lExStyle|0x80000);
 			int nTansparent = 255 * theApp.m_ini.m_visual.m_nSemitransparent / 100;
 			m_pExStyle(this->m_hWnd,0,nTansparent,2);

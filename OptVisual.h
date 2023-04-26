@@ -70,6 +70,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedOptLoadVisual();
+	void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+
+private:
+	void SetOpacityText(int value);
 };
 
 //{{AFX_INSERT_LOCATION}}

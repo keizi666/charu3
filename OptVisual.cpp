@@ -52,31 +52,36 @@ void COptVisual::DoDataExchange(CDataExchange* pDX)
 		DDX_Control(pDX, IDC_OPT_TEXT_COLOR_PAL, m_ctrlTextPal);
 	if(GetDlgItem(IDC_OPT__BACK_COLOR_PAL))
 		DDX_Control(pDX, IDC_OPT__BACK_COLOR_PAL, m_ctrlBackPal);
+
 	if(GetDlgItem(IDC_OPT_FONT_NAME))
 		DDX_Control(pDX, IDC_OPT_FONT_NAME, m_ctrlFontCombo);
+	if (GetDlgItem(IDC_OPT_FONT_SIZE))
+		DDX_Text(pDX, IDC_OPT_FONT_SIZE, theApp.m_ini.m_visual.m_nFontSize);
+
+	if (GetDlgItem(IDC_OPT_ICON_FILE_NAME))
+		DDX_Text(pDX, IDC_OPT_ICON_FILE_NAME, theApp.m_ini.m_visual.m_strResourceName);
+
 	if(GetDlgItem(IDC_OPT__BACK_COLOR))
 		DDX_Text(pDX, IDC_OPT__BACK_COLOR, m_strBackColor);
 	if(GetDlgItem(IDC_OPT_TEXT_COLOR))
 		DDX_Text(pDX, IDC_OPT_TEXT_COLOR, m_strTextColor);
 	if(GetDlgItem(IDC_OPT_BORDER_COLOR))
 		DDX_Text(pDX, IDC_OPT_BORDER_COLOR, m_strBorderColor);
-	//}}AFX_DATA_MAP
-	if(GetDlgItem(IDC_OPT_ICON_FILE_NAME))
-		DDX_Text(pDX, IDC_OPT_ICON_FILE_NAME, theApp.m_ini.m_visual.m_strResourceName);
-	if(GetDlgItem(IDC_OPT_FONT_SIZE))
-		DDX_Text(pDX, IDC_OPT_FONT_SIZE, theApp.m_ini.m_visual.m_nFontSize);
-	if(GetDlgItem(IDC_OPT_TOUMEI_CHECK))
-		DDX_Check(pDX,IDC_OPT_TOUMEI_CHECK,theApp.m_ini.m_visual.m_nTransparentSW);
-	if(GetDlgItem(IDC_OPT_RESET_TREE))
-		DDX_Check(pDX,IDC_OPT_RESET_TREE,theApp.m_ini.m_visual.m_nResetTree);
+
 	if(GetDlgItem(IDC_OPT_TOUMEI_SLIDER))
 		DDX_Slider(pDX,IDC_OPT_TOUMEI_SLIDER,theApp.m_ini.m_visual.m_nSemitransparent);
-	if(GetDlgItem(IDC_OPT_SCROLBAR1))
-		DDX_Check(pDX,IDC_OPT_SCROLBAR1,m_nScrollV);
-	if(GetDlgItem(IDC_OPT_SCROLBAR2))
-		DDX_Check(pDX,IDC_OPT_SCROLBAR2,m_nScrollH);
+
+	if (GetDlgItem(IDC_OPT_RESET_TREE))
+		DDX_Check(pDX, IDC_OPT_RESET_TREE, theApp.m_ini.m_visual.m_nResetTree);
+
+	if (GetDlgItem(IDC_OPT_SCROLBAR1))
+		DDX_Check(pDX, IDC_OPT_SCROLBAR1, m_nScrollV);
+	if (GetDlgItem(IDC_OPT_SCROLBAR2))
+		DDX_Check(pDX, IDC_OPT_SCROLBAR2, m_nScrollH);
+
 	if(GetDlgItem(IDC_OPT_TOOLTIP_01))
 		DDX_Radio(pDX, IDC_OPT_TOOLTIP_01, theApp.m_ini.m_visual.m_nToolTip);
+	//}}AFX_DATA_MAP
 }
 
 
@@ -90,8 +95,9 @@ BEGIN_MESSAGE_MAP(COptVisual, CDialog)
 	ON_EN_CHANGE(IDC_OPT_BORDER_COLOR, OnChangeOptBorderColor)
 	ON_EN_CHANGE(IDC_OPT__BACK_COLOR, OnChangeOptBackColor)
 	ON_WM_SHOWWINDOW()
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_OPT_LOAD_VISUAL, &COptVisual::OnBnClickedOptLoadVisual)
+	ON_WM_HSCROLL()
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -121,9 +127,9 @@ int CALLBACK EnumFontProc(ENUMLOGFONT *lpelf,NEWTEXTMETRIC *lpntm,int FontType,L
 //---------------------------------------------------
 BOOL COptVisual::OnInitDialog() 
 {
-	m_strBackColor.Format(_T("%06x"),theApp.m_ini.m_visual.m_nBackColor);
-	m_strBorderColor.Format(_T("%06x"),theApp.m_ini.m_visual.m_nBorderColor);
-	m_strTextColor.Format(_T("%06x"),theApp.m_ini.m_visual.m_nTextColor);
+	m_strBackColor.Format(_T("%.6x"),theApp.m_ini.m_visual.m_nBackColor);
+	m_strBorderColor.Format(_T("%.6x"),theApp.m_ini.m_visual.m_nBorderColor);
+	m_strTextColor.Format(_T("%.6x"),theApp.m_ini.m_visual.m_nTextColor);
 	m_ctrlBackPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackColor));
 	m_ctrlBorderPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor));
 	m_ctrlTextPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nTextColor));
@@ -137,6 +143,7 @@ BOOL COptVisual::OnInitDialog()
 	EnumFontFamilies(hDC,NULL,(FONTENUMPROC)EnumFontProc,(LPARAM)this);
 	::ReleaseDC(NULL,hDC);
 	
+	SetOpacityText(theApp.m_ini.m_visual.m_nSemitransparent);
 	return TRUE;
 }
 
@@ -299,7 +306,7 @@ BOOL COptVisual::PreTranslateMessage(MSG* pMsg)
 void COptVisual::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
 	CDialog::OnShowWindow(bShow, nStatus);
-	if(bShow)	GetDlgItem(IDC_OPT_TOUMEI_CHECK)->SetFocus();	
+	if(bShow)	GetDlgItem(IDC_OPT_BORDER_COLOR)->SetFocus();	
 }
 
 
@@ -308,4 +315,19 @@ void COptVisual::OnBnClickedOptLoadVisual()
 	theApp.OnVisualFile();
 	OnInitDialog();
 	InvalidateRect(NULL, false);
+}
+
+void COptVisual::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	void* pOpacitySlider = GetDlgItem(IDC_OPT_TOUMEI_SLIDER);
+	if (pScrollBar == pOpacitySlider) {
+		SetOpacityText(static_cast<CSliderCtrl*>(pOpacitySlider)->GetPos());
+	}
+}
+
+void COptVisual::SetOpacityText(int value)
+{
+	CString strBuff;
+	strBuff.Format(_T("%u%%"), value);
+	GetDlgItem(IDC_OPACITY_TEXT)->SetWindowText(strBuff);
 }

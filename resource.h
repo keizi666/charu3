@@ -73,6 +73,7 @@
 #define IDC_OPT_HISTORY_SIZE_LIMIT      1016
 #define IDC_OPT_LOAD_VISUAL             1017
 #define IDC_KIND_COMBO                  1019
+#define IDC_OPACITY_TEXT                1019
 #define IDC_ICON_COMBO                  1020
 #define IDC_RIREKIKEY                   1020
 #define IDC_OPT_RIREKIKEY               1020
@@ -332,7 +333,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        143
 #define _APS_NEXT_COMMAND_VALUE         32786
-#define _APS_NEXT_CONTROL_VALUE         1019
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

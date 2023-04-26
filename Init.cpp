@@ -142,8 +142,7 @@ void CInit::readAllInitData()
 	m_fifo.m_nDuplication = setIniFileInt(REGKEY_FIFO,_T("Duplication"),1);
 
 	//ビジュアル設定
-	m_visual.m_nTransparentSW = setIniFileInt(REGKEY_VISUAL,_T("TransparentSW"),0);	//透明機能を使うかスイッチ
-	m_visual.m_nSemitransparent = setIniFileInt(REGKEY_VISUAL,_T("Semitransparent"),50);	//透明度
+	m_visual.m_nSemitransparent = setIniFileInt(REGKEY_VISUAL,_T("Semitransparent"),100);	//透明度
 	strRes.LoadString(APP_INF_DEF_FONT);
 	m_visual.m_strFontName = setIniFileString(REGKEY_VISUAL,_T("FontName"),strRes);//フォント名
 	m_visual.m_nFontSize = setIniFileInt(REGKEY_VISUAL,_T("FontSize"),100);					//フォントサイズ
@@ -355,7 +354,6 @@ void CInit::writeAllInitData()
 	writeProfileInt(REGKEY_FIFO,_T("Duplication"),m_fifo.m_nDuplication);
 
 	//ビジュアル設定
-	writeProfileInt(REGKEY_VISUAL,_T("TransparentSW"),m_visual.m_nTransparentSW);	//透明機能を使うかスイッチ
 	writeProfileInt(REGKEY_VISUAL,_T("Semitransparent"),m_visual.m_nSemitransparent);//透明度
 	writeProfileString(REGKEY_VISUAL,_T("FontName"),m_visual.m_strFontName);		//フォント名
 	writeProfileInt(REGKEY_VISUAL,_T("FontSize"),m_visual.m_nFontSize);				//フォントサイズ

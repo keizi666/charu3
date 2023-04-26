@@ -107,7 +107,6 @@ struct OPTION_FIFO
 //---------------------------------------------------
 struct OPTION_VISUAL
 {
-	int m_nTransparentSW;	//透明機能を使うかスイッチ
 	int m_nSemitransparent;
 	int m_nScrollbar;
 
