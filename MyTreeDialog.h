@@ -111,13 +111,16 @@ protected:
 	afx_msg void OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-    afx_msg void OnNcPaint(void);
+	afx_msg void OnNcPaint();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnBeginlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEndlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCheckItem();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	void DrawBorder();
 };
 
 //{{AFX_INSERT_LOCATION}}

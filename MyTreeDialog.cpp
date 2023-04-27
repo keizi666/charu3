@@ -276,16 +276,20 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 //---------------------------------------------------
 // CMyTreeDialog メッセージ ハンドラ
 //---------------------------------------------------
-void CMyTreeDialog::OnNcPaint(void)
+void CMyTreeDialog::OnNcPaint()
 {
-    CDialog::OnNcPaint();
+	CDialog::OnNcPaint();
+	DrawBorder();
+}
 
-    CRect rect;
-    GetWindowRect(rect);
-    rect -= rect.TopLeft();
-
-    CWindowDC dc(this);
-    drawFrame(&dc, rect);
+void CMyTreeDialog::DrawBorder()
+{
+	CRect rect;
+	GetWindowRect(rect);
+	rect -= rect.TopLeft();
+	CDC* pDC = GetWindowDC();
+	drawFrame(pDC, rect);
+	ReleaseDC(pDC);
 }
 
 //---------------------------------------------------
@@ -348,8 +352,6 @@ void CMyTreeDialog::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);	
 	if(m_pTreeCtrl->m_hWnd) {
-		RECT rect;
-		this->GetWindowRect(&rect);
 		m_pTreeCtrl->SetWindowPos(&wndTop,0,0,cx,cy,SWP_NOMOVE);
 		m_pTreeCtrl->setScrollBar();
 	}
@@ -371,7 +373,7 @@ BOOL CMyTreeDialog::OnInitDialog()
 	m_toolTip.AddTool(m_pTreeCtrl, _T("")); 
 
 	m_hDLL = ::LoadLibrary(_T("user32"));
-	m_pExStyle = (PFUNC)::GetProcAddress(m_hDLL,"SetLayeredWindowAttributes");
+	m_pExStyle = m_hDLL != 0 ? (PFUNC)::GetProcAddress(m_hDLL,"SetLayeredWindowAttributes") : NULL;
 	m_PopupMenu.LoadMenu(MAKEINTRESOURCE(IDR_LISTMENU));//メニュークラスにメニューを読む
 	return TRUE;
 }
