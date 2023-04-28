@@ -17,6 +17,7 @@
 // TODO: Did not handle this well with Visual Studio 2019.
 #include <MULTIMON.H>
 #endif
+#include <dwmapi.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -191,6 +192,8 @@ BOOL CCharu3App::InitInstance()
 	m_pTreeDlg->setTree(m_pTree);
     m_pTreeDlg->Create(IDD_POPUP_DIALOG,this->m_pMainWnd);
 //	::SetForegroundWindow(hActiveWnd);
+	DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
+	DwmSetWindowAttribute(m_pTreeDlg->m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
 
 	pFrame->setMenu();
 	init();//‰Šú‰»
