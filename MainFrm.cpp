@@ -165,6 +165,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 //---------------------------------------------------
 void CMainFrame::changeClip()
 {
+	Sleep(theApp.m_ini.m_etc.m_nClipboardOpenDelay);
 	CString strClipBord;
 	theApp.m_clipbord.getClipboardText(strClipBord);//クリップボードの内容を取得
 	theApp.changeClipBord(strClipBord);//本体にクリップボードの変更を通知
@@ -306,19 +307,10 @@ LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			strText.Format(_T("WM_DRAWCLIPBOARD wParam:%x lParam:%x nowNext:%x\n"),wParam,lParam,theApp.m_clipbord.getNextCb());
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
-		//Wordバグ回避
-		if(theApp.m_ini.m_etc.m_nWordBugSW)	{
-			PostMessage(WM_WORD_CLIP,NULL,NULL);
-		}
-		else 								changeClip();
+		changeClip();
 		if(m_hWnd != theApp.m_clipbord.getNextCb() && theApp.m_clipbord.getNextCb()) {//次のチェインにメッセージを渡す
 			::SendMessage(theApp.m_clipbord.getNextCb(), message, wParam, lParam);
 		}
-	}
-	//ワードバグ用メッセージハンドラ
-	if(message == WM_WORD_CLIP) {
-		Sleep(150);
-		changeClip();
 	}
 	
 	return CFrameWnd::WindowProc(message, wParam, lParam);

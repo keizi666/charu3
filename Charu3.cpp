@@ -80,7 +80,6 @@ CCharu3App::CCharu3App()// : m_treeDlg(&m_tree)
 	m_isCloseKey = false;
 	m_isStockMode = false;
 	m_isCornerPopup = false;
-	m_isWordBugClipCheck = false;
 	m_nPhase = PHASE_START;
 	m_dwDoubleKeyPopTime = 0;
 	m_dwDoubleKeyFifoTime = 0;
@@ -1636,11 +1635,7 @@ CString CCharu3App::convertMacro(STRING_DATA *SourceData,CString strSelect,CStri
 //          クリップボードの内容をリストに追加する
 //---------------------------------------------------
 void CCharu3App::changeClipBord(CString strClipBord)
-{ 
-	if(m_isWordBugClipCheck) {
-		m_isWordBugClipCheck = false;
-		return;
-	}
+{
 	//デバッグログ処理
 	if(m_ini.m_nDebug) {
 		CString strText;
@@ -2077,8 +2072,6 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 			if(m_ini.m_nDebug) {
 				CGeneral::writeLog(m_ini.m_strDebugLog,_T("HOTKEY_PASTE\n"),_ME_NAME_,__LINE__);
 			}
-			if(m_ini.m_etc.m_nWordBugSW && !m_ini.m_fifo.m_nDuplication) m_isWordBugClipCheck = true;
-
 			fifoClipbord();
 			return FALSE;
 			break;

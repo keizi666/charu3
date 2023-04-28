@@ -35,6 +35,10 @@ void COptEtc::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptEtc)
 	//}}AFX_DATA_MAP
+	if (GetDlgItem(IDC_OPT_CLIPBOARD_OPEN_DELAY)) {
+		DDX_Text(pDX, IDC_OPT_CLIPBOARD_OPEN_DELAY, theApp.m_ini.m_etc.m_nClipboardOpenDelay);
+		DDV_MinMaxUInt(pDX, theApp.m_ini.m_etc.m_nClipboardOpenDelay, 0, 4000);
+	}
 	if(GetDlgItem(IDC_OPT_SELF_TIME)) {
 		DDX_Text(pDX, IDC_OPT_SELF_TIME, theApp.m_ini.m_etc.m_nSelfDiagnosisTime);
 		DDV_MinMaxUInt(pDX, theApp.m_ini.m_etc.m_nSelfDiagnosisTime, 0, 1000000);
@@ -45,8 +49,6 @@ void COptEtc::DoDataExchange(CDataExchange* pDX)
 		DDX_Check(pDX,IDC_OPT_TOCLIP,theApp.m_ini.m_etc.m_nToClip);
 	if(GetDlgItem(IDC_OPT_TOOLTIP_TITLE))
 		DDX_Check(pDX,IDC_OPT_TOOLTIP_TITLE,theApp.m_ini.m_etc.m_nToolTip);
-	if(GetDlgItem(IDC_OPT_WORD_BUG))
-		DDX_Check(pDX,IDC_OPT_WORD_BUG,theApp.m_ini.m_etc.m_nWordBugSW);
 	if(GetDlgItem(IDC_OPT_MINIMIZ))
 		DDX_Check(pDX,IDC_OPT_MINIMIZ,theApp.m_ini.m_etc.m_nMinimization);
 }

@@ -93,7 +93,7 @@ void CInit::readAllInitData()
 	m_etc.m_nToClip    = setIniFileInt(REGKEY_ETC,_T("ToClipBord"),1);//リストから選んだ文字列はクリップボードにも入れる
 	m_etc.m_nToolTip   = setIniFileInt(REGKEY_ETC,_T("FixToolTip"),0);//タスクトレイアイコンのツールチップを固定にする
 	m_etc.m_nIconClick = setIniFileInt(REGKEY_ETC,_T("IconClickAct"),0);//アイコンをクリックしたときの動作
-	m_etc.m_nWordBugSW = setIniFileInt(REGKEY_ETC,_T("WordBug"),0);	//Wordのバグに対応する
+	m_etc.m_nClipboardOpenDelay = setIniFileInt(REGKEY_ETC,_T("ClipboardOpenDelay"),0);
 	m_etc.m_nSelfDiagnosisTime = setIniFileInt(REGKEY_ETC,_T("SelfDiagnosisTime"),10000);	//自己診断タイマー
 	m_etc.m_nActiveTime = setIniFileInt(REGKEY_ETC,_T("ActiveTime"),400);	//監視タイマー
 	m_etc.m_nMinimization = setIniFileInt(REGKEY_ETC,_T("Minimization"),1);	//最小化する
@@ -149,7 +149,7 @@ void CInit::readAllInitData()
 	strRes.LoadString(APP_INF_DEF_ICON);
 	m_visual.m_strResourceName = setIniFileString(REGKEY_VISUAL,_T("ResourceName"),strRes);//リソース名
 	m_visual.m_nBorderColor = setIniFileInt(REGKEY_VISUAL,_T("BorderColor"),0xff9900);	//枠色
-	m_visual.m_nBackColor = setIniFileInt(REGKEY_VISUAL,_T("BackColor"),0xffffe0);		//背景色
+	m_visual.m_nBackColor = setIniFileInt(REGKEY_VISUAL,_T("BackColor"),0xffffee);		//背景色
 	m_visual.m_nTextColor = setIniFileInt(REGKEY_VISUAL,_T("TextColor"),0x663300);		//テキスト色
 	m_visual.m_nResetTree = setIniFileInt(REGKEY_VISUAL,_T("ResetTree"),1);	//ツリーの自動再構築
 	m_visual.m_nScrollbar = setIniFileInt(REGKEY_VISUAL,_T("Scrollbar"),SB_BOTH);
@@ -314,7 +314,7 @@ void CInit::writeAllInitData()
 	writeProfileInt(REGKEY_ETC,_T("ToClipBord"),m_etc.m_nToClip);		//リストから選んだ文字列はクリップボードにも入れる
 	writeProfileInt(REGKEY_ETC,_T("FixToolTip"),m_etc.m_nToolTip);		//タスクトレイアイコンのツールチップを固定にする
 	writeProfileInt(REGKEY_ETC,_T("IconClickAct"),m_etc.m_nIconClick);	//アイコンをクリックしたときの動作
-	writeProfileInt(REGKEY_ETC,_T("WordBug"),m_etc.m_nWordBugSW);		//Wordのバグに対応する
+	writeProfileInt(REGKEY_ETC,_T("ClipboardOpenDelay"),m_etc.m_nClipboardOpenDelay);
 	writeProfileInt(REGKEY_ETC,_T("SelfDiagnosisTime"),m_etc.m_nSelfDiagnosisTime);	//自己診断タイマー
 	writeProfileInt(REGKEY_ETC,_T("ActiveTime"),m_etc.m_nActiveTime);	//監視タイマー
 	writeProfileInt(REGKEY_ETC,_T("Minimization"),m_etc.m_nMinimization);	//最小化する

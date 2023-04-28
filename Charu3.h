@@ -75,7 +75,6 @@ using namespace std;
 
 
 #define WM_TASKTRAY    (WM_USER+100)
-#define WM_WORD_CLIP   (WM_USER+101)
 #define WM_TREE_CLOSE  (WM_USER+102)
 #define WM_TIPS_CHANGE (WM_USER+103)
 #define WM_KEY_HOOK    (WM_USER+104)
@@ -281,7 +280,7 @@ protected:
 	HWND m_hSelfWnd;
 	HINSTANCE m_hLangDll;
 
-	bool m_isCloseKey,m_isStockMode,m_isCornerPopup,m_isWordBugClipCheck;
+	bool m_isCloseKey,m_isStockMode,m_isCornerPopup;
 	BOOL m_isImeStatus;
 	int m_nPhase;
 	CString m_strlClipBackup;

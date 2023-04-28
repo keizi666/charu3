@@ -16,7 +16,6 @@
 #define IDD_OPTION                      158
 #define IDD_OPT_RIREKI                  159
 #define IDD_OPT_FIFO                    159
-#define IDD_OPT_TOUMEI                  160
 #define IDD_OPT_VISUAL                  160
 #define IDD_OPT_POPUP                   161
 #define IDD_OPT_ETC                     162
@@ -55,6 +54,7 @@
 #define IDC_OPT_PASTE_SOUND             1008
 #define IDC_EDIT_DATA                   1008
 #define IDC_OPT_KEY_ACTION03            1008
+#define IDC_OPT_CLIPBOARD_OPEN_DELAY    1008
 #define IDC_EDIT_MACRO                  1009
 #define IDC_OPT_VS_BROWS                1009
 #define IDC_OPT_DUPLICATION             1009
@@ -124,12 +124,7 @@
 #define IDC_OPT_OUT_HOSEI               1039
 #define IDC_RADIO_OR                    1040
 #define IDC_OPT_SINGLE_EXPAND           1040
-#define IDC_TOUMEI_SLIDER               1041
 #define IDC_OPT_TOUMEI_SLIDER           1041
-#define IDC_TOUMEI_CHECK                1042
-#define IDC_OPT_TOUMEI_CHECK            1042
-#define IDC_WORD_BUG                    1043
-#define IDC_OPT_WORD_BUG                1043
 #define IDC_EDIT_MACRO_COMBO            1048
 #define IDC_EDIT_DATA_MACRO_COMBO       1049
 #define IDC_EDIT_PASTE                  1050
@@ -213,7 +208,6 @@
 #define IDML_CHANGE_LOCK                32778
 #define IDM_BBS_OPEN                    32778
 #define IDML_DELETE                     32779
-#define IDM_VISUAL_FILE                 32779
 #define IDML_CHECK_ITEM                 32780
 #define IDML_OPTION                     32781
 #define IDM_RESET_TREE                  32781

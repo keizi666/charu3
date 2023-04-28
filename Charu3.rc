@@ -390,14 +390,16 @@ BEGIN
     CONTROL         "ポップアップから選んだ文字列はクリップボードにも入れる",IDC_OPT_TOCLIP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,183,10
     CONTROL         "タスクトレイアイコンのツールチップを固定にする",IDC_OPT_TOOLTIP_TITLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,21,155,10
     CONTROL         "ペースト後に自分を最小化してメモリを解放する",IDC_OPT_MINIMIZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,35,153,10
+    GROUPBOX        "タスクトレイアイコンをクリックした時の動作",IDC_STATIC,7,86,136,38,WS_GROUP
     CONTROL         "ポップアップを表示する",IDC_OPT_ICON_POP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,11,97,83,10
     CONTROL         "ストックモードの切り替え",IDC_OPT_ICON_RIREKI,"Button",BS_AUTORADIOBUTTON,11,109,110,10
-    GROUPBOX        "タスクトレイアイコンをクリックした時の動作",IDC_STATIC,7,86,136,38,WS_GROUP
-    CONTROL         "ワード97,98の切り取りバグ、Notes問題に対応する",IDC_OPT_WORD_BUG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,137,167,9
+    LTEXT           "クリップボードへのアクセスを",IDC_STATIC,7,134,85,8
+    EDITTEXT        IDC_OPT_CLIPBOARD_OPEN_DELAY,93,132,34,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "ミリ秒遅延させる",IDC_STATIC,130,134,49,8
+    LTEXT           "他のアプリが HRESULT 0x800401D0 (CLIPBRD_E_CANT_OPEN) エラーとなる場合にお試しください",IDC_STATIC,15,147,192,16
     LTEXT           "自己診断タイマー",IDC_STATIC,7,179,52,8
     EDITTEXT        IDC_OPT_SELF_TIME,61,177,34,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "他のアプリで HRESULT 0x800401D0 (CLIPBRD_E_CANT_OPEN) エラーなどが出る場合もチェックを入れて試してみてください",IDC_STATIC,17,147,190,16
-    LTEXT           "ミリ秒(0にすると自己診断停止)",IDC_STATIC,98,181,91,8
+    LTEXT           "ミリ秒(0にすると自己診断停止)",IDC_STATIC,98,179,91,8
 END
 
 IDD_OPT_KEYSET DIALOGEX 0, 0, 231, 253

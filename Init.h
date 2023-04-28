@@ -43,7 +43,8 @@ struct OPTION_ETC
 	int m_nMinimization;	//最小化する
 
 	int m_nIconClick;		//アイコンをクリックしたときの動作
-	int m_nWordBugSW;		//Wordのバグに対応する
+
+	int m_nClipboardOpenDelay;
 
 	int m_nSelfDiagnosisTime;//自己診断タイマー
 	int m_nActiveTime;		//監視タイマー
