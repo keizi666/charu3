@@ -2202,6 +2202,13 @@ void CCharu3App::OnOption()
 	if(m_ini.m_visual.m_nResetTree && nPhase != PHASE_POPUP && iniBkup.m_visual.m_strResourceName != m_ini.m_visual.m_strResourceName)
 		resetTreeDialog();//ツリー再構築
 
+	if (ret == IDOK && nPhase == PHASE_POPUP) {
+		CRect rect;
+		m_pTreeDlg->GetWindowRect(rect);
+		m_pTreeDlg->ShowWindow(false);
+		m_pTreeDlg->showWindowPos(rect.TopLeft(), m_ini.m_DialogSize, SW_SHOW, true);
+	}
+
 	registerHotkey();
 	setAppendHotKey();//追加ホットキーを設定
 	if(nPhase == PHASE_IDOL)	m_ini.setHookKey(m_hSelfWnd);
