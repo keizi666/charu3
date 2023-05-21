@@ -93,6 +93,7 @@ BOOL COptMainDialog::OnInitDialog()
 	//‰Šúİ’è
 	for(i = 0; i <= MAX_OPT_PAGE; i++) {
 	    m_OptionPage[i]->Create(nDialogID[i],this);
+	    if (theApp.m_pTreeDlg->IsWindowVisible()) theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
 	    m_OptionPage[i]->MoveWindow(&rect);
 	    m_OptionPage[i]->ShowWindow(SW_HIDE);
 	}
@@ -125,6 +126,8 @@ void COptMainDialog::OnSelchangeOptTab(NMHDR* pNMHDR, LRESULT* pResult)
 //---------------------------------------------------
 BOOL COptMainDialog::DestroyWindow() 
 {
+	if (theApp.m_pTreeDlg->IsWindowVisible()) theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
+
 	for(int i = 0; i <= MAX_OPT_PAGE; i++) {
 		m_OptionPage[i]->UpdateData();
 	    m_OptionPage[i]->DestroyWindow();

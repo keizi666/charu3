@@ -30,6 +30,7 @@ public:
 	BOOL showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelect,HTREEITEM hOpenItem = NULL);
 	void enterData(STRING_DATA *dataPtr);
 	void closePopup();
+	void DrawBorder();
 
 	STRING_DATA *m_selectDataPtr;
 
@@ -118,9 +119,6 @@ protected:
 	afx_msg void OnCheckItem();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
-private:
-	void DrawBorder();
 };
 
 //{{AFX_INSERT_LOCATION}}
