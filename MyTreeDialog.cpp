@@ -555,6 +555,7 @@ void CMyTreeDialog::OnDataPaste()
 				CString strRes;
 				strRes.LoadString(APP_MES_CANT_COPY);
 				AfxMessageBox(strRes,MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
+				DrawBorder(); // Resume the border erased by MessageBox
 				m_pTreeCtrl->SetFocus();
 				m_isModal = false;
 			}
@@ -583,6 +584,7 @@ void CMyTreeDialog::OnDelete()
 	CString strMessage;
 	strMessage.Format(APP_MES_DELETE_OK,data.m_strTitle);
 	int nRet = AfxMessageBox(strMessage,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
+	DrawBorder(); // Resume the border erased by MessageBox
 
 	if(nRet == IDYES) {
 		if(data.m_cKind & KIND_FOLDER_ALL) {
@@ -590,6 +592,7 @@ void CMyTreeDialog::OnDelete()
 			CString strRes;
 			strRes.LoadString(APP_MES_DELETE_FOLDER);
 			int nRet = AfxMessageBox(strRes,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
+			DrawBorder(); // Resume the border erased by MessageBox
 			if(nRet != IDYES) {
 				m_pTreeCtrl->SetFocus();
 				m_isModal = false;		
@@ -672,6 +675,7 @@ void CMyTreeDialog::OnImport()
 			strRes.LoadString(APP_MES_IMPORT_OK);
 			strMessage.Format(strRes,tmplist.size());
 			AfxMessageBox(strMessage,MB_OK|MB_APPLMODAL);
+			DrawBorder(); // Resume the border erased by MessageBox
 			if(hTreeItem) 	m_pTreeCtrl->SelectItem(hTreeItem);//‘ÎÛ‚ð‘I‘ð
 		}
 		delete pFileDialog;
@@ -723,6 +727,7 @@ void CMyTreeDialog::OnFolderClear()
 		CString strRes;
 		strRes.LoadString(APP_MES_FOLDER_CLEAR);
 		int nRet = AfxMessageBox(strRes,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
+		DrawBorder(); // Resume the border erased by MessageBox
 		if(nRet == IDYES) {
 			HTREEITEM hChildItem = m_pTreeCtrl->GetChildItem(hTreeItem);
 			m_pTreeCtrl->clearFolder(hChildItem);

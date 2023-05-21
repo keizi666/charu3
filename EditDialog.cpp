@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CEditDialog, CDialog)
 	ON_BN_CLICKED(IDC_EDIT_PASTE_FILE, OnEditPasteFile)
 	ON_CBN_SELCHANGE(IDC_EDIT_MACRO_COMBO, OnSelchangeEditMacroCombo)
 	ON_CBN_SELCHANGE(IDC_EDIT_DATA_MACRO_COMBO, OnSelchangeEditDataMacroCombo)
+	ON_WM_SHOWWINDOW()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -238,8 +239,16 @@ void CEditDialog::pasteMacro(int nCtrlID,CString strString)
 }
 
 
+void CEditDialog::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialog::OnShowWindow(bShow, nStatus);
+	theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
+}
+
 BOOL CEditDialog::DestroyWindow() 
 {
+	theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
+
 	GetDlgItem(IDC_EDIT_DATA)->SetFont(m_cOlgFontEdit,FALSE);	
 	GetDlgItem(IDC_EDIT_MACRO)->SetFont(m_cOlgFontEdit,TRUE);
 	if(m_cFontEdit) delete m_cFontEdit;	

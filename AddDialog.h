@@ -62,6 +62,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeAddMacroCombo();
 	afx_msg void OnSelchangeEditDataMacroCombo();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

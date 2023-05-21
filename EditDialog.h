@@ -65,6 +65,7 @@ protected:
 	virtual void OnOK();
 	afx_msg void OnSelchangeEditMacroCombo();
 	afx_msg void OnSelchangeEditDataMacroCombo();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
