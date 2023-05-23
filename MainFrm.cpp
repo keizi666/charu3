@@ -39,6 +39,8 @@ END_MESSAGE_MAP()
 //---------------------------------------------------
 CMainFrame::CMainFrame()
 {
+	setlocale(LC_ALL, "");
+
 	//ƒƒjƒ…[‚ğŒ´‘¥—LŒø‰»
 	CFrameWnd::m_bAutoMenuEnable = FALSE;
 	

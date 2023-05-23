@@ -157,8 +157,8 @@ END
 
 STRINGTABLE
 BEGIN
-    APP_INF_TIP_DATA03      "\n作成:"
-    APP_INF_TIP_DATA04      "\n変更:"
+    APP_INF_TIP_DATA03      "\n作成: "
+    APP_INF_TIP_DATA04      "\n変更: "
     APP_INF_COPY_APPEND     "のコピー"
     APP_INF_NEW_FOLDER      "新規フォルダ"
     APP_INF_CLASS_HISTORY   "階層履歴"
@@ -1087,14 +1087,14 @@ STRINGTABLE
 BEGIN
     APP_INF_IMPORT_FOLDERNAME "????????"
     APP_INF_2BYTESPACE      " "
-    APP_INF_TIP_DATA01      "????: "
+    APP_INF_TIP_DATA01      "Title: "
     APP_INF_TIP_DATA02      "\n?????\n  "
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_TIP_DATA03      "\n??:"
-    APP_INF_TIP_DATA04      "\n??:"
+    APP_INF_TIP_DATA03      "\n??: "
+    APP_INF_TIP_DATA04      "\n??: "
     APP_INF_COPY_APPEND     "????"
     APP_INF_NEW_FOLDER      "??????"
     APP_INF_CLASS_HISTORY   "????"

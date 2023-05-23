@@ -235,38 +235,40 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelec
 //---------------------------------------------------
 void CMyTreeDialog::changeTipString(STRING_DATA data) 
 {
-	CString strTip,strData;
+	CString strTip = _T("");
 	CString strRes;
-	CTime timeC(data.m_timeCreate),timeE(data.m_timeEdit);
-	
-	m_toolTip.Activate(FALSE);
+	bool gap = false;
 
+	m_toolTip.Activate(FALSE);
 	if(theApp.m_ini.m_visual.m_nToolTip == 0) {
-		strData = data.m_strTitle.Left(1024);
-		strData.Replace(_T("	"),_T(""));
-		strRes.LoadString(APP_INF_TIP_DATA01);
-		strTip = strRes + strData + _T("\n\n");
+		(void)strRes.LoadString(APP_INF_TIP_DATA01);
+		strTip += strRes + data.m_strTitle;
+		gap = true;
 	}
 	if(theApp.m_ini.m_visual.m_nToolTip != 2) {
-		strData = data.m_strData.Left(4096);
-		strData.Replace(_T("	"),_T(""));
-		strData.TrimLeft();
-		strData.TrimRight();
-		if(strData.GetLength() > 512) strTip = strTip + strData.Left(511) + _T("\n");
-		else strTip = strTip + strData + _T("\n");
+		if (data.m_strData != _T("")) {
+			if (gap) strTip += _T("\n\n");
+			CString s = data.m_strData;
+			(void)s.Replace(_T("\t"), _T("    "));
+			strTip += s;
+			gap = true;
+		}
 		if(data.m_strMacro != _T("")) {
-			data.m_strMacro.Replace(_T("\n"),_T("\n  "));
-			strRes.LoadString(APP_INF_TIP_DATA02);
-			strTip = strTip + strRes + data.m_strMacro;
+			(void)strRes.LoadString(APP_INF_TIP_DATA02);
+			CString s = data.m_strMacro;
+			(void)s.Replace(_T("\t"), _T("    "));
+			(void)s.Replace(_T("\n"), _T("\n  "));
+			if (gap) strTip += _T("\n");
+			strTip += strRes + s;
+			gap = true;
 		}
 	}
 	if(theApp.m_ini.m_visual.m_nToolTip == 0) {
-		strRes.LoadString(APP_INF_TIP_DATA03);
-		strTip = strTip + strRes;
-		strTip = strTip + timeC.Format(_T("%Y/%m/%d-%H:%M:%S"));
-		strRes.LoadString(APP_INF_TIP_DATA04);
-		strTip = strTip + strRes;
-		strTip = strTip + timeE.Format(_T("%Y/%m/%d-%H:%M:%S"));
+		if (gap) strTip += _T("\n");
+		(void)strRes.LoadString(APP_INF_TIP_DATA03);
+		strTip += strRes + CTime(data.m_timeCreate).Format(_T("%x %X"));
+		(void)strRes.LoadString(APP_INF_TIP_DATA04);
+		strTip += strRes + CTime(data.m_timeEdit).Format(_T("%x %X"));
 	}
 	m_toolTip.UpdateTipText(strTip,m_pTreeCtrl);
 	m_toolTip.Activate(TRUE);
