@@ -23,7 +23,7 @@ public:
 		m_hNextClipbord = ::SetClipboardViewer(hWnd);
 	}
 	BOOL getClipboardText(CString& sData);
-	BOOL setClipboardText(const TCHAR *szString);
+	BOOL setClipboardText(const CString sData);
 
 	void delClipView(HWND hWnd){
 	    ::ChangeClipboardChain(hWnd,getNextCb());

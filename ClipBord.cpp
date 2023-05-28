@@ -37,11 +37,14 @@ CClipBord::~CClipBord()
 //関数名	setClipboardText(const CString& sData)
 //機能		クリップボードにテキストを設定
 //---------------------------------------------------
-BOOL CClipBord::setClipboardText(const TCHAR *szString)
+BOOL CClipBord::setClipboardText(const CString sData)
 {
-	HGLOBAL hMem;
-	int nStrLength=_tcsclen(szString)+1;
-	LPTSTR  pPtr;
+	size_t len = sData.GetLength();
+	if (0 == len) return true; // do not set empty text
+	++len; // for terminator
+	TCHAR* newText = new TCHAR[len];
+	_tcscpy_s(newText, len, sData);
+
 	bool isRet = false;
 	UINT uFormat;
 	#ifdef _UNICODE
@@ -50,20 +53,26 @@ BOOL CClipBord::setClipboardText(const TCHAR *szString)
 		uFormat = CF_TEXT;
 	#endif
 
-	if(!::OpenClipboard(m_hParentWnd)) return isRet;
-
-	hMem = ::GlobalAlloc(GHND,nStrLength * sizeof(WCHAR));
-	pPtr=(TCHAR *)::GlobalLock(hMem);
-	_tcscpy_s(pPtr, nStrLength, szString);
-	::GlobalUnlock(hMem);
-
-	::EmptyClipboard();
-	HANDLE hRet = ::SetClipboardData(uFormat,hMem);
-	::CloseClipboard();
-
-	OutputDebugString(_T("setClipboardText\n"));
-
-	isRet = true;
+	if (::OpenClipboard(m_hParentWnd)) {
+		HGLOBAL hMem = ::GlobalAlloc(GHND, len * sizeof(TCHAR));
+		if (hMem) {
+			LPVOID pPtr = ::GlobalLock(hMem);
+			if (pPtr) {
+				_tcscpy_s(static_cast<TCHAR*>(pPtr), len, newText);
+			}
+			else {
+				::GlobalFree(hMem);
+				return isRet;
+			}
+			::GlobalUnlock(hMem);
+			::EmptyClipboard();
+			HANDLE hRet = ::SetClipboardData(uFormat, hMem);
+			if (hRet) {
+				isRet = true;
+			}
+		}
+		::CloseClipboard();
+	}
 	return isRet;
 }
 
@@ -73,31 +82,28 @@ BOOL CClipBord::setClipboardText(const TCHAR *szString)
 //---------------------------------------------------
 BOOL CClipBord::getClipboardText(CString& sData)
 {
-	TCHAR *pPtr;
 	bool isRet = false;
 
 	UINT uFormat;
-	#ifdef _UNICODE
-		uFormat = CF_UNICODETEXT;
-	#else
-		uFormat = CF_TEXT;
-	#endif
-
-	if(::IsClipboardFormatAvailable(uFormat)==FALSE) return isRet;
-	if(!::OpenClipboard(m_hParentWnd)) return isRet;
-
-	HGLOBAL hGet=::GetClipboardData(uFormat);
-	if(!hGet) {
-		::CloseClipboard();
-		return isRet;
+#ifdef _UNICODE
+	uFormat = CF_UNICODETEXT;
+#else
+	uFormat = CF_TEXT;
+#endif
+	if (::IsClipboardFormatAvailable(uFormat)) {
+		if (::OpenClipboard(m_hParentWnd)) {
+			HGLOBAL hGet = ::GetClipboardData(uFormat);
+			if (hGet) {
+				LPVOID pPtr = ::GlobalLock(hGet);
+				if (pPtr) {
+					sData = CString(static_cast<TCHAR*>(pPtr));
+					isRet = true;
+					::GlobalUnlock(hGet);
+				}
+			}
+			::CloseClipboard();
+		}
 	}
-	pPtr=(TCHAR *)::GlobalLock(hGet);
-	sData=pPtr;
-	::GlobalUnlock(hGet);
-
-	::CloseClipboard();
-
-	isRet = true;
 	return isRet;
 }
 
