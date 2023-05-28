@@ -39,19 +39,17 @@ CClipBord::~CClipBord()
 //---------------------------------------------------
 BOOL CClipBord::setClipboardText(const CString sData)
 {
-	size_t len = sData.GetLength();
-	if (0 == len) return true; // do not set empty text
-	++len; // for terminator
+	size_t len = sData.GetLength() + 1;
 	TCHAR* newText = new TCHAR[len];
 	_tcscpy_s(newText, len, sData);
 
 	bool isRet = false;
 	UINT uFormat;
-	#ifdef _UNICODE
-		uFormat = CF_UNICODETEXT;
-	#else
-		uFormat = CF_TEXT;
-	#endif
+#ifdef _UNICODE
+	uFormat = CF_UNICODETEXT;
+#else
+	uFormat = CF_TEXT;
+#endif
 
 	if (::OpenClipboard(m_hParentWnd)) {
 		HGLOBAL hMem = ::GlobalAlloc(GHND, len * sizeof(TCHAR));
