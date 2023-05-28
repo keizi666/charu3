@@ -59,20 +59,21 @@ BOOL CClipBord::setClipboardText(const CString sData)
 			LPVOID pPtr = ::GlobalLock(hMem);
 			if (pPtr) {
 				_tcscpy_s(static_cast<TCHAR*>(pPtr), len, newText);
+				::GlobalUnlock(hMem);
+				::EmptyClipboard();
+				HANDLE hRet = ::SetClipboardData(uFormat, hMem);
+				if (hRet) {
+					isRet = true;
+				}
 			}
 			else {
 				::GlobalFree(hMem);
-				return isRet;
-			}
-			::GlobalUnlock(hMem);
-			::EmptyClipboard();
-			HANDLE hRet = ::SetClipboardData(uFormat, hMem);
-			if (hRet) {
-				isRet = true;
 			}
 		}
 		::CloseClipboard();
 	}
+
+	delete[] newText;
 	return isRet;
 }
 
