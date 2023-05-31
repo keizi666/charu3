@@ -256,6 +256,7 @@
 #define APP_MES_DELETE_FOLDER           62214
 #define APP_MES_IMPORT_OK               62215
 #define APP_MES_FOLDER_CLEAR            62216
+#define APP_MES_NAME_EMPTY              62217
 #define APP_INF_FILE_FILTER             62220
 #define APP_INF_FILE_FILTER2            62221
 #define APP_INF_FILE_FILTER3            62222

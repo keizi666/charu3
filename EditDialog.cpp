@@ -168,6 +168,19 @@ BOOL CEditDialog::OnInitDialog()
 void CEditDialog::OnOK() 
 {
 	CString strBuff;
+	GetDlgItem(IDC_NAME)->GetWindowText(strBuff);
+	if (strBuff == _T("")) {
+		CString strRes;
+		strRes.LoadString(APP_MES_NAME_EMPTY);
+		AfxMessageBox(strRes);
+		return;
+	}
+	m_data.m_strTitle = strBuff;
+	GetDlgItem(IDC_EDIT_MACRO)->GetWindowText(strBuff);
+	m_data.m_strMacro = strBuff;
+	GetDlgItem(IDC_EDIT_DATA)->GetWindowText(strBuff);
+	m_data.m_strData = strBuff;
+
 	int nCursel;
 	if(m_data.m_cKind & KIND_FOLDER_ALL) {
 		if(!m_ctrlRirekiChk.GetCheck())	m_data.m_cKind = KIND_FOLDER;
@@ -180,12 +193,6 @@ void CEditDialog::OnOK()
 		else				m_data.m_cKind = KIND_LOCK;
 		m_data.m_cIcon = m_ctrlIconCombo.GetCurSel() - 1;
 	}
-	GetDlgItem(IDC_NAME)->GetWindowText(strBuff);
-	m_data.m_strTitle = strBuff;
-	GetDlgItem(IDC_EDIT_MACRO)->GetWindowText(strBuff);
-	m_data.m_strMacro = strBuff;
-	GetDlgItem(IDC_EDIT_DATA)->GetWindowText(strBuff);
-	m_data.m_strData = strBuff;
 
 	CDialog::OnOK();
 }

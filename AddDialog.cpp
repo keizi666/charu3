@@ -84,28 +84,27 @@ void CAddDialog::OnAddOk()
 		CString strRes;
 		strRes.LoadString(APP_MES_ALL_EMPTY);
 		AfxMessageBox(strRes);
+		return;
 	}
-	else {
-		if(Data.m_strTitle == _T("")) {//タイトルが空の場合はタイトルを作る
-			Data.m_strTitle = theApp.m_pTree->makeTitle(Data.m_strData);
-		}
-		Data.m_cKind = KIND_LOCK;
-		int nCursel = m_comboIcon.GetCurSel();
-		if(nCursel > 0)			Data.m_cIcon = nCursel - 1;
-		else if(nCursel == 0)	Data.m_cIcon = theApp.m_pTree->decideIcon(Data.m_strData);
+	if(Data.m_strTitle == _T("")) {//タイトルが空の場合はタイトルを作る
+		Data.m_strTitle = theApp.m_pTree->makeTitle(Data.m_strData);
+	}
+	Data.m_cKind = KIND_LOCK;
+	int nCursel = m_comboIcon.GetCurSel();
+	if(nCursel > 0)			Data.m_cIcon = nCursel - 1;
+	else if(nCursel == 0)	Data.m_cIcon = theApp.m_pTree->decideIcon(Data.m_strData);
 
-		theApp.m_pTree->addData(m_hTreeItem,Data);
-		CString strMessage;
-		CString strRes;
-		strRes.LoadString(APP_MES_ADD_OK2);
-		strMessage.Format(strRes,Data.m_strTitle);
-		AfxMessageBox(strMessage,MB_OK | MB_ICONINFORMATION);
-		//エディットボックスをクリア
-		GetDlgItem(IDC_ADD_MACRO)->SetWindowText(_T(""));
-		GetDlgItem(IDC_ADD_EDIT)->SetWindowText(_T(""));
-		GetDlgItem(IDC_ADD_NAME)->SetWindowText(_T(""));
-		GetDlgItem(IDC_ADD_NAME)->SetFocus();
-	}
+	theApp.m_pTree->addData(m_hTreeItem,Data);
+	CString strMessage;
+	CString strRes;
+	strRes.LoadString(APP_MES_ADD_OK2);
+	strMessage.Format(strRes,Data.m_strTitle);
+	AfxMessageBox(strMessage,MB_OK | MB_ICONINFORMATION);
+	//エディットボックスをクリア
+	GetDlgItem(IDC_ADD_MACRO)->SetWindowText(_T(""));
+	GetDlgItem(IDC_ADD_EDIT)->SetWindowText(_T(""));
+	GetDlgItem(IDC_ADD_NAME)->SetWindowText(_T(""));
+	GetDlgItem(IDC_ADD_NAME)->SetFocus();
 }
 
 //---------------------------------------------------

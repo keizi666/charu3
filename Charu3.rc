@@ -110,7 +110,7 @@ END
 STRINGTABLE
 BEGIN
     APP_MES_ADD_OK2         "%sを追加しました。"
-    APP_MES_ALL_EMPTY       "タイトルも登録文も空白です。何か入れてください。"
+    APP_MES_ALL_EMPTY       "データと名前が空です"
     APP_MES_NOT_FOUND_WRITEPLUGIN "書き込みに適切なプラグインがありません。"
     APP_MES_NOT_FOUND_READPLUGIN "読み込みに適切なプラグインがありません。"
     APP_MES_NOT_FOUND_MACROPLUGIN "マクロ処理に適切なプラグインがありません。"
@@ -118,6 +118,7 @@ BEGIN
     APP_MES_DELETE_FOLDER   "フォルダですが、本当に削除しますか？\n削除するとフォルダの内容すべてが失われます。"
     APP_MES_IMPORT_OK       "%d件をインポートしました。"
     APP_MES_FOLDER_CLEAR    "フォルダ内のデータは全て失われます。\nよろしいですか？"
+    APP_MES_NAME_EMPTY      "データの名前が空です"
     APP_INF_FILE_FILTER     "Charu3データファイル(*.c3d)|*.c3d"
     APP_INF_FILE_FILTER2    "%sデータファイル(*.%s)|*.%s|"
     APP_INF_FILE_FILTER_VISUAL_PREF "ビジュアル設定ファイル(*.json)|*.json|"
