@@ -73,7 +73,7 @@ public:
 	HTREEITEM addNewFolder(HTREEITEM hTreeItem,CString strName);
 
 	void deleteData(HTREEITEM hTreeItem);
-	void clearFolder(HTREEITEM hStartItem);
+	void clearFolder(HTREEITEM hItem);
 	void closeFolder(HTREEITEM hStartItem);
 	void checkFolder(HTREEITEM hStartItem,bool isCheck,list<HTREEITEM> *listItem);
 	void clearOneTime(HTREEITEM hStartItem,int nKind = 0);
@@ -172,15 +172,11 @@ public:
 	vector<RW_PLUGIN>  m_rwPlugin;
 	list<HTREEITEM> m_ltCheckItems;
 	void setScrollBar();
-	bool isDrag() { return m_isDrag;}
+	bool IsDragging() { return m_dragState != DRAGSTATE_NOT_DRAGGING; }
 
 protected:
 	int *m_nMaxID;
 	int *m_nRecNumber;
-	bool m_isDrag;
-	CImageList* m_pDragImage;
-	HTREEITEM m_hDragItem,m_hDragTarget,m_hSerchItem;
-	HTREEITEM m_hPrevTarget;
 
 	// オペレーション
 public:
@@ -192,6 +188,18 @@ public:
 	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
 	//}}AFX_VIRTUAL
 
+private:
+	enum {
+		DRAGSTATE_NOT_DRAGGING,
+		DRAGSTATE_INSERT_BEFORE,
+		DRAGSTATE_PLACE_INSIDE,
+		DRAGSTATE_INSERT_AFTER
+	} m_dragState;
+	ULONGLONG m_nHoverTick;
+	HTREEITEM m_hDragItem;
+	HTREEITEM m_hDragTarget;
+	HTREEITEM m_hPrevTarget;
+	CImageList* m_pDragImage;
 
 	// 生成されたメッセージ マップ関数
 protected:

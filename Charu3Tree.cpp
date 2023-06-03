@@ -26,14 +26,9 @@ extern CCharu3App theApp;
 //関数名	CCharu3Tree
 //機能		コンストラクタ
 //---------------------------------------------------
-CCharu3Tree::CCharu3Tree()
+CCharu3Tree::CCharu3Tree() : m_dragState(DRAGSTATE_NOT_DRAGGING), m_hPrevTarget(nullptr), m_ImageList(nullptr), m_nMaxID(0), m_nSelectID(0)
 {
 	m_MyStringList.clear();
-	m_ImageList = nullptr;
-	m_nMaxID = 0;
-	m_nSelectID = 0;
-	m_isDrag = false;
-	m_hPrevTarget = nullptr;
 }
 
 //---------------------------------------------------
@@ -854,7 +849,7 @@ void CCharu3Tree::copyChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 	list<STRING_DATA>::iterator it;
 	hFromItem = GetChildItem(hFromItem);
 	HTREEITEM hAddtItem = nullptr;
-	do {
+	while (hFromItem) {
 		//データを取得
 		STRING_DATA dataF;
 		dataF = getData(hFromItem);
@@ -864,13 +859,10 @@ void CCharu3Tree::copyChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 			hAddtItem = addData(hAddtItem,dataF);
 		else
 			hAddtItem = addData(hToItem,dataF,true,true);
-		//元にフォルダ発見
-		if(ItemHasChildren(hFromItem)) {
-			//ターゲットを決めて再帰コピー
-			copyChildren(hFromItem,hAddtItem);
-		}
+		// 子もコピー（もしあれば）
+		copyChildren(hFromItem, hAddtItem);
 		hFromItem = GetNextItem(hFromItem,TVGN_NEXT);
-	}while(hFromItem);
+	}
 }
 
 
@@ -1141,25 +1133,23 @@ void CCharu3Tree::deleteData(HTREEITEM hTreeItem)
 }
 
 //---------------------------------------------------
-//関数名	void clearFolder(HTREEITEM hStartItem)
+//関数名	void clearFolder(HTREEITEM hItem)
 //機能		指定データ以下を削除する
 //---------------------------------------------------
-void CCharu3Tree::clearFolder(HTREEITEM hStartItem)
+void CCharu3Tree::clearFolder(HTREEITEM hItem)
 {
-	if(!hStartItem) return;
-	HTREEITEM hItem = hStartItem,hPrevItem;
-	do {
+	while (hItem) {
 		if(ItemHasChildren(hItem)) {
 			clearFolder(GetChildItem(hItem));//再帰で削除
 		}
 		STRING_DATA *dataPtr = getDataPtr(hItem);
 		list<STRING_DATA>::iterator it = findData(dataPtr);
-		hPrevItem = hItem;
-		hItem = GetNextItem(hItem,TVGN_NEXT);
 		m_MyStringList.erase(it);
-		checkOut(hPrevItem);
-		this->DeleteItem(hPrevItem);
-	}while(hItem);
+		HTREEITEM hNextItem = GetNextItem(hItem, TVGN_NEXT);
+		checkOut(hItem);
+		this->DeleteItem(hItem);
+		hItem = hNextItem;
+	}
 }
 
 //---------------------------------------------------
@@ -1323,7 +1313,6 @@ HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM h
 	}
 	hTreeItem = getTrueNextItem(hStartItem);
 	while(hTreeItem != hStartItem) {
-		m_hSerchItem = hTreeItem;
 		data = getData(hTreeItem);
 		data.m_strData = data.m_strData + data.m_strMacro;//マクロも検索対象にする
 		if(!hTreeItem)	break;
@@ -2027,36 +2016,69 @@ BOOL CCharu3Tree::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 //---------------------------------------------------
 void CCharu3Tree::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	if(m_isDrag) {
+	if (IsDragging()) {
 		CPoint ptTree(point);
 
 		MapWindowPoints(this,&ptTree,1);
 		m_pDragImage->DragMove(point);
 		m_pDragImage->DragLeave(this);
 		UINT uHitTest = TVHT_ONITEM;
-		m_hDragTarget = this->HitTest(point,&uHitTest);
-		if(m_hDragTarget) {
-			STRING_DATA data;
-			data = getData(m_hDragTarget);
-			//フォルダで子供がいなければ選択、それ以外は挿入マーク
-			if(data.m_cKind & KIND_FOLDER_ALL && !GetChildItem(m_hDragTarget)) {
-				SetInsertMark(nullptr);
-				SelectItem(m_hDragTarget);
+		HTREEITEM hTarget = HitTest(point, &uHitTest);
+		if (hTarget) {
+			if (hTarget != m_hDragTarget) {
+				m_nHoverTick = GetTickCount64();
+			}
+			STRING_DATA* pTargetData = getDataPtr(hTarget);
+			RECT rect;
+			GetItemRect(hTarget, &rect, FALSE);
+			LONG height = rect.bottom - rect.top;
+			if (pTargetData->m_cKind & KIND_FOLDER_ALL) {
+				if (!(pTargetData->m_cKind & FOLDER_OPEN) && ItemHasChildren(hTarget) && GetTickCount64() - m_nHoverTick >= 1000) {
+					Expand(hTarget, TVE_EXPAND);
+					pTargetData->m_cKind |= FOLDER_OPEN;
+				}
+				if (pTargetData->m_cKind & FOLDER_OPEN && ItemHasChildren(hTarget)) {
+					if (ptTree.y < rect.top + height / 3) {
+						m_dragState = DRAGSTATE_INSERT_BEFORE;
+					}
+					else {
+						m_dragState = DRAGSTATE_PLACE_INSIDE;
+					}
+				}
+				else {
+					if (ptTree.y < rect.top + height / 3) {
+						m_dragState = DRAGSTATE_INSERT_BEFORE;
+					}
+					else if (ptTree.y > rect.bottom - height / 3) {
+						m_dragState = DRAGSTATE_INSERT_AFTER;
+					}
+					else {
+						m_dragState = DRAGSTATE_PLACE_INSIDE;
+					}
+				}
 			}
 			else {
-				SetInsertMark(m_hDragTarget,TRUE);
+				if (ptTree.y < rect.top + height / 2) {
+					m_dragState = DRAGSTATE_INSERT_BEFORE;
+				}
+				else {
+					m_dragState = DRAGSTATE_INSERT_AFTER;
+				}
+			}
+			if (DRAGSTATE_PLACE_INSIDE == m_dragState) {
 				SelectItem(m_hDragTarget);
+				SetInsertMark(NULL);
+			}
+			else {
+				SelectItem(NULL);
+				SetInsertMark(hTarget, DRAGSTATE_INSERT_AFTER == m_dragState);
 			}
 		}
 		else {
-			if(point.y <= 0) {
-				m_hDragTarget = GetFirstVisibleItem();
-				m_hDragTarget = GetNextItem(m_hDragTarget,TVGN_PREVIOUSVISIBLE);
-			}
-			m_pDragImage->DragLeave(this);
-			SelectItem(m_hDragTarget);
-			return;
+			SelectItem(NULL);
+			SetInsertMark(NULL);
 		}
+		m_hDragTarget = hTarget;
 		this->UpdateWindow();
 		m_pDragImage->DragEnter(this, point);
 	}
@@ -2104,8 +2126,9 @@ void CCharu3Tree::OnBegindrag(NMHDR* pNMHDR, LRESULT* pResult)
 	m_pDragImage->DragEnter(this,pNMTreeView->ptDrag);
 	SetCapture();
 
-//	m_nDragPosY = pNMTreeView->ptDrag.y;
-	m_isDrag = true;
+	m_hDragTarget = nullptr;
+	m_dragState = DRAGSTATE_INSERT_AFTER;
+	SelectItem(NULL);
 
 	*pResult = 0;
 }
@@ -2116,14 +2139,13 @@ void CCharu3Tree::OnBegindrag(NMHDR* pNMHDR, LRESULT* pResult)
 //---------------------------------------------------
 void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	if(!m_isDrag) return;
+	if(!IsDragging()) return;
 
-	m_isDrag = false;
 	m_pDragImage->DragLeave(this);
 	m_pDragImage->EndDrag();
 	delete m_pDragImage;
 	ReleaseCapture();
-	SetInsertMark(nullptr);
+	SetInsertMark(NULL);
 
 	//アイテムの移動処理をする
 	if(m_hDragTarget && m_hDragTarget != m_hDragItem) {
@@ -2132,56 +2154,62 @@ void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point)
 			AfxGetApp()->DoWaitCursor(1);
 
 			//データを取得
-			STRING_DATA data,dataTarget;
-			data       = getData(m_hDragItem);
-			dataTarget = getData(m_hDragTarget);
+			STRING_DATA* pData = getDataPtr(m_hDragItem);
+			STRING_DATA* pDataTarget = getDataPtr(m_hDragTarget);
 
-			//ツリーデータを取得
+			// 移動するツリーアイテムの属性を取得
 			TV_ITEM TreeCtrlItem;
 			ZeroMemory(&TreeCtrlItem,sizeof(TreeCtrlItem));
 			TreeCtrlItem.hItem = m_hDragItem;
 			TreeCtrlItem.mask = TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT;
-			this->GetItem(&TreeCtrlItem);
+			GetItem(&TreeCtrlItem);
 
 			//追加データを作成
 			TV_INSERTSTRUCT AddTreeCtrlItem;
-
 			ZeroMemory(&AddTreeCtrlItem,sizeof(AddTreeCtrlItem));
-			AddTreeCtrlItem.hInsertAfter = m_hDragTarget;
 			AddTreeCtrlItem.item.mask = TreeCtrlItem.mask;
 			AddTreeCtrlItem.item.iImage = TreeCtrlItem.iImage;
 			AddTreeCtrlItem.item.iSelectedImage = TreeCtrlItem.iSelectedImage;
-			AddTreeCtrlItem.item.pszText = data.m_strTitle.GetBuffer(data.m_strTitle.GetLength());
+			AddTreeCtrlItem.item.pszText = pData->m_strTitle.GetBuffer(pData->m_strTitle.GetLength());
 			AddTreeCtrlItem.item.lParam = TreeCtrlItem.lParam;
 
-			//親を設定
-			if(dataTarget.m_cKind & KIND_FOLDER_ALL && !ItemHasChildren(m_hDragTarget)) {
+			// 移動先の親と挿入位置を決定
+			if (pDataTarget->m_cKind & KIND_FOLDER_ALL && DRAGSTATE_PLACE_INSIDE == m_dragState) {
+				AddTreeCtrlItem.hParent = m_hDragTarget;
 				AddTreeCtrlItem.hInsertAfter = TVI_FIRST;
-				AddTreeCtrlItem.hParent = m_hDragTarget;//フォルダ
-				data.m_nParentID = dataTarget.m_nMyID;
-				editData(m_hDragItem,data);
+				pData->m_nParentID = pDataTarget->m_nMyID;
 			}
 			else {
-				AddTreeCtrlItem.hParent = GetParentItem(m_hDragTarget);//それ以外
-				data.m_nParentID = dataTarget.m_nParentID;
-				editData(m_hDragItem,data);
+				AddTreeCtrlItem.hParent = GetParentItem(m_hDragTarget);
+				if (DRAGSTATE_INSERT_BEFORE == m_dragState) {
+					AddTreeCtrlItem.hInsertAfter = GetPrevSiblingItem(m_hDragTarget);
+					if (NULL == AddTreeCtrlItem.hInsertAfter) {
+						AddTreeCtrlItem.hInsertAfter = TVI_FIRST;
+					}
+				}
+				else {
+					AddTreeCtrlItem.hInsertAfter = m_hDragTarget;
+				}
+				pData->m_nParentID = pDataTarget->m_nParentID;
 			}
-			//データを移動
-			if(data.m_cKind & KIND_FOLDER_ALL && ItemHasChildren(m_hDragItem)) {
-				copyChildren(m_hDragItem,InsertItem(&AddTreeCtrlItem));
-				checkOut(m_hDragItem);
-				clearFolder(GetChildItem(m_hDragItem));
-				DeleteItem(m_hDragItem);
-			}
-			else {
-				SelectItem(InsertItem(&AddTreeCtrlItem));
-				checkOut(m_hDragItem);
-				DeleteItem(m_hDragItem);
-			}
+
+			// 新ツリーアイテムを挿入
+			HTREEITEM hNewItem = InsertItem(&AddTreeCtrlItem);
+			// 旧ツリーアイテムの子孫を新ツリーアイテムにコピー
+			copyChildren(m_hDragItem, hNewItem);
+			// 旧ツリーアイテムとその子孫のチェックを外す
+			checkOut(m_hDragItem);
+			// 旧ツリーアイテムの子孫を削除
+			clearFolder(GetChildItem(m_hDragItem));
+			// 旧ツリーアイテムを削除
+			DeleteItem(m_hDragItem);
+			// 新ツリーアイテムを選択
+			SelectItem(hNewItem);
 
 			AfxGetApp()->DoWaitCursor(0);
 		}
 	}
+	m_dragState = DRAGSTATE_NOT_DRAGGING;
 	CTreeCtrl::OnLButtonUp(nFlags, point);
 }
 
