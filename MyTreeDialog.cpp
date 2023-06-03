@@ -409,7 +409,7 @@ void CMyTreeDialog::OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 //---------------------------------------------------
 void CMyTreeDialog::OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if(m_isModal || m_pTreeCtrl->isDrag()) return;
+	if(m_isModal || m_pTreeCtrl->IsDragging()) return;
 	POINT point;
 	::GetCursorPos(&point);
 	pouupMenu(point);	
@@ -906,7 +906,7 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 	//左ボタンダブルクリック
-	else if(pMsg->message == WM_LBUTTONDBLCLK && !m_pTreeCtrl->isDrag()){
+	else if(pMsg->message == WM_LBUTTONDBLCLK && !m_pTreeCtrl->IsDragging()){
 		if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
 		//データ取得
 		HTREEITEM hTreeItem;
@@ -918,13 +918,13 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-	else if(pMsg->message == WM_LBUTTONUP && m_dataPtrDbClick != nullptr && !m_pTreeCtrl->isDrag()) {
+	else if(pMsg->message == WM_LBUTTONUP && m_dataPtrDbClick != nullptr && !m_pTreeCtrl->IsDragging()) {
 		enterData(m_dataPtrDbClick);
 		return TRUE;
 	}
 	//ALTかメニューキーポップアップメニューを出す
 	if(pMsg->message == WM_SYSKEYDOWN) m_isAltDown = true;
-	else if(((pMsg->message == WM_SYSKEYUP && m_isAltDown) || (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_APPS)) && !theApp.isCloseKey() && !m_pTreeCtrl->isDrag()) {
+	else if(((pMsg->message == WM_SYSKEYUP && m_isAltDown) || (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_APPS)) && !theApp.isCloseKey() && !m_pTreeCtrl->IsDragging()) {
 		if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
 		m_isAltDown = false;
 		CPoint point;
@@ -942,7 +942,7 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 	}
 
 	if( pMsg->message == WM_KEYDOWN) {
-		if(!m_pTreeCtrl->isDrag()) {
+		if(!m_pTreeCtrl->IsDragging()) {
 			MSG msg;
 			ZeroMemory(&msg,sizeof(msg));
 			msg.message =WM_LBUTTONDOWN;
@@ -953,7 +953,7 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			::SetCursor(NULL);
 		}
 		//ESCで閉じる
-		if(pMsg->wParam == VK_ESCAPE && !m_isModal && !m_pTreeCtrl->isDrag()) {
+		if(pMsg->wParam == VK_ESCAPE && !m_isModal && !m_pTreeCtrl->IsDragging()) {
 			closePopup();
 			return TRUE;
 		}
@@ -963,7 +963,7 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			return TRUE;
 		}
 		//リターンキーを押したら決定
-		else if(pMsg->wParam == VK_RETURN && !m_pTreeCtrl->isDrag()) {
+		else if(pMsg->wParam == VK_RETURN && !m_pTreeCtrl->IsDragging()) {
 			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
 			//データ取得
 			HTREEITEM hTreeItem;
@@ -1009,12 +1009,12 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			return true;
 		}
 		//デリートキー(データ削除)
-		else if(pMsg->wParam ==  VK_DELETE && !m_pTreeCtrl->isDrag() && !m_isModal) {
+		else if(pMsg->wParam ==  VK_DELETE && !m_pTreeCtrl->IsDragging() && !m_isModal) {
 			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
 			OnDelete();
 		}
 		//F1キー 内容表示
-		else if(pMsg->wParam ==  VK_F1 && !m_pTreeCtrl->isDrag()) {
+		else if(pMsg->wParam ==  VK_F1 && !m_pTreeCtrl->IsDragging()) {
 			CPoint point;
 			ZeroMemory(&point,sizeof(point));
 			RECT rSelItem;
@@ -1038,13 +1038,13 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 		//F2キー リネーム
-		else if(pMsg->wParam ==  VK_F2 && !m_pTreeCtrl->isDrag()) {
+		else if(pMsg->wParam ==  VK_F2 && !m_pTreeCtrl->IsDragging()) {
 			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
 			if(m_pTreeCtrl->GetSelectedItem())
 				m_pTreeCtrl->EditLabel(m_pTreeCtrl->GetSelectedItem());
 		}
 		//F3キー
-		else if(pMsg->wParam ==  VK_F3 && !m_pTreeCtrl->isDrag() && !m_isModal) {
+		else if(pMsg->wParam ==  VK_F3 && !m_pTreeCtrl->IsDragging() && !m_isModal) {
 			if(::GetKeyState(VK_SHIFT) < 0) {
 				OnListSerch();
 				return true;
@@ -1056,7 +1056,7 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 		//TABキーでチェック
-		else if(pMsg->wParam ==  VK_TAB && !m_pTreeCtrl->isDrag() && !m_isModal) {
+		else if(pMsg->wParam ==  VK_TAB && !m_pTreeCtrl->IsDragging() && !m_isModal) {
 			HTREEITEM hSelItem  = m_pTreeCtrl->GetSelectedItem();
 			m_pTreeCtrl->checkItem(hSelItem);
 			return true;
@@ -1090,12 +1090,12 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 		//クイックアクセス処理
-		else if(!m_isModal && !m_pTreeCtrl->isDrag()){
+		else if(!m_isModal && !m_pTreeCtrl->IsDragging()){
 			if(quickAccess((UINT)pMsg->wParam)) return TRUE;
 		}
 	}
 	//クイック確定処理
-	else if(pMsg->message == WM_TIMER && pMsg->wParam == CHARU_QUICK_TIMER && !m_pTreeCtrl->isDrag()){
+	else if(pMsg->message == WM_TIMER && pMsg->wParam == CHARU_QUICK_TIMER && !m_pTreeCtrl->IsDragging()){
 		if(!m_hQuickItem) {
 			this->KillTimer(CHARU_QUICK_TIMER);
 			return FALSE;
