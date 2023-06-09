@@ -783,7 +783,6 @@ void CCharu3App::closeTreeWindow(int nRet)
 	else if(::GetForegroundWindow() == m_focusInfo.m_hActiveWnd){
 		CGeneral::setFocusInfo(&m_focusInfo);
 	}
-	if(m_ini.m_fifo.m_nAllClearOff && !m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo) && m_isStockMode) toggleStockMode();
 	if(m_hSelectItemBkup) {
 		m_pTree->SelectItem(m_hSelectItemBkup);
 		m_hSelectItemBkup = NULL;
@@ -1778,8 +1777,10 @@ void CCharu3App::fifoClipbord()
 	keybd_event(uVkCode, (BYTE)MapVirtualKey(uVkCode, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 
 	RegisterHotKey(NULL,HOTKEY_PASTE,m_keySet.m_uMod_Paste,m_keySet.m_uVK_Paste);//ペーストキー
-	//一時項目が無かったらストックモードOFF
-	if(m_ini.m_fifo.m_nAllClearOff && !m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo)) toggleStockMode();
+
+	if (m_ini.m_fifo.m_nAllClearOff && !m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo)) {
+		toggleStockMode(); // Toggle (turn off) stock mode due to loss of one-time item
+	}
 	m_nPhase = PHASE_IDOL;
 }
 
@@ -2064,7 +2065,7 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 					return FALSE;
 				}
 			}
-			toggleStockMode();
+			toggleStockMode(); // Toggle stock mode by hotkey
 			return FALSE;
 			break;
 		case HOTKEY_PASTE://履歴FIFO処理
@@ -2405,7 +2406,7 @@ void CCharu3App::OnBbsOpen()
 //---------------------------------------------------
 void CCharu3App::OnStockStop() 
 {
-	toggleStockMode();
+	toggleStockMode(); // Toggle stock mode by main menu
 }
 
 //---------------------------------------------------
