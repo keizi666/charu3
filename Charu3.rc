@@ -99,7 +99,7 @@ BEGIN
         MENUITEM "名前の変更(&R)",                   IDML_RENAME
         POPUP "アイコンを変更"
         BEGIN
-            MENUITEM "ロック項目",                       IDML_ICON_KEY
+            MENUITEM "一般項目",                        IDML_ICON_KEY
             MENUITEM "日付 時間系",                      IDML_ICON_DATE
             MENUITEM "ファイル実行",                      IDML_ICON_EXE
             MENUITEM "関連付け実行",                      IDML_ICON_RELATE
@@ -129,7 +129,7 @@ BEGIN
         MENUITEM "コピーした項目を貼り付け(&P)",            IDML_DATA_PASTE
         MENUITEM SEPARATOR
         MENUITEM "データをインポート (選択位置の次に挿入)...",    IDML_IMPORT
-        MENUITEM "選択データをエクスポート...",             IDML_EXPORT
+        MENUITEM "選択アイテムをエクスポート...",            IDML_EXPORT
         MENUITEM SEPARATOR
         MENUITEM "設定",                          IDML_OPTION
     END
@@ -1124,24 +1124,19 @@ IDR_MAINFRAME MENU
 BEGIN
     POPUP "dummy"
     BEGIN
-        MENUITEM "???????????(&R)",             IDM_STOCK_STOP
+        MENUITEM "Switch Stock Mode(&R)",       IDM_STOCK_STOP
+        MENUITEM SEPARATOR
         MENUITEM "New Data(&N)",                IDM_ADD_DATA
-        POPUP "?????"
-        BEGIN
-            MENUITEM "???????????????",             IDM_ONETIME_CLEAR
-            MENUITEM "?????????????????????",       IDM_ALL_LOCK
-            MENUITEM "?????????",                   IDM_ICON_DECIDE
-        END
-        MENUITEM "Rebuild Data Tree",           IDM_RESET_TREE
         MENUITEM SEPARATOR
-        MENUITEM "???????????...",              IDM_CHANG_DATA
-        MENUITEM "Export Data...",              IDM_DATA_SAVE
+        MENUITEM "Switch Data File",            IDM_CHANG_DATA
+        MENUITEM "Export Whole Data...",        IDM_DATA_SAVE
+        MENUITEM "Rebuild Data Tree View",      IDM_RESET_TREE
         MENUITEM SEPARATOR
-        MENUITEM "Settings(&E)",                IDM_OPTION
+        MENUITEM "Settings",                    IDM_OPTION
         POPUP "Help(&H)"
         BEGIN
             MENUITEM "Help(&H)",                    IDM_HELP
-            MENUITEM "???????(&V)",                 IDM_ABOUT
+            MENUITEM "About Charu3 SE(&V)",         IDM_ABOUT
         END
         MENUITEM "Exit(&X)",                    IDM_EXIT
     END
@@ -1152,38 +1147,39 @@ BEGIN
     POPUP "dummy"
     BEGIN
         MENUITEM "Edit(&E)",                    IDML_EDIT
-        POPUP "New(&N)"
-        BEGIN
-            MENUITEM "Data(&D)",                    IDML_NEW_DATA
-        END
         MENUITEM "Delete(&D)",                  IDML_DELETE
         MENUITEM "Rename(&R)",                  IDML_RENAME
         POPUP "Switch Icon"
         BEGIN
-            MENUITEM "?????",                       IDML_ICON_KEY
-            MENUITEM "?? ???",                      IDML_ICON_DATE
-            MENUITEM "??????",                      IDML_ICON_EXE
-            MENUITEM "??????",                      IDML_ICON_RELATE
-            MENUITEM "?????",                       IDML_ICON_SELECT
-            MENUITEM "???????",                     IDML_ICON_CLIP
-            MENUITEM "?????",                       IDML_ICON_PLUGIN
-            MENUITEM "????",                        IDML_ICON_KEYMACRO
+            MENUITEM "General",                     IDML_ICON_KEY
+            MENUITEM "Date && Time",                IDML_ICON_DATE
+            MENUITEM "Do File Execution",           IDML_ICON_EXE
+            MENUITEM "Do File Association",         IDML_ICON_RELATE
+            MENUITEM "Select Texts",                IDML_ICON_SELECT
+            MENUITEM "Clipboard",                   IDML_ICON_CLIP
+            MENUITEM "Plugin",                      IDML_ICON_PLUGIN
+            MENUITEM "Key Press",                   IDML_ICON_KEYMACRO
+        END
+        MENUITEM "Make This Data One-Time",     IDML_MAKE_ONETIME
+        MENUITEM "Make This Data Permanent",    IDML_MAKE_PERMANENT
+        MENUITEM "Empty This Folder",           IDML_FOLDER_CLEAR
+        POPUP "New(&N)"
+        BEGIN
+            MENUITEM "Data(&D)",                    IDML_NEW_DATA
         END
         MENUITEM SEPARATOR
-        MENUITEM "Make This Data Permanent",    IDML_MAKE_PERMANENT
-        MENUITEM "Make This Data One-Time",     IDML_MAKE_ONETIME
-        MENUITEM SEPARATOR
-        MENUITEM "Empty This Folder",           IDML_FOLDER_CLEAR
-        MENUITEM SEPARATOR
+        MENUITEM "Auto Re-select Icons for All Items", IDML_RESELECT_ICONS
+        MENUITEM "Delete All One-Time Items",   IDML_LIST_SERCH
+        MENUITEM "Make All One-Time Items Permanent", ID_DUMMY_MAKEALLONE
         MENUITEM "Collapse All    Ctrl+Shift+Left", IDML_CLOSE_ALL
-        MENUITEM "Find(&F)    Shift+F3",        IDML_LIST_SERCH
+        MENUITEM "Find(&F)    Ctrl+F",          IDML_LIST_SERCH
         MENUITEM "Select Multiple Item(&M)",    IDML_CHECK_ITEM
         MENUITEM SEPARATOR
         MENUITEM "Copy Item(&C)",               IDML_COPY_DATA
         MENUITEM "Paste Copied Item(&P)",       IDML_DATA_PASTE
         MENUITEM SEPARATOR
-        MENUITEM "Import Data",                 IDML_IMPORT
-        MENUITEM "Export Data",                 IDML_EXPORT
+        MENUITEM "Import Data (Insert after selected item)...", IDML_IMPORT
+        MENUITEM "Export Selected Item...",     IDML_EXPORT
         MENUITEM SEPARATOR
         MENUITEM "Settings",                    IDML_OPTION
     END

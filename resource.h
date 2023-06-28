@@ -283,6 +283,8 @@
 #define IDML_IMPORT                     32809
 #define IDML_EXPORT                     32810
 #define IDML_NEW_FOLDER                 32810
+#define ID_Menu32811                    32811
+#define ID_DUMMY_MAKEALLONE             32812
 #define IDML_ICON_KEY                   32816
 #define IDML_ICON_DATE                  32817
 #define IDML_ICON_EXE                   32818
@@ -402,7 +404,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        175
-#define _APS_NEXT_COMMAND_VALUE         32811
+#define _APS_NEXT_COMMAND_VALUE         32813
 #define _APS_NEXT_CONTROL_VALUE         1041
 #define _APS_NEXT_SYMED_VALUE           105
 #endif
