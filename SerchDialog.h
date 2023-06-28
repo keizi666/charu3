@@ -14,20 +14,23 @@
 //---------------------------------------------------
 // CSerchDialog ダイアログ
 //---------------------------------------------------
-class CSerchDialog : public CDialog
+class CSearchDialog : public CDialog
 {
 // コンストラクション
 public:
-	CSerchDialog(CWnd* pParent = NULL);   // 標準のコンストラクタ
+	CSearchDialog(CWnd* pParent = NULL);   // 標準のコンストラクタ
 
 // ダイアログ データ
 	//{{AFX_DATA(CSerchDialog)
-	enum { IDD = IDD_SERCH };
-	int		m_nSerchKind;
-	int		m_nSerchLogic;
-	CString	m_strSerchKey;
+	enum { IDD = IDD_SEARCH };
+	int m_nSearchByName;
+	int m_nSearchByData;
+	int m_nSearchLogic;
+	CString	m_strSearchKeywords;
 	//}}AFX_DATA
 
+	int GetTarget();
+	int GetSearchLogic();
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
@@ -40,7 +43,6 @@ public:
 protected:
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CSerchDialog)
-	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

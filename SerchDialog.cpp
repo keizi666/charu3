@@ -19,7 +19,7 @@ extern	CCharu3App theApp;
 //---------------------------------------------------
 // CSerchDialog ダイアログ
 //---------------------------------------------------
-BEGIN_MESSAGE_MAP(CSerchDialog, CDialog)
+BEGIN_MESSAGE_MAP(CSearchDialog, CDialog)
 	//{{AFX_MSG_MAP(CSerchDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -27,47 +27,40 @@ END_MESSAGE_MAP()
 //---------------------------------------------------
 //コンストラクタ
 //---------------------------------------------------
-CSerchDialog::CSerchDialog(CWnd* pParent /*=NULL*/)	: CDialog(CSerchDialog::IDD, pParent)
+CSearchDialog::CSearchDialog(CWnd* pParent /*=NULL*/)	: CDialog(CSearchDialog::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CSerchDialog)
-	m_nSerchKind = -1;
-	m_nSerchLogic = -1;
-	m_strSerchKey = _T("");
+	m_nSearchByName = (theApp.m_ini.m_nSearchTarget & SEARCH_TARGET_NAME) ? 1 : 0;
+	m_nSearchByData = (theApp.m_ini.m_nSearchTarget & SEARCH_TARGET_DATA) ? 1 : 0;
+	m_nSearchLogic = theApp.m_ini.m_nSearchLogic;
+	m_strSearchKeywords = _T("");
 	//}}AFX_DATA_INIT
 }
 
 //---------------------------------------------------
 //データエクスチェンジ
 //---------------------------------------------------
-void CSerchDialog::DoDataExchange(CDataExchange* pDX)
+void CSearchDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	m_nSerchKind = theApp.m_ini.m_nSerchKind;
-	m_nSerchLogic = theApp.m_ini.m_nSerchLogic;
 	//{{AFX_DATA_MAP(CSerchDialog)
-	if(GetDlgItem(IDC_RADIO_NAME))
-		DDX_Radio(pDX, IDC_RADIO_NAME, m_nSerchKind);
+	if(GetDlgItem(IDC_SEARCH_NAME))
+		DDX_Check(pDX, IDC_SEARCH_NAME, m_nSearchByName);
+	if (GetDlgItem(IDC_SEARCH_DATA))
+		DDX_Check(pDX, IDC_SEARCH_DATA, m_nSearchByData);
 	if(GetDlgItem(IDC_RADIO_AND))
-		DDX_Radio(pDX, IDC_RADIO_AND, m_nSerchLogic);
-	if(GetDlgItem(IDC_SERCH_TEXT))
-		DDX_Text(pDX, IDC_SERCH_TEXT, m_strSerchKey);
+		DDX_Radio(pDX, IDC_RADIO_AND, m_nSearchLogic);
+	if(GetDlgItem(IDC_SEARCH_TEXT))
+		DDX_Text(pDX, IDC_SEARCH_TEXT, m_strSearchKeywords);
 	//}}AFX_DATA_MAP
 }
 
-
-//---------------------------------------------------
-// CSerchDialog メッセージ ハンドラ
-//---------------------------------------------------
-
-void CSerchDialog::OnOK() 
+int CSearchDialog::GetTarget()
 {
-	CDialog::OnOK();
+	return (m_nSearchByName ? SEARCH_TARGET_NAME : 0) | (m_nSearchByData ? SEARCH_TARGET_DATA : 0);
 }
 
-
-
-
-
-
-
-
+int CSearchDialog::GetSearchLogic()
+{
+	return m_nSearchLogic;
+}

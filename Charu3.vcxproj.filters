@@ -72,13 +72,7 @@
     <ClCompile Include="StringWork.cpp">
       <Filter>一般クラス</Filter>
     </ClCompile>
-    <ClCompile Include="AddDialog.cpp">
-      <Filter>機能ダイアログ</Filter>
-    </ClCompile>
     <ClCompile Include="EditDialog.cpp">
-      <Filter>機能ダイアログ</Filter>
-    </ClCompile>
-    <ClCompile Include="MyFileDialog.cpp">
       <Filter>機能ダイアログ</Filter>
     </ClCompile>
     <ClCompile Include="SerchDialog.cpp">
@@ -99,11 +93,17 @@
     <ClCompile Include="Charu3Tree.cpp">
       <Filter>ツリー＆データ</Filter>
     </ClCompile>
-    <ClCompile Include="MyTreeDialog.cpp">
-      <Filter>ツリー＆データ</Filter>
-    </ClCompile>
     <ClCompile Include="Color.cpp">
       <Filter>一般クラス</Filter>
+    </ClCompile>
+    <ClCompile Include="OptAdvanced.cpp">
+      <Filter>設定クラス\ダイアログ</Filter>
+    </ClCompile>
+    <ClCompile Include="InitialDialog.cpp">
+      <Filter>機能ダイアログ</Filter>
+    </ClCompile>
+    <ClCompile Include="MyTreeDialog.cpp">
+      <Filter>ツリー＆データ</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,13 +149,7 @@
     <ClInclude Include="StringWork.h">
       <Filter>一般クラス</Filter>
     </ClInclude>
-    <ClInclude Include="AddDialog.h">
-      <Filter>機能ダイアログ</Filter>
-    </ClInclude>
     <ClInclude Include="EditDialog.h">
-      <Filter>機能ダイアログ</Filter>
-    </ClInclude>
-    <ClInclude Include="MyFileDialog.h">
       <Filter>機能ダイアログ</Filter>
     </ClInclude>
     <ClInclude Include="SerchDialog.h">
@@ -179,14 +173,20 @@
     <ClInclude Include="Charu3Tree.h">
       <Filter>ツリー＆データ</Filter>
     </ClInclude>
-    <ClInclude Include="MyTreeDialog.h">
-      <Filter>ツリー＆データ</Filter>
-    </ClInclude>
     <ClInclude Include="nlomann\json.hpp">
       <Filter>一般クラス</Filter>
     </ClInclude>
     <ClInclude Include="Color.h">
       <Filter>一般クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="OptAdvanced.h">
+      <Filter>設定クラス\ダイアログ</Filter>
+    </ClInclude>
+    <ClInclude Include="InitialDialog.h">
+      <Filter>機能ダイアログ</Filter>
+    </ClInclude>
+    <ClInclude Include="MyTreeDialog.h">
+      <Filter>ツリー＆データ</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

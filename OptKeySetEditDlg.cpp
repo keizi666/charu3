@@ -2,9 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "charu3.h"
-#include "OptKeySetEditDlg.h"
 #include "General.h"
+#include "OptKeySetEditDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,29 +35,29 @@ void COptKeySetEditDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptKeySetEditDlg)
 	//}}AFX_DATA_MAP
-	if(GetDlgItem(IDC_OPT_PASTKEY2))
-		DDX_Control(pDX, IDC_OPT_PASTKEY2, m_pasteKey);
-	if(GetDlgItem(IDC_OPT_COPYKEY2))
-		DDX_Control(pDX, IDC_OPT_COPYKEY2, m_copyKey);
-	if(GetDlgItem(IDC_OPT_PASTE_MESS))
-		DDX_Text(pDX, IDC_OPT_PASTE_MESS, m_pasteMessage);
-	if(GetDlgItem(IDC_OPT_COPY_MESS))
-		DDX_Text(pDX, IDC_OPT_COPY_MESS, m_copyMessage);
-	if(GetDlgItem(IDC_OPT_KEY_ACTION2_01))
-		DDX_Radio(pDX, IDC_OPT_KEY_ACTION2_01, m_keyAction);
-	if(GetDlgItem(IDC_OPT_MATCH_COMBO))
-		DDX_CBIndex(pDX, IDC_OPT_MATCH_COMBO, m_matchCombo);
-	if(GetDlgItem(IDC_OPT_WINCAP_COMBO))
+	if (GetDlgItem(IDC_OPT_WINCAP_COMBO)) {
 		DDX_CBString(pDX, IDC_OPT_WINCAP_COMBO, m_caption);
-	if(GetDlgItem(IDC_OPT_COPY_WAIT2)) {
+	}
+	if (GetDlgItem(IDC_OPT_MATCH_COMBO)) {
+		DDX_CBIndex(pDX, IDC_OPT_MATCH_COMBO, m_matchCombo);
+	}
+	if (GetDlgItem(IDC_OPT_COPYKEY2)) {
+		DDX_Control(pDX, IDC_OPT_COPYKEY2, m_copyKey);
+	}
+	if (GetDlgItem(IDC_OPT_PASTKEY2)) {
+		DDX_Control(pDX, IDC_OPT_PASTKEY2, m_pasteKey);
+	}
+	if (GetDlgItem(IDC_OPT_COPY_WAIT2)) {
 		DDX_Text(pDX, IDC_OPT_COPY_WAIT2, m_copyWait);
-		DDV_MinMaxUInt(pDX, m_copyWait, 0, 1000);
+		// Not worked correctly
+		//DDV_MinMaxInt(pDX, m_copyWait, 0, 1000);
 	}
-	if(GetDlgItem(IDC_OPT_PASTE_WAIT2)) {
+	if (GetDlgItem(IDC_OPT_PASTE_WAIT2)) {
 		DDX_Text(pDX, IDC_OPT_PASTE_WAIT2, m_pasteWait);
-		DDV_MinMaxUInt(pDX, m_pasteWait, 0, 1000);
+		// Not worked correctly
+		//DDV_MinMaxInt(pDX, m_pasteWait, 0, 1000);
 	}
-	if(GetDlgItem(IDC_OPT_HISTORY_SIZE_LIMIT)) {
+	if (GetDlgItem(IDC_OPT_HISTORY_SIZE_LIMIT)) {
 		DDX_Text(pDX, IDC_OPT_HISTORY_SIZE_LIMIT, m_nHistoryLimit);
 	}
 
@@ -110,7 +109,7 @@ void COptKeySetEditDlg::DoDataExchange(CDataExchange* pDX)
 
 //---------------------------------------------------
 //関数名	EnumWindowTitle				[friend]
-//機能		ウィンドウタイトルを列挙
+//機能		ウィンドウの名前を列挙
 //---------------------------------------------------
 BOOL CALLBACK EnumWindowTitle(HWND hwnd, LPARAM lParam)
 {
@@ -140,8 +139,6 @@ END_MESSAGE_MAP()
 BOOL COptKeySetEditDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	
-	EnumWindows(&EnumWindowTitle,(LPARAM)GetDlgItem(IDC_OPT_WINCAP_COMBO));
-	
+	EnumWindows(&EnumWindowTitle, (LPARAM)GetDlgItem(IDC_OPT_WINCAP_COMBO));
 	return TRUE;
 }

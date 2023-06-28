@@ -3,7 +3,6 @@
 									2002/12/07 (c)Keizi
 ----------------------------------------------------------*/
 
-#include "stdafx.h"
 #include "General.h"
 
 #ifdef _DEBUG
@@ -66,47 +65,54 @@ CString CGeneral::wideCharToCString(wchar_t *szUnicodeBuff)
 	return strRet;
 }
 
-bool CGeneral::getPrefNumber(nlohmann::json& j, const char* key, double& result)
+bool CGeneral::getSettingBool(nlohmann::json& j, const char* key, bool defaultValue)
 {
-	if (j[key].is_number()) {
-		nlohmann::json::iterator it = j.find(key);
-		if (it != j.end() && it.value().is_number()) {
-			result = it.value().get<double>();
-			return true;
-		}
-	}
-	return false;
+	nlohmann::json::iterator it = j.find(key);
+	return (it != j.end() && it.value().is_boolean()) ? it.value().get<bool>() : defaultValue;
 }
 
-std::string CGeneral::getPrefString(nlohmann::json& j, const char* key)
+double CGeneral::getSettingNumber(nlohmann::json& j, const char* key, double defaultValue)
 {
-	if (j[key].is_string()) {
-		nlohmann::json::iterator it = j.find(key);
-		if (it != j.end() && it.value().is_string()) {
-			return it.value().get<std::string>();
-		}
-	}
-	return std::string();
+	nlohmann::json::iterator it = j.find(key);
+	return (it != j.end() && it.value().is_number()) ? it.value().get<double>() : defaultValue;
 }
 
-CString CGeneral::getPrefCString(nlohmann::json& j, const char* key)
+std::string CGeneral::getSettingString(nlohmann::json& j, const char* key, std::string defaultValue)
 {
-	if (j[key].is_string()) {
-		nlohmann::json::iterator it = j.find(key);
-		if (it != j.end() && it.value().is_string()) {
-			auto s = it.value().get<std::string>();
-			const char* cptr = s.c_str();
-			int size = MultiByteToWideChar(CP_UTF8, 0, cptr, -1, nullptr, 0);
-			wchar_t* wbuf = new wchar_t[size];
-			if (wbuf) {
-				MultiByteToWideChar(CP_UTF8, 0, cptr, -1, wbuf, size);
-				CString cs = CString(wbuf);
-				delete[] wbuf;
-				return cs;
-			}
+	nlohmann::json::iterator it = j.find(key);
+	return (it != j.end() && it.value().is_string()) ? it.value().get<std::string>() : defaultValue;
+}
+
+CString CGeneral::getSettingCString(nlohmann::json& j, const char* key, CString defaultValue)
+{
+	nlohmann::json::iterator it = j.find(key);
+	if (it != j.end() && it.value().is_string()) {
+		auto s = it.value().get<std::string>();
+		const char* cptr = s.c_str();
+		int size = MultiByteToWideChar(CP_UTF8, 0, cptr, -1, nullptr, 0);
+		wchar_t* wbuf = new wchar_t[size];
+		if (wbuf) {
+			MultiByteToWideChar(CP_UTF8, 0, cptr, -1, wbuf, size);
+			CString cs = CString(wbuf);
+			delete[] wbuf;
+			return cs;
 		}
 	}
-	return CString();
+	return defaultValue;
+}
+
+CStringA CGeneral::ConvertUnicodeToUTF8(const CStringW& uni)
+{
+	if (uni.IsEmpty()) return "";
+	CStringA utf8;
+	int cc = 0;
+	// get length (cc) of the new multibyte string excluding the \0 terminator first
+	if ((cc = WideCharToMultiByte(CP_UTF8, 0, uni, -1, NULL, 0, 0, 0) - 1) > 0) {
+		char* buf = utf8.GetBuffer(cc);
+		if (buf) WideCharToMultiByte(CP_UTF8, 0, uni, -1, buf, cc, 0, 0);
+		utf8.ReleaseBuffer();
+	}
+	return utf8;
 }
 
 void CGeneral::flatSB_UpdateMetrics(HWND hWnd)
@@ -455,9 +461,9 @@ void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSource
 			fputs(szMbcsBuff,outPut);
 			delete[] szMbcsBuff;
 		}
-		fflush(outPut);
-		OutputDebugString(strWrite);
 		fclose(outPut);
+
+		OutputDebugString(strWrite);
 	}
 #else
 	if((outPut = fopen(strFileName, "a")) != NULL) {

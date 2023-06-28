@@ -10,8 +10,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // OptPopup.h : ヘッダー ファイル
-//
-#include "MyHotkeyCtrl.h"
+#include "resource.h"
+
+#include <afxwin.h>
 
 //---------------------------------------------------
 // COptPopup ダイアログ
@@ -25,36 +26,38 @@ public:
 // ダイアログ データ
 	//{{AFX_DATA(COptPopup)
 	enum { IDD = IDD_OPT_POPUP };
-	CMyHotkeyCtrl	m_ctrlFifoKey;
-	CMyHotkeyCtrl	m_ctrlPopupKey;
-	int		m_nPopupCombo;
 	//}}AFX_DATA
 
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(COptPopup)
-	public:
+public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL DestroyWindow();
-	protected:
+
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 	//}}AFX_VIRTUAL
 
 // インプリメンテーション
-protected:
-
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(COptPopup)
-	afx_msg void hotkeyEnablePOP();
-	afx_msg void hotkeyDisablePOP();
-	afx_msg void hotkeyEnableFIFO();
-	afx_msg void hotkeyDisableFIFO();
-	afx_msg void OnOptPopupEdge();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnCbnSelchangeOptPopupPos();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	int m_nSelectByTypingCaseInsensitive;
+	int m_nSelectByTypingAutoPaste;
+	int m_nSelectByTypingAutoExpand;
+	int m_nScrollVertical;
+	int m_nScrollHorizontal;
+	int m_nSingleExpand;
+	int m_nKeepSelection;
+	int m_nKeepFolders;
 };
 
 //{{AFX_INSERT_LOCATION}}

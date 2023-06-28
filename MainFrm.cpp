@@ -4,9 +4,8 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
-#include "General.h"
 #include "MainFrm.h"
+#include "Charu3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,7 +42,8 @@ CMainFrame::CMainFrame()
 
 	//メニューを原則有効化
 	CFrameWnd::m_bAutoMenuEnable = FALSE;
-	
+
+	m_PopupMenu.LoadMenu(MAKEINTRESOURCE(IDR_MAINFRAME));
 }
 
 //---------------------------------------------------
@@ -52,6 +52,7 @@ CMainFrame::CMainFrame()
 //---------------------------------------------------
 CMainFrame::~CMainFrame()
 {
+	Shell_NotifyIcon(NIM_DELETE, &m_nIcon);
 }
 
 //---------------------------------------------------
@@ -63,7 +64,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	// フレームのクライアント領域全体を占めるビューを作成します。
-	if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))	{
+	if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL)) {
 		TRACE0("Failed to create view window\n");
 		return -1;
 	}
@@ -75,7 +76,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_hIcon = (HICON)LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_RUN), IMAGE_ICON, 16, 16, 0);//スモールアイコン
 	m_hStopIcon = (HICON)LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_STOP), IMAGE_ICON, 16, 16, 0);//スモールアイコン
 #endif
-	//タスクトレイアイコンを設定する
+	// 通知領域アイコンを設定する
 	m_nIcon.cbSize = sizeof(NOTIFYICONDATA);
 	m_nIcon.uID = 4;
 	m_nIcon.hWnd = m_hWnd;
@@ -119,29 +120,6 @@ bool CMainFrame::checkTrayPos()
 }
 
 //---------------------------------------------------
-//関数名	setMenu()
-//機能		メニュー初期化
-//---------------------------------------------------
-void CMainFrame::setMenu()
-{
-	m_PopupMenu.LoadMenu(MAKEINTRESOURCE(IDR_MAINFRAME));//メニュークラスにメニューを読む
-	//マクロプラグインメニューを構築
-	if(theApp.m_ini.m_strMacroPluginName == DAT_FORMAT)
-		m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU,MF_CHECKED);
-	else
-		m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU,MF_UNCHECKED);
-
-	int nMax = theApp.m_pTree->m_rwPlugin.size();//データ数を取得
-	for(int i = 0; i < nMax; i++) {
-		m_PopupMenu.InsertMenu (IDM_MACRO_CHARU,MF_STRING,IDM_MACRO_CHARU + i + 1,theApp.m_pTree->m_rwPlugin[i].m_strSoftName);
-		if(theApp.m_ini.m_strMacroPluginName == theApp.m_pTree->m_rwPlugin[i].m_strSoftName) {
-			m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU + i + 1,MF_CHECKED);
-		}
-	}
-	m_PopupMenu.InsertMenu (IDM_MACRO_CHARU,MF_SEPARATOR);
-}
-
-//---------------------------------------------------
 //関数名	PreCreateWindow(CREATESTRUCT& cs)
 //機能		初期化前処理
 //---------------------------------------------------
@@ -167,13 +145,15 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 //---------------------------------------------------
 void CMainFrame::changeClip()
 {
-	Sleep(theApp.m_ini.m_etc.m_nClipboardOpenDelay);
+	if (theApp.m_ini.m_nClipboardOpenDelay > 0) {
+		Sleep(theApp.m_ini.m_nClipboardOpenDelay);
+	}
 	CString strClipBord;
-	theApp.m_clipbord.getClipboardText(strClipBord);//クリップボードの内容を取得
+	theApp.m_clipboard.getClipboardText(strClipBord, theApp.m_ini.m_nClipboardRetryTimes, theApp.m_ini.m_nClipboardRetryInterval);//クリップボードの内容を取得
 	theApp.changeClipBord(strClipBord);//本体にクリップボードの変更を通知
 
-	if(!theApp.m_ini.m_etc.m_nToolTip) {
-		//タスクトレイのツールヒントを変更
+	if(theApp.m_ini.m_etc.m_bShowClipboardInTooltipOfNofifyIcon) {
+		// 通知領域のツールチップを変更
 		strClipBord = strClipBord.Left(1024);
 		strClipBord.Replace(_T("	"),_T("･"));//タブを置換
 		_tcscpy_s(m_nIcon.szTip,strClipBord.Left(63));
@@ -243,78 +223,46 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 //---------------------------------------------------
 LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
 {
-	//タスクトレイ処理
-	if(message == WM_TASKTRAY && theApp.getPhase() == PHASE_IDOL) {
-		if(lParam == WM_RBUTTONUP) {//メニューを出す
-			//マクロプラグインメニューを構築
-			int nMax = theApp.m_pTree->m_rwPlugin.size();//データ数を取得
-			if(theApp.m_ini.m_strMacroPluginName == DAT_FORMAT)
-				m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU,MF_CHECKED);
-			else
-				m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU,MF_UNCHECKED);
-			for(int i = 0; i < nMax; i++) {
-				if(theApp.m_ini.m_strMacroPluginName == theApp.m_pTree->m_rwPlugin[i].m_strSoftName)
-					m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU + i + 1,MF_CHECKED);
-				else
-					m_PopupMenu.CheckMenuItem(IDM_MACRO_CHARU + i + 1,MF_UNCHECKED);
-			}
-
+	// tasktray messages
+	if (WM_TASKTRAY == message && theApp.getPhase() == PHASE_IDOL) {
+		if (WM_RBUTTONUP == lParam) {
+			// menu
 			POINT point;
 			GetCursorPos(&point);
 			this->SetForegroundWindow();
-
 			m_PopupMenu.GetSubMenu(0)->TrackPopupMenu(TPM_BOTTOMALIGN | TPM_LEFTALIGN | TPM_LEFTBUTTON,point.x, point.y, this);
 			PostMessage(0,0,0);
-			return FALSE;//タスクトレイのメニューも出ちゃうので追加
+			return FALSE; // to suppress notification area menu
 		}
-		//左クリック
-		else if(lParam == WM_LBUTTONDOWN) {
-			if(theApp.m_ini.m_etc.m_nIconClick == 0) {
+		else if (WM_LBUTTONDOWN == lParam) {
+			if (theApp.m_ini.m_etc.m_nIconClick == 0) {
+				// popup treeview
 				if(theApp.getPhase() == PHASE_IDOL) {
-					theApp.popupTreeWinMC(m_hActive);//ポップアップを出す
+					theApp.popupTreeWinMC(m_hActive);
 				}
 			}
-			else
-				theApp.toggleStockMode();//ストックモード切替
-
+			else {
+				// toggle stock mode
+				theApp.toggleStockMode();
+			}
 		}
-		else if(checkTrayPos()) {//カーソルがアイコンに重なった
+		else if (checkTrayPos()) {
 			m_hActive = ::GetForegroundWindow();
-			if(m_hActive != theApp.m_focusInfo.m_hActiveWnd) {
+			if (m_hActive != theApp.m_focusInfo.m_hActiveWnd) {
 				CGeneral::getFocusInfo(&theApp.m_focusInfo);
 			}
 		}
 	}
-	//クリップボードチェインの変更を検知
-  	if(message == WM_CHANGECBCHAIN) {
-		//デバッグログ処理
-		if(theApp.m_ini.m_nDebug) {
+	// clipboard update notification
+	if (WM_CLIPBOARDUPDATE == message) {
+		if (theApp.m_ini.m_bDebug) {
 			CString strText;
-			strText.Format(_T("WM_CHANGECBCHAIN wParam:%x lParam:%x nowNext:%x\n"),wParam,lParam,theApp.m_clipbord.getNextCb());
-			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-		}
-
-		if(theApp.m_clipbord.getNextCb() == (HWND)wParam){
-			theApp.m_clipbord.setNextCb((HWND)lParam);
-
-		}
-		else if(m_hWnd != theApp.m_clipbord.getNextCb() && theApp.m_clipbord.getNextCb())
-			::SendMessage(theApp.m_clipbord.getNextCb(),message,wParam,lParam);
-	}
-	//クリップボードの変更を検知
- 	if(message == WM_DRAWCLIPBOARD) {
-		//デバッグログ処理
-		if(theApp.m_ini.m_nDebug) {
-			CString strText;
-			strText.Format(_T("WM_DRAWCLIPBOARD wParam:%x lParam:%x nowNext:%x\n"),wParam,lParam,theApp.m_clipbord.getNextCb());
-			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
+			strText.Format(_T("WM_CLIPBOARDUPDATE wParam:%x lParam:%x\n"), wParam, lParam);
+			CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
 		}
 		changeClip();
-		if(m_hWnd != theApp.m_clipbord.getNextCb() && theApp.m_clipbord.getNextCb()) {//次のチェインにメッセージを渡す
-			::SendMessage(theApp.m_clipbord.getNextCb(), message, wParam, lParam);
-		}
 	}
-	
+
 	return CFrameWnd::WindowProc(message, wParam, lParam);
 }
 
@@ -324,28 +272,16 @@ LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 //---------------------------------------------------
 void CMainFrame::OnExit() 
 {
-	theApp.m_clipbord.delClipView(m_hWnd);
 	theApp.OnExit();
 	Shell_NotifyIcon(NIM_DELETE,&m_nIcon);
 	CFrameWnd::DestroyWindow();
 }
 
-void CMainFrame::OnTimer(UINT_PTR nIDEvent) 
-{
-	if(nIDEvent == TIMER_SELF_DIAGNOSIS){
-		if(!Shell_NotifyIcon(NIM_MODIFY,&m_nIcon)){
-			Shell_NotifyIcon(NIM_ADD,&m_nIcon);
-		}
-	}	
-	CFrameWnd::OnTimer(nIDEvent);
-}
-
 BOOL CMainFrame::OnQueryEndSession() 
 {
-	if (!CFrameWnd::OnQueryEndSession())
+	if (!CFrameWnd::OnQueryEndSession()) {
 		return FALSE;
-	
-	theApp.m_clipbord.delClipView(m_hWnd);
+	}
 	theApp.OnExit();
 	Shell_NotifyIcon(NIM_DELETE,&m_nIcon);
 	

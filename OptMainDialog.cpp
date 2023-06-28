@@ -4,8 +4,8 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
 #include "OptMainDialog.h"
+#include "Charu3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,7 +67,7 @@ BOOL COptMainDialog::OnInitDialog()
 
 	//タブを設定
 	CString strTabText;
-	//{_T("一般"),_T("ストックモード"),_T("ポップアップ"),_T("ビジュアル"),_T("キー設定")};
+	//{_T("全般"),_T("スタイル"),_T("ポップアップ"),_T("ストックモード"),_T("キーイベント設定")};
 
 	for(i = 0; i <= MAX_OPT_PAGE; i++) {
 		strTabText.LoadString(APP_INF_TABNAME_01 + i);
@@ -82,26 +82,26 @@ BOOL COptMainDialog::OnInitDialog()
     ScreenToClient(&rect);
 
 	//ページを構築
-	int nDialogID[] = {IDD_OPT_ETC,IDD_OPT_FIFO,IDD_OPT_POPUP,IDD_OPT_VISUAL,IDD_OPT_KEYSET};
+	int nDialogID[] = {IDD_SETTINGS_01_GENERAL, IDD_SETTINGS_02_STYLE, IDD_SETTINGS_03_DATATREE, IDD_SETTINGS_04_STOCKMODE, IDD_SETTINGS_05_KEYS, IDD_SETTINGS_06_ADVANCED };
 
 	m_OptionPage[0] = &m_EtcPage;
-	m_OptionPage[1] = &m_FifoPage;
+	m_OptionPage[1] = &m_VisualPage;
 	m_OptionPage[2] = &m_PopupPage;
-	m_OptionPage[3] = &m_VisualPage;
+	m_OptionPage[3] = &m_FifoPage;
 	m_OptionPage[4] = &m_KeysetPage;
+	m_OptionPage[5] = &m_AdvancedPage;
 
 	//初期設定
 	for(i = 0; i <= MAX_OPT_PAGE; i++) {
 	    m_OptionPage[i]->Create(nDialogID[i],this);
-	    if (theApp.m_pTreeDlg->IsWindowVisible()) theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
 	    m_OptionPage[i]->MoveWindow(&rect);
-	    m_OptionPage[i]->ShowWindow(SW_HIDE);
+		m_OptionPage[i]->ShowWindow(SW_HIDE);
 	}
 	m_nPage = theApp.m_ini.m_nOptionPage;
     m_OptionPage[m_nPage]->ShowWindow(SW_SHOW);
-	m_ctrlTab.SetCurFocus(m_nPage);	
-	
-	return TRUE;  // コントロールにフォーカスを設定しないとき、戻り値は TRUE となります
+	m_ctrlTab.SetCurFocus(m_nPage);
+
+	return FALSE; // コントロールにフォーカスを設定しないとき、戻り値は TRUE となります
 	              // 例外: OCX プロパティ ページの戻り値は FALSE となります
 }
 
@@ -126,7 +126,9 @@ void COptMainDialog::OnSelchangeOptTab(NMHDR* pNMHDR, LRESULT* pResult)
 //---------------------------------------------------
 BOOL COptMainDialog::DestroyWindow() 
 {
-	if (theApp.m_pTreeDlg->IsWindowVisible()) theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
+	if (theApp.m_pTreeDlg->IsWindowVisible()) {
+		theApp.m_pTreeDlg->RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+	}
 
 	for(int i = 0; i <= MAX_OPT_PAGE; i++) {
 		m_OptionPage[i]->UpdateData();

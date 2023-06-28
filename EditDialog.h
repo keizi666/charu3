@@ -9,19 +9,24 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// EditDialog.h : ヘッダー ファイル
-//
+
+#include "resource.h"
+#include "Charu3Tree.h"
 #include "MyEditCtrl.h"
+#include "Init.h"
+
+#include <vector>
+#include <afxwin.h>
+
 //---------------------------------------------------
 // CEditDialog ダイアログ
 //---------------------------------------------------
 class CEditDialog : public CDialog
 {
-// コンストラクション
 public:
-	CEditDialog(CWnd* pParent,STRING_DATA data);   // 標準のコンストラクタ
-	STRING_DATA m_data;
-	void setMacroTempate(vector<MACRO_STRUCT> *pMacro,vector<MACRO_STRUCT> *pDataMacro){
+	CEditDialog(CWnd* pParent, STRING_DATA* pData, bool newData);
+	STRING_DATA* m_pData;
+	void setMacroTempate(std::vector<MACRO_STRUCT>* pMacro, std::vector<MACRO_STRUCT>* pDataMacro) {
 		m_vctMacro = pMacro;
 		m_vctDataMacro = pDataMacro;
 	}
@@ -29,15 +34,13 @@ public:
 	//{{AFX_DATA(CEditDialog)
 	enum { IDD = IDD_EDIT };
 	CMyEditCtrl	m_ctrlDataEdit;
+	CMyEditCtrl m_ctrlNameEdit;
 	CMyEditCtrl	m_ctrlMacroEdit;
 	CComboBox	m_ctrlKindCombo;
 	CComboBox	m_ctrlIconCombo;
-	CButton	m_ctrlRirekiChk;
 	CComboBox	m_ctrlMacro;
 	CComboBox	m_ctrlDataMacro;
-	CString	m_strDataName;
-	CString	m_strDataMacro;
-	CString	m_strData;
+	CButton m_ctrlPasteFile;
 	//}}AFX_DATA
 
 
@@ -50,13 +53,9 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 	//}}AFX_VIRTUAL
 
-// インプリメンテーション
 protected:
-	vector<MACRO_STRUCT>  *m_vctMacro;
-	vector<MACRO_STRUCT>  *m_vctDataMacro;
-	void pasteMacro(int nCtrlID,CString strString);
-	CFont *m_cFontEdit,*m_cOlgFontEdit;
-	CFont *m_cFontTitle,*m_cOlgFontTitle;
+	std::vector<MACRO_STRUCT>* m_vctMacro;
+	std::vector<MACRO_STRUCT>* m_vctDataMacro;
 
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CEditDialog)
@@ -65,9 +64,17 @@ protected:
 	virtual void OnOK();
 	afx_msg void OnSelchangeEditMacroCombo();
 	afx_msg void OnSelchangeEditDataMacroCombo();
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg void OnKindChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	void InsertText(CEdit& ctrl, CString strString);
+	void ResetExtendedSettingItems();
+
+	bool m_bNewData;
+	int m_nKind;
 };
 
 //{{AFX_INSERT_LOCATION}}

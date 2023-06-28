@@ -4,8 +4,8 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "charu3.h"
 #include "PaletStatic.h"
+#include "charu3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

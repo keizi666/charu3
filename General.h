@@ -31,6 +31,11 @@ class CGeneral
 public:
 	CGeneral();
 	virtual ~CGeneral();
+
+	static inline int BoolToInt(bool value) {
+		return value ? 1 : 0;
+	}
+
 	static WORD hotkey2MOD(WORD wModS);
 	static UINT mod2Hotkey(UINT uMod);
 	static UINT mod2VK(UINT uMod);
@@ -49,9 +54,11 @@ public:
 	static bool loadBitmapFile(CString strFileName,CBitmap *BitMap);
 	static CString getLastErrorMessage();
 	static CString wideCharToCString(wchar_t *szUnicodeBuff);
-	static bool getPrefNumber(nlohmann::json& j, const char* key, double& result);
-	static std::string getPrefString(nlohmann::json& j, const char* key);
-	static CString getPrefCString(nlohmann::json& j,  const char* key);
+	static bool getSettingBool(nlohmann::json& j, const char* key, bool defaultValue);
+	static double getSettingNumber(nlohmann::json& j, const char* key, double defaultValue);
+	static std::string getSettingString(nlohmann::json& j, const char* key, std::string defaultValue);
+	static CString getSettingCString(nlohmann::json& j,  const char* key, CString defaultValue);
+	static CStringA ConvertUnicodeToUTF8(const CStringW& uni);
 	static CString getWindowTitle(HWND hWnd);
 
 	static void writeLog(CString strFileName,CString strLogText,CString strSourceFile,int nLine);

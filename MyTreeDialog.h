@@ -10,6 +10,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // MyTreeDialog.h : ヘッダー ファイル
+#include "resource.h"
 #include "Charu3Tree.h"
 
 //---------------------------------------------------
@@ -27,19 +28,17 @@ public:
 	void setTree(CCharu3Tree *pTreeCtrl) {
 		m_pTreeCtrl = pTreeCtrl;
 	}
-	BOOL showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelect,HTREEITEM hOpenItem = NULL);
+	BOOL showWindowPos(POINT pos, POINT size, int nCmdShow, bool isSelect, HTREEITEM hOpenItem = NULL);
 	void enterData(STRING_DATA *dataPtr);
 	void closePopup();
-	void DrawBorder();
 
 	STRING_DATA *m_selectDataPtr;
 
 // ダイアログ データ
 	//{{AFX_DATA(CMyTreeDialog)
-	enum { IDD = IDD_POPUP_DIALOG };
+	enum { IDD = IDD_DATA_TREE_VIEW };
 	CCharu3Tree	*m_pTreeCtrl;
 	//}}AFX_DATA
-
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
@@ -76,25 +75,13 @@ protected:
 	CString m_strQuickKey;
 	HTREEITEM m_hQuickItem;
 
-	void changeTipString(STRING_DATA data);	
-	void drawFrame(CDC* pDC, CRect& rect);
-	void drawLline(CDC* pDC, CPoint* point, COLORREF col);
-
-	void pouupMenu(CPoint point);
-	bool quickAccess(UINT uKeyCode);
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CMyTreeDialog)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL OnInitDialog();
-	afx_msg void OnAdd();
-	afx_msg void OnChangeOnetime();
-	afx_msg void OnChangeLock();
-	afx_msg void OnCopyData();
-	afx_msg void OnDataPaste();
-	afx_msg void OnDelete();
 	afx_msg void OnEdit();
-	afx_msg void OnExport();
-	afx_msg void OnFolderClear();
+	afx_msg void OnDelete();
+	afx_msg void OnRename();
 	afx_msg void OnIconClip();
 	afx_msg void OnIconDate();
 	afx_msg void OnIconExe();
@@ -103,9 +90,20 @@ protected:
 	afx_msg void OnIconPlugin();
 	afx_msg void OnIconRelate();
 	afx_msg void OnIconSelect();
-	afx_msg void OnImport();
-	afx_msg void OnListSerch();
+	afx_msg void OnMakeOnetime();
+	afx_msg void OnMakePermanent();
+	afx_msg void OnFolderClear();
+	afx_msg void OnNewData();
 	afx_msg void OnNewFolder();
+	afx_msg void OnReselectIcons();
+	afx_msg void OnCleanupAllOnetime();
+	afx_msg void OnMakeAllOnetimePermanent();
+	afx_msg void OnCloseAll();
+	afx_msg void OnListSearch();
+	afx_msg void OnCopyData();
+	afx_msg void OnDataPaste();
+	afx_msg void OnImport();
+	afx_msg void OnExport();
 	afx_msg void OnOption();
 	afx_msg void OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult);
@@ -119,6 +117,15 @@ protected:
 	afx_msg void OnCheckItem();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	void drawFrame(CDC* pDC, CRect& rect);
+	void drawLline(CDC* pDC, CPoint* point, COLORREF col);
+	void popupMenu(CPoint point);
+	void changeTipString(STRING_DATA data);
+	bool selectByTyping(UINT uKeyCode);
+
+	bool m_bCheckbox;
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -4,10 +4,12 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
 #include "OptKeySet.h"
 #include "General.h"
 #include "OptKeySetEditDlg.h"
+#include "Charu3.h"
+
+#include <list>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,39 +37,45 @@ COptKeySet::COptKeySet(CWnd* pParent /*=NULL*/) : CDialog(COptKeySet::IDD, pPare
 void COptKeySet::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(COptKeySet)
-	//}}AFX_DATA_MAP
-	if(GetDlgItem(IDC_OPT_PASTKEY))
-		DDX_Control(pDX, IDC_OPT_PASTKEY, m_ctrlPasteKey);
-	if(GetDlgItem(IDC_OPT_KEY_INI_LIST))
-		DDX_Control(pDX, IDC_OPT_KEY_INI_LIST, m_ctrlIniList);
-	if(GetDlgItem(IDC_OPT_COPYKEY))
-		DDX_Control(pDX, IDC_OPT_COPYKEY, m_ctrlCopyKey);
-	if(GetDlgItem(IDC_OPT_KEY_ACTION01))
-		DDX_Radio(pDX, IDC_OPT_KEY_ACTION01, theApp.m_ini.m_key.m_defKeySet.m_nMessage);
 
-	if(GetDlgItem(IDC_OPT_COPY_WAIT)) {
+	//{{AFX_DATA_MAP(COptKeySet)
+
+	// obsolete
+	//if(GetDlgItem(IDC_OPT_KEY_ACTION01))
+	//	DDX_Radio(pDX, IDC_OPT_KEY_ACTION01, theApp.m_ini.m_key.m_defKeySet.m_nMessage);
+
+	if (GetDlgItem(IDC_OPT_COPYKEY)) {
+		DDX_Control(pDX, IDC_OPT_COPYKEY, m_ctrlCopyKey);
+	}
+	if (GetDlgItem(IDC_OPT_PASTKEY)) {
+		DDX_Control(pDX, IDC_OPT_PASTKEY, m_ctrlPasteKey);
+	}
+	if (GetDlgItem(IDC_OPT_COPY_WAIT)) {
 		DDX_Text(pDX, IDC_OPT_COPY_WAIT, theApp.m_ini.m_key.m_defKeySet.m_nCopyWait);
-		DDV_MinMaxUInt(pDX, theApp.m_ini.m_key.m_defKeySet.m_nCopyWait, 0, 1000);
+		// Not worked correctly
+		//DDV_MinMaxInt(pDX, theApp.m_ini.m_key.m_defKeySet.m_nCopyWait, 0, 1000);
 	}
 	if(GetDlgItem(IDC_OPT_PASTE_WAIT)) {
 		DDX_Text(pDX, IDC_OPT_PASTE_WAIT, theApp.m_ini.m_key.m_defKeySet.m_nPasteWait);
-		DDV_MinMaxUInt(pDX, theApp.m_ini.m_key.m_defKeySet.m_nPasteWait,0, 1000);
+		// Not worked correctly
+		//DDV_MinMaxInt(pDX, theApp.m_ini.m_key.m_defKeySet.m_nPasteWait,0, 1000);
 	}
 	if(GetDlgItem(IDC_OPT_HISTORY_SIZE_LIMIT)) {
 		DDX_Text(pDX, IDC_OPT_HISTORY_SIZE_LIMIT, theApp.m_ini.m_key.m_nHistoryLimit);
 	}
+	if (GetDlgItem(IDC_OPT_KEY_INI_LIST)) {
+		DDX_Control(pDX, IDC_OPT_KEY_INI_LIST, m_ctrlIniList);
+	}
+	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(COptKeySet, CDialog)
 	//{{AFX_MSG_MAP(COptKeySet)
+	ON_BN_CLICKED(IDC_OPT_KEY_EDIT, OnOptKeyEdit)
 	ON_BN_CLICKED(IDC_OPT_KEY_ADD, OnOptKeyAdd)
 	ON_BN_CLICKED(IDC_OPT_KEY_DALETE, OnOptKeyDalete)
-	ON_BN_CLICKED(IDC_OPT_KEY_OK, OnOptKeyOk)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_OPT_KEY_INI_LIST, OnItemchangedOptKeyIniList)
-	ON_WM_SHOWWINDOW()
-	ON_BN_CLICKED(IDC_OPT_KEY_EDIT, OnOptKeyEdit)
 	ON_NOTIFY(NM_DBLCLK, IDC_OPT_KEY_INI_LIST, OnDblclkOptKeyIniList)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -149,9 +157,9 @@ void COptKeySet::SetListData(CHANGE_KEY sKeyData, CHANGE_KEY *dataPtr, bool isSe
 //関数名	findData(CHANGE_KEY *ptr)
 //機能		キー設定データリストからptrが指している要素を探す
 //---------------------------------------------------
-list<CHANGE_KEY>::iterator COptKeySet::findData(CHANGE_KEY *dataPtr)
+std::list<CHANGE_KEY>::iterator COptKeySet::findData(CHANGE_KEY *dataPtr)
 {
-	list<CHANGE_KEY>::iterator it;
+	std::list<CHANGE_KEY>::iterator it;
 	for (it = m_MyKeyList.begin(); it != m_MyKeyList.end(); it++) {
 		if (&*it == dataPtr) {
 			break;
@@ -196,9 +204,23 @@ CHANGE_KEY COptKeySet::windouToKeyOption()
 */
 	return key;
 }
+
 //---------------------------------------------------
 // COptKeySet メッセージ ハンドラ
 //---------------------------------------------------
+
+//---------------------------------------------------
+//関数名	PreTranslateMessage(MSG* pMsg)
+//機能		メッセージ前処理
+//---------------------------------------------------
+BOOL COptKeySet::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB && ::GetKeyState(VK_CONTROL) < 0) {
+		::PostMessage(::GetParent(this->m_hWnd), pMsg->message, VK_PRIOR, pMsg->lParam);
+	}
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
 
 //---------------------------------------------------
 //関数名	OnInitDialog()
@@ -218,16 +240,16 @@ BOOL COptKeySet::OnInitDialog()
 
 	CString strRes;
 	strRes.LoadString(APP_INF_KEY_LIST_CAPTION01);
-	m_ctrlIniList.InsertColumn(0,strRes,LVCFMT_LEFT,117);
+	m_ctrlIniList.InsertColumn(0,strRes,LVCFMT_LEFT,188);
 	strRes.LoadString(APP_INF_KEY_LIST_CAPTION02);
-	m_ctrlIniList.InsertColumn(1,strRes,LVCFMT_LEFT,80);
+	m_ctrlIniList.InsertColumn(1,strRes,LVCFMT_LEFT,60);
 	strRes.LoadString(APP_INF_KEY_LIST_CAPTION03);
-	m_ctrlIniList.InsertColumn(2,strRes,LVCFMT_LEFT,76);
+	m_ctrlIniList.InsertColumn(2,strRes,LVCFMT_LEFT,55);
 	strRes.LoadString(APP_INF_KEY_LIST_CAPTION04);
-	m_ctrlIniList.InsertColumn(3,strRes,LVCFMT_LEFT,80);
+	m_ctrlIniList.InsertColumn(3,strRes,LVCFMT_LEFT,55);
 	ListView_SetExtendedListViewStyle(m_ctrlIniList.GetSafeHwnd(),LVS_EX_FULLROWSELECT);
 
-	list<CHANGE_KEY>::iterator it;
+	std::list<CHANGE_KEY>::iterator it;
 	CHANGE_KEY key;
 	int i;
 	
@@ -251,6 +273,70 @@ BOOL COptKeySet::OnInitDialog()
 	return TRUE;
 }
 
+//---------------------------------------------------
+//関数名	DestroyWindow()
+//機能		終了処理
+//---------------------------------------------------
+BOOL COptKeySet::DestroyWindow()
+{
+	WORD wVkCodeP, wModP;
+	WORD wVkCodeC, wModC;
+	//基本キー設定を取得、設定
+	m_ctrlCopyKey.GetHotKey(wVkCodeC, wModC);
+	wModC = CGeneral::hotkey2MOD(wModC);
+
+	m_ctrlPasteKey.GetHotKey(wVkCodeP, wModP);
+	wModP = CGeneral::hotkey2MOD(wModP);
+
+	theApp.m_ini.setPasteHotkey(wVkCodeP, wModP, wVkCodeC, wModC);
+
+	//拡張キー設定をコピーする
+	CHANGE_KEY ckey;
+	std::list<CHANGE_KEY>::iterator it;
+
+	theApp.m_ini.m_key.m_KeyList.clear();
+
+	for (it = m_MyKeyList.begin(); it != m_MyKeyList.end(); it++) {
+		theApp.m_ini.m_key.m_KeyList.insert(theApp.m_ini.m_key.m_KeyList.end(), *it);
+	}
+	return CDialog::DestroyWindow();
+}
+
+//---------------------------------------------------
+//関数名	OnOptKeyEdit() 
+//機能		キー設定変更
+//---------------------------------------------------
+void COptKeySet::OnOptKeyEdit()
+{
+	COptKeySetEditDlg keySetEditDlg(this);
+
+	if (m_nSelItem > -1) {
+		CString strBuff;
+		keySetEditDlg.setKeyInfo(*m_dataPtrSelect);
+
+		strBuff.Format(_T("%x,%x,%x"), m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.Msg,
+			m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.wParam,
+			m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.lParam);
+		keySetEditDlg.m_pasteMessage = strBuff;
+		strBuff.Format(_T("%x,%x,%x"), m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.Msg,
+			m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.wParam,
+			m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.lParam);
+		keySetEditDlg.m_copyMessage = strBuff;
+
+		keySetEditDlg.m_keyAction = m_dataPtrSelect->m_sCopyPasteKey.m_nMessage;
+		keySetEditDlg.m_matchCombo = m_dataPtrSelect->m_nMatch;
+		keySetEditDlg.m_caption = m_dataPtrSelect->m_strTitle;
+		keySetEditDlg.m_copyWait = m_dataPtrSelect->m_sCopyPasteKey.m_nCopyWait;
+		keySetEditDlg.m_pasteWait = m_dataPtrSelect->m_sCopyPasteKey.m_nPasteWait;
+		keySetEditDlg.m_nHistoryLimit = m_dataPtrSelect->m_nHistoryLimit;
+
+		int nRet = keySetEditDlg.DoModal();
+		if (nRet == IDOK) {
+			*m_dataPtrSelect = keySetEditDlg.getKeyInfo();
+			SetListData(*m_dataPtrSelect, m_dataPtrSelect, true, m_nSelItem);
+		}
+	}
+}
 
 //---------------------------------------------------
 //関数名	OnOptKeyAdd()
@@ -295,7 +381,7 @@ void COptKeySet::OnOptKeyDalete()
 		strBuff.Format(strRes,m_dataPtrSelect->m_strTitle);
 		int nRet = AfxMessageBox(strBuff,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
 		if(nRet == IDYES) {
-			list<CHANGE_KEY>::iterator it = findData(m_dataPtrSelect);
+			std::list<CHANGE_KEY>::iterator it = findData(m_dataPtrSelect);
 			it = m_MyKeyList.erase(it);
 			m_dataPtrSelect = it != m_MyKeyList.end() ? &*it : nullptr;
 			m_ctrlIniList.DeleteItem(m_nSelItem);
@@ -306,20 +392,6 @@ void COptKeySet::OnOptKeyDalete()
 			}
 		}
 	}
-}
-
-//---------------------------------------------------
-//関数名	OnOptKeyOk()
-//機能		適用
-//---------------------------------------------------
-void COptKeySet::OnOptKeyOk() 
-{
-/*	if(m_nSelItem > -1) {
-		CHANGE_KEY key;
-		key = windouToKeyOption();
-		*m_itSelect = key;
-		SetListData(key,m_itSelect,true,m_nSelItem);
-	}	*/
 }
 
 //---------------------------------------------------
@@ -365,90 +437,6 @@ void COptKeySet::OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 	CheckRadioButton(IDC_OPT_KEY_ACTION2_01,IDC_OPT_KEY_ACTION2_03,
 		IDC_OPT_KEY_ACTION2_01 + m_itSelect->m_sCopyPasteKey.m_nMessage);
 	*pResult = 0;*/
-}
-
-//---------------------------------------------------
-//関数名	DestroyWindow()
-//機能		終了処理
-//---------------------------------------------------
-BOOL COptKeySet::DestroyWindow() 
-{
-	WORD wVkCodeP,wModP;
-	WORD wVkCodeC,wModC;
-	//基本キー設定を取得、設定
-	m_ctrlCopyKey.GetHotKey(wVkCodeC,wModC);
-	wModC = CGeneral::hotkey2MOD(wModC);
-
-	m_ctrlPasteKey.GetHotKey(wVkCodeP,wModP);
-	wModP = CGeneral::hotkey2MOD(wModP);
-	
-	theApp.m_ini.setPasteHotkey(wVkCodeP,wModP,wVkCodeC,wModC);
-
-	//拡張キー設定をコピーする
-	CHANGE_KEY ckey;
-	list<CHANGE_KEY>::iterator it;
-	
-	theApp.m_ini.m_key.m_KeyList.clear();
-	
-	for(it = m_MyKeyList.begin(); it != m_MyKeyList.end(); it++) {
-		theApp.m_ini.m_key.m_KeyList.insert(theApp.m_ini.m_key.m_KeyList.end(),*it);
-	}
-	return CDialog::DestroyWindow();
-}
-
-//---------------------------------------------------
-//関数名	PreTranslateMessage(MSG* pMsg)
-//機能		メッセージ前処理
-//---------------------------------------------------
-BOOL COptKeySet::PreTranslateMessage(MSG* pMsg) 
-{
-	if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB && ::GetKeyState(VK_CONTROL) < 0){
-		::PostMessage(::GetParent(this->m_hWnd),pMsg->message,VK_PRIOR,pMsg->lParam);
-	}
-	
-	return CDialog::PreTranslateMessage(pMsg);
-}
-
-void COptKeySet::OnShowWindow(BOOL bShow, UINT nStatus) 
-{
-	CDialog::OnShowWindow(bShow, nStatus);
-	if(bShow)	GetDlgItem(IDC_OPT_KEY_ACTION01)->SetFocus();	
-}
-
-//---------------------------------------------------
-//関数名	OnOptKeyEdit() 
-//機能		キー設定変更
-//---------------------------------------------------
-void COptKeySet::OnOptKeyEdit() 
-{
-	COptKeySetEditDlg keySetEditDlg(this);
-
-	if(m_nSelItem > -1) {
-		CString strBuff;
-		keySetEditDlg.setKeyInfo(*m_dataPtrSelect);
-
-		strBuff.Format(_T("%x,%x,%x"),m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.Msg,
-			m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.wParam,
-			m_dataPtrSelect->m_sCopyPasteKey.m_pasteMessage.lParam);
-		keySetEditDlg.m_pasteMessage = strBuff;
-		strBuff.Format(_T("%x,%x,%x"),m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.Msg,
-			m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.wParam,
-			m_dataPtrSelect->m_sCopyPasteKey.m_copyMessage.lParam);
-		keySetEditDlg.m_copyMessage = strBuff;
-
-		keySetEditDlg.m_keyAction = m_dataPtrSelect->m_sCopyPasteKey.m_nMessage;
-		keySetEditDlg.m_matchCombo = m_dataPtrSelect->m_nMatch;
-		keySetEditDlg.m_caption = m_dataPtrSelect->m_strTitle;
-		keySetEditDlg.m_copyWait = m_dataPtrSelect->m_sCopyPasteKey.m_nCopyWait;
-		keySetEditDlg.m_pasteWait = m_dataPtrSelect->m_sCopyPasteKey.m_nPasteWait;
-		keySetEditDlg.m_nHistoryLimit = m_dataPtrSelect->m_nHistoryLimit;
-
-		int nRet = keySetEditDlg.DoModal();
-		if(nRet == IDOK) {
-			*m_dataPtrSelect = keySetEditDlg.getKeyInfo();
-			SetListData(*m_dataPtrSelect, m_dataPtrSelect, true, m_nSelItem);
-		}
-	}
 }
 
 void COptKeySet::OnDblclkOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult) 

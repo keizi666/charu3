@@ -6,7 +6,11 @@
 #endif // _MSC_VER > 1000
 // OptKeySetEditDlg.h : ヘッダー ファイル
 //
+#include "resource.h"
+#include "Init.h"
 #include "MyHotkeyCtrl.h"
+
+#include <afxwin.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // COptKeySetEditDlg ダイアログ
@@ -27,8 +31,8 @@ public:
 	int		m_keyAction;
 	int		m_matchCombo;
 	CString	m_caption;
-	UINT	m_copyWait;
-	UINT	m_pasteWait;
+	int m_copyWait;
+	int m_pasteWait;
 	int		m_nHistoryLimit;
 	//}}AFX_DATA
 	friend BOOL CALLBACK EnumWindowTitle(HWND hwnd, LPARAM lParam);

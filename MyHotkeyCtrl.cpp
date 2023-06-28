@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "charu3.h"
 #include "MyHotkeyCtrl.h"
 
 #ifdef _DEBUG

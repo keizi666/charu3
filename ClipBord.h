@@ -10,37 +10,41 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <WinUser.h>
+
 //---------------------------------------------------
 // ƒNƒ‰ƒX’è‹`
 //---------------------------------------------------
-class CClipBord  
+class CClipBoard
 {
 public:
-	CClipBord();
-	virtual ~CClipBord();
-	void setParent(HWND hWnd){
+	CClipBoard() : m_hParentWnd(NULL), m_bListening(false), m_nRetryCount(0), m_nRetryInterval(0) {}
+	CClipBoard(int retryCount, int retryInterval) : m_hParentWnd(NULL), m_bListening(false), m_nRetryCount(retryCount), m_nRetryInterval(retryInterval) {}
+	virtual ~CClipBoard() {}
+	void setParent(HWND hWnd) {
 		m_hParentWnd = hWnd;
-		m_hNextClipbord = ::SetClipboardViewer(hWnd);
+		StartListener();
 	}
-	BOOL getClipboardText(CString& sData);
-	BOOL setClipboardText(const CString sData);
-
-	void delClipView(HWND hWnd){
-	    ::ChangeClipboardChain(hWnd,getNextCb());
-	}
-	void resetClipView(HWND hWnd){
-		if(GetClipboardViewer() != hWnd){
-			::ChangeClipboardChain(hWnd,getNextCb());
-			m_hNextClipbord = NULL;
-			m_hNextClipbord = ::SetClipboardViewer(hWnd);
+	void StartListener() {
+		if (!m_bListening) {
+			::AddClipboardFormatListener(m_hParentWnd);
+			m_bListening = true;
 		}
 	}
+	void StopListener() {
+		::RemoveClipboardFormatListener(m_hParentWnd);
+		m_bListening = false;
+	}
+	bool getClipboardText(CString& sData);
+	bool setClipboardText(const CString sData);
+	bool getClipboardText(CString& sData, int retryCount, int retryInterval);
+	bool setClipboardText(const CString sData, int retryCount, int retryInterval);
 
-	HWND getNextCb() {return m_hNextClipbord;};
-	void setNextCb(HWND hWnd) {m_hNextClipbord = hWnd;};
-protected:
+private:
 	HWND m_hParentWnd;
-	HWND m_hNextClipbord;
+	bool m_bListening;
+	int m_nRetryCount;
+	int m_nRetryInterval;
 };
 
 #endif // !defined(AFX_CLIPBORD_H__582AEB30_7E55_42E1_8D77_A28FAD0F7294__INCLUDED_)

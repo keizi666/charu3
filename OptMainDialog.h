@@ -11,12 +11,15 @@
 #endif // _MSC_VER > 1000
 // OptMainDialog.h : ヘッダー ファイル
 #include "OptEtc.h"
+#include "OptVisual.h"
+#include "OptPopup.h"
 #include "OptFifo.h"
 #include "OptKeySet.h"
-#include "OptPopup.h"
-#include "OptVisual.h"
+#include "OptAdvanced.h"
 
-#define MAX_OPT_PAGE 4
+#include <afxwin.h>
+
+#define MAX_OPT_PAGE 5
 
 //---------------------------------------------------
 // COptMainDialog ダイアログ
@@ -27,15 +30,16 @@ class COptMainDialog : public CDialog
 public:
 	COptMainDialog(CWnd* pParent = NULL,int nPage = 0);   // 標準のコンストラクタ
 
-	COptEtc		m_EtcPage;
-	COptPopup	m_PopupPage;
-	COptFifo	m_FifoPage;
-	COptKeySet	m_KeysetPage;
-	COptVisual  m_VisualPage;
+	COptEtc m_EtcPage;
+	COptVisual m_VisualPage;
+	COptPopup m_PopupPage;
+	COptFifo m_FifoPage;
+	COptKeySet m_KeysetPage;
+	COptAdvanced m_AdvancedPage;
 
 // ダイアログ データ
 	//{{AFX_DATA(COptMainDialog)
-	enum { IDD = IDD_OPTION };
+	enum { IDD = IDD_PREFERENCES };
 	CTabCtrl	m_ctrlTab;
 	//}}AFX_DATA
 

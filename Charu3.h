@@ -30,7 +30,7 @@
 #include "General.h"
 
 #include <list>
-using namespace std;
+#include <vector>
 
 // App Name
 #ifdef _UNICODE
@@ -42,6 +42,9 @@ using namespace std;
 //ファイル名設定
 #define NAME				_T("Charu3")
 #define INI_FILE			_T("Charu3.ini")
+#define STATE_FILE			_T("state.json")
+#define SETTINGS_FILE		_T("settings.json")
+#define DEBUGLOG_FILE		_T("debug.log")
 #define DAT_FILE			_T("Charu3.c3d")
 #define HELP_FILE			_T("Doc\\index.html")
 #define DAT_FORMAT			"Charu3Data1.0"
@@ -68,7 +71,6 @@ using namespace std;
 #define SZTRAY_CLASS		"TrayNotifyWnd"
 #define TITL_LENGTH 64	//タイトル文字列の長さ
 
-#define TIMER_SELF_DIAGNOSIS	605
 #define TIMER_ACTIVE			606
 #define TIMER_MOUSE				607
 #define CHARU_QUICK_TIMER		610
@@ -98,28 +100,6 @@ using namespace std;
 #define EXMACRO_DIRECT_COPY "directcopykey"
 #define EXMACRO_HOT_KEY		"hotkey"
 
-//データ種別
-#define KIND_ONETIME 0x01	//ワンタイム項目
-#define KIND_LOCK    0x02	//ノーマル項目
-#define KIND_FOLDER  0x04	//フォルダ項目
-#define KIND_RIREKI  0x08	//履歴フォルダ
-
-#define KIND_DATA_ALL	 0x03	//データ
-#define KIND_FOLDER_ALL  0x0C	//フォルダ
-
-#define FOLDER_OPEN 0x10	//フォルダオープンマスク
-
-//データアイコン種別
-#define KIND_DEFAULT 0  //アイコン指定無し
-
-#define KIND_DATE	1	//日付
-#define KIND_EXE    2	//実行
-#define KIND_RELATE 3	//関連付け
-#define KIND_SELECT 4	//選択
-#define KIND_CLIP   5	//クリップボード
-#define KIND_PLUG   6   //プラグイン
-#define KIND_KEY    7   //キーマクロ
-
 //アイコン番号
 #define ICON_FOLDER	 0
 #define ICON_RIREKI_FOLDER 2
@@ -136,18 +116,17 @@ using namespace std;
 #define KEY_DOWN			0x01
 #define KEY_UP				0x02
 
-//検索種別
-#define SERCH_KIND_TITLE	0
-#define SERCH_KIND_TEXT		1
-#define SERCH_KIND_ALL		2
-#define SERCH_LOGIC_AND		0
-#define SERCH_LOGIC_OR		1
+//検索方法
+#define SEARCH_TARGET_NAME	(1<<0)
+#define SEARCH_TARGET_DATA	(1<<1)
+#define SEARCH_LOGIC_AND	0
+#define SEARCH_LOGIC_OR	1
 
 //キャプションのマッチ方法
-#define MATCH_FORWORD	0
-#define MATCH_BACK		1
-#define MATCH_INCLUDE	2
-#define MATCH_PHRASE	3
+#define MATCH_FORWARD	0
+#define MATCH_BACKWARD	1
+#define MATCH_PARTIAL	2
+#define MATCH_EXACT		3
 
 #define PHASE_START		0x00
 #define PHASE_IDOL		0x01
@@ -191,7 +170,7 @@ public:
 	CCharu3App();
 	~CCharu3App();
 
-	void popupTreeWindow(POINT pos,int nSelect,HTREEITEM hOpenItem = NULL);
+	void popupTreeWindow(POINT pos, bool keepSelection, HTREEITEM hOpenItem = NULL);
 	void closeTreeWindow(int nRet);
 	void pasteData(CString strPaste,COPYPASTE_KEY key,HWND hWnd);
 	void execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetItem,HWND hWnd);
@@ -206,8 +185,8 @@ public:
 	void stopHotkey();
 	void setAppendHotKey();
 	void stopAppendHotKey();
-	CString convertMacro(STRING_DATA *SourceData,CString strSelect,CString strClip,CString strSoftName);
-	CString convertMacroPlugin(STRING_DATA *SourceData,CString strSelect,CString strClip,CString strSoftName);
+	CString convertMacro(STRING_DATA* SourceData, CString strSelect, CString strClip, CString strSoftName);
+	CString convertMacroPlugin(STRING_DATA* SourceData, CString strSelect, CString strClip, CString strSoftName);
 
 	HWND getAppWnd(){return m_hSelfWnd;}
 	bool isCloseKey(){return m_isCloseKey;}
@@ -220,13 +199,18 @@ public:
 	void fifoClipbord();
 	void resetTreeDialog();
 
+	bool SelectFile();
+	CString NewFile();
+	void SaveData();
+
 	CMyTreeDialog *m_pTreeDlg;
 	CInit m_ini;
-	CClipBord m_clipbord;
+	CClipBoard m_clipboard;
 	CCharu3Tree *m_pTree;
 	CMainFrame *m_pMainFrame;
 	COPYPASTE_KEY m_keySet;
 	FOCUS_INFO m_focusInfo;
+	HWND m_hSelfWnd;
 
 	// オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
@@ -234,7 +218,6 @@ public:
 	public:
 	virtual BOOL InitInstance();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	virtual int ExitInstance();
 	//}}AFX_VIRTUAL
 
@@ -242,48 +225,41 @@ public:
 
 public:
 	//{{AFX_MSG(CCharu3App)
-	afx_msg void OnAbout();
-	afx_msg void OnHelp();
 	afx_msg void OnExit();
 	afx_msg void OnOption();
-	afx_msg void OnDataSave();
-	afx_msg void OnOnetimeClear();
-	afx_msg void OnAllLock();
-	afx_msg void OnChangData();
+	afx_msg void OnAbout();
+	afx_msg void OnHelp();
 	afx_msg void OnAddData();
-	afx_msg void OnIconDecide();
-	afx_msg void OnBbsOpen();
+	afx_msg void OnChangData();
+	afx_msg void OnExport();
 	afx_msg void OnStockStop();
-	afx_msg void OnVisualFile();
 	afx_msg void OnResetTree();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void getPopupPos(POINT *pPos,int nPosType);
-	bool cornerPopup();
-	void reviseWindowPos(POINT *pos);
+	void adjustLocation(POINT *pos);
 	void convHotKeyConf(CString strKey,UINT *pMod,UINT *pVK,bool *isDoubleClick);
 	int getKeycode(TCHAR *szKeyName);
 	bool setAppendKeyInit(HWND hTopWindow,COPYPASTE_KEY *keySet);
 	void playHotItem(int nTarget);
-	void playData(STRING_DATA data,CString strClip,CString strSelect,bool isPaste,bool isChange = true);
+	void playData(STRING_DATA data, CString strClip, CString strSelect, bool isPaste, bool isChange = true);
 
 	HTREEITEM m_hSelectItemBkup;
 	DWORD m_dwDoubleKeyPopTime,m_dwDoubleKeyFifoTime;
 
-	vector<HOT_KEY_CODE> m_hotkeyVector;
+	std::vector<HOT_KEY_CODE> m_hotkeyVector;
 	KEY_CODE_NAME m_keyStruct[256];
-	void init();
+	bool init();
 	HANDLE m_hMutex;				//重複起動判別ハンドル
 	HWND m_hActiveKeyWnd;
-	HWND m_hSelfWnd;
 	HINSTANCE m_hLangDll;
 
-	bool m_isCloseKey,m_isStockMode,m_isCornerPopup;
+	bool m_isCloseKey,m_isStockMode;
 	BOOL m_isImeStatus;
 	int m_nPhase;
-	CString m_strlClipBackup;
+	CString m_strClipBackup;
 };
 
 //---------------------------------------------------
@@ -301,20 +277,16 @@ public:
 
 	// ClassWizard 仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(CAboutDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV のサポート
 	//}}AFX_VIRTUAL
 
 // インプリメンテーション
 protected:
 	//{{AFX_MSG(CAboutDlg)
-	afx_msg void OnWeb();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
-
-
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。

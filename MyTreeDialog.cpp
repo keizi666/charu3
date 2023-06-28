@@ -4,13 +4,13 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
 #include "MyTreeDialog.h"
-#include "AddDialog.h"
 #include "EditDialog.h"
-#include "General.h"
-#include "MyFileDialog.h"
 #include "SerchDialog.h"
+#include "Charu3.h"
+
+#include <list>
+#include <vector>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,25 +24,24 @@ extern CCharu3App theApp;
 //関数名	CMyTreeDialog
 //機能		コンストラクタ
 //---------------------------------------------------
-CMyTreeDialog::CMyTreeDialog(CWnd* pParent /*=NULL*/) : CDialog(CMyTreeDialog::IDD, pParent)
-{
+CMyTreeDialog::CMyTreeDialog(CWnd* pParent /*=NULL*/)
+    : CDialog(CMyTreeDialog::IDD, pParent)
+    , m_selectDataPtr(nullptr)
+    , m_isInitOK(false)
+    , m_isModal(true)
+    , m_isAltDown(false)
+    , m_dataPtrDbClick(nullptr)
+    , m_hCopyData(nullptr)
+    , m_dwStartTime(0)
+    , m_hDLL(NULL)
+    , m_pExStyle(NULL)
+    , m_cOlgFont(nullptr)
+    , m_strQuickKey("")
+    , m_bCheckbox(false)
+	{
 	//{{AFX_DATA_INIT(CMyTreeDialog)
 	//}}AFX_DATA_INIT
-	m_selectDataPtr = nullptr;
 	m_brBack.m_hObject = NULL;
-
-	m_isInitOK = false;
-	m_isModal = true;
-	m_isAltDown = false;
-	m_dataPtrDbClick = nullptr;
-	m_hCopyData = nullptr;
-	m_dwStartTime = 0;
-
-	m_hDLL = NULL;
-	m_pExStyle = NULL;
-	m_cOlgFont = nullptr;
-
-	m_strQuickKey = "";
 }
 
 //---------------------------------------------------
@@ -56,148 +55,159 @@ void CMyTreeDialog::DoDataExchange(CDataExchange* pDX)
 	if(GetDlgItem(IDC_MY_TREE))
 		DDX_Control(pDX, IDC_MY_TREE, *m_pTreeCtrl);
 	//}}AFX_DATA_MAP
-
 }
-
 
 BEGIN_MESSAGE_MAP(CMyTreeDialog, CDialog)
 	//{{AFX_MSG_MAP(CMyTreeDialog)
 	ON_WM_SIZE()
-	ON_COMMAND(IDML_ADD, OnAdd)
-	ON_COMMAND(IDML_CHANGE_ONETIME, OnChangeOnetime)
-	ON_COMMAND(IDML_CHANGE_LOCK, OnChangeLock)
-	ON_COMMAND(IDML_COPY_DATA, OnCopyData)
-	ON_COMMAND(IDML_DATA_PASTE, OnDataPaste)
-	ON_COMMAND(IDML_DELETE, OnDelete)
 	ON_COMMAND(IDML_EDIT, OnEdit)
-	ON_COMMAND(IDML_EXPORT, OnExport)
-	ON_COMMAND(IDML_FOLDER_CLEAR, OnFolderClear)
-	ON_COMMAND(IDML_ICON_CLIP, OnIconClip)
+	ON_COMMAND(IDML_DELETE, OnDelete)
+	ON_COMMAND(IDML_RENAME, OnRename)
+	ON_COMMAND(IDML_ICON_KEY, OnIconKey)
 	ON_COMMAND(IDML_ICON_DATE, OnIconDate)
 	ON_COMMAND(IDML_ICON_EXE, OnIconExe)
-	ON_COMMAND(IDML_ICON_KEY, OnIconKey)
-	ON_COMMAND(IDML_ICON_KEYMACRO, OnIconKeymacro)
-	ON_COMMAND(IDML_ICON_PLUGIN, OnIconPlugin)
 	ON_COMMAND(IDML_ICON_RELATE, OnIconRelate)
 	ON_COMMAND(IDML_ICON_SELECT, OnIconSelect)
-	ON_COMMAND(IDML_IMPORT, OnImport)
-	ON_COMMAND(IDML_LIST_SERCH, OnListSerch)
+	ON_COMMAND(IDML_ICON_CLIP, OnIconClip)
+	ON_COMMAND(IDML_ICON_PLUGIN, OnIconPlugin)
+	ON_COMMAND(IDML_ICON_KEYMACRO, OnIconKeymacro)
+	ON_COMMAND(IDML_MAKE_ONETIME, OnMakeOnetime)
+	ON_COMMAND(IDML_MAKE_PERMANENT, OnMakePermanent)
+	ON_COMMAND(IDML_FOLDER_CLEAR, OnFolderClear)
+	ON_COMMAND(IDML_NEW_DATA, OnNewData)
 	ON_COMMAND(IDML_NEW_FOLDER, OnNewFolder)
+	ON_COMMAND(IDML_RESELECT_ICONS, OnReselectIcons)
+	ON_COMMAND(IDML_CLEANUP_ONETIME, OnCleanupAllOnetime)
+	ON_COMMAND(IDML_MAKE_PERMANENT_ALL, OnMakeAllOnetimePermanent)
+	ON_COMMAND(IDML_CLOSE_ALL, OnCloseAll)
+	ON_COMMAND(IDML_LIST_SERCH, OnListSearch)
+	ON_COMMAND(IDML_CHECK_ITEM, OnCheckItem)
+	ON_COMMAND(IDML_COPY_DATA, OnCopyData)
+	ON_COMMAND(IDML_DATA_PASTE, OnDataPaste)
+	ON_COMMAND(IDML_IMPORT, OnImport)
+	ON_COMMAND(IDML_EXPORT, OnExport)
 	ON_COMMAND(IDML_OPTION, OnOption)
 	ON_NOTIFY(NM_RCLICK, IDC_MY_TREE, OnRclickMyTree)
 	ON_NOTIFY(NM_CLICK, IDC_MY_TREE, OnClickMyTree)
-	ON_NOTIFY(TVN_KEYDOWN, IDC_MY_TREE, OnKeydownMyTree)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_MY_TREE, OnKillfocusMyTree)
+	ON_NOTIFY(TVN_KEYDOWN, IDC_MY_TREE, OnKeydownMyTree)
+	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_MY_TREE, OnBeginlabeleditMyTree)
+	ON_NOTIFY(TVN_ENDLABELEDIT, IDC_MY_TREE, OnEndlabeleditMyTree)
 	ON_WM_SHOWWINDOW()
     ON_WM_NCPAINT()
 	ON_WM_CTLCOLOR()
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_MY_TREE, OnBeginlabeleditMyTree)
-	ON_NOTIFY(TVN_ENDLABELEDIT, IDC_MY_TREE, OnEndlabeleditMyTree)
-	ON_COMMAND(IDML_CHECK_ITEM, OnCheckItem)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //---------------------------------------------------
-//関数名	PouupMenu(CPoint point)
+//関数名	OnInitDialog()
+//機能		ダイアログの初期化
+//---------------------------------------------------
+BOOL CMyTreeDialog::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	m_toolTip.Create(this, TTS_ALWAYSTIP);
+	m_toolTip.SetMaxTipWidth(400);
+
+	m_toolTip.Activate(TRUE);
+
+	m_toolTip.AddTool(m_pTreeCtrl, _T(""));
+
+	m_hDLL = ::LoadLibrary(_T("user32"));
+	m_pExStyle = m_hDLL != 0 ? (PFUNC)::GetProcAddress(m_hDLL, "SetLayeredWindowAttributes") : NULL;
+	m_PopupMenu.LoadMenu(MAKEINTRESOURCE(IDR_LISTMENU));//メニュークラスにメニューを読む
+	return TRUE;
+}
+
+//---------------------------------------------------
+//関数名	PopupMenu(CPoint point)
 //機能		ポップアップメニューを出す
 //---------------------------------------------------
-void CMyTreeDialog::pouupMenu(CPoint point)
+void CMyTreeDialog::popupMenu(CPoint point)
 {
 	if(m_isModal || !m_isInitOK) return;
-	CPoint HitPoint;
 
-	UINT tmp;
-	HTREEITEM hTreeItem;
-
-	//カーソル位置の項目を選択
-	HitPoint = point;
-	this->ScreenToClient(&HitPoint);
-	hTreeItem = m_pTreeCtrl->HitTest(HitPoint,&tmp);
-
-	//メニューを出す
-	if(hTreeItem) {
-		list<STRING_DATA>::iterator it;
+	CPoint HitPoint = point;
+	ScreenToClient(&HitPoint);
+	HTREEITEM hTreeItem = m_pTreeCtrl->HitTest(HitPoint);
+	m_PopupMenu.EnableMenuItem(IDML_EDIT, hTreeItem ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_DELETE, hTreeItem ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_RENAME, hTreeItem ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_CHECK_ITEM, m_bCheckbox ? MF_GRAYED : MF_ENABLED);
+	m_PopupMenu.EnableMenuItem(IDML_COPY_DATA, hTreeItem ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_DATA_PASTE, m_hCopyData ? MF_ENABLED : MF_GRAYED);
+	bool isData = false;
+	bool isFolder = false;
+	if (hTreeItem) {
 		m_pTreeCtrl->SelectItem(hTreeItem);
-		STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
-
-		m_PopupMenu.EnableMenuItem(IDML_CHANGE_LOCK,!(dataPtr->m_cKind & KIND_ONETIME));
-		m_PopupMenu.EnableMenuItem(IDML_CHANGE_ONETIME,!(dataPtr->m_cKind & KIND_LOCK));
-		m_PopupMenu.EnableMenuItem(IDML_FOLDER_CLEAR,!(dataPtr->m_cKind & KIND_FOLDER_ALL));
-		m_PopupMenu.EnableMenuItem(IDML_EDIT,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_DELETE,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_LIST_SERCH,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_EXPORT,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_KEY,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_DATE,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_EXE,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_RELATE,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_SELECT,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_CLIP,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_PLUGIN,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_KEYMACRO,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_COPY_DATA,FALSE);
-		m_PopupMenu.EnableMenuItem(IDML_DATA_PASTE,(BOOL)(!m_hCopyData));
-		m_PopupMenu.EnableMenuItem(IDML_CHECK_ITEM,FALSE);
+		STRING_DATA* dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
+		isData = (dataPtr->m_cKind & KIND_DATA_ALL) != 0;
+		isFolder = (dataPtr->m_cKind & KIND_FOLDER_ALL) != 0;
+		m_PopupMenu.EnableMenuItem(IDML_MAKE_PERMANENT, !isData || (dataPtr->m_cKind & KIND_LOCK) ? MF_GRAYED : MF_ENABLED);
+		m_PopupMenu.EnableMenuItem(IDML_MAKE_ONETIME, !isData || (dataPtr->m_cKind & KIND_ONETIME) ? MF_GRAYED : MF_ENABLED);
 	}
 	else {
-		m_PopupMenu.EnableMenuItem(IDML_CHANGE_LOCK,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_CHANGE_ONETIME,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_EDIT,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_DELETE,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_FOLDER_CLEAR,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_LIST_SERCH,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_EXPORT,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_KEY,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_DATE,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_EXE,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_RELATE,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_SELECT,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_CLIP,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_PLUGIN,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_ICON_KEYMACRO,TRUE);
-
-		m_PopupMenu.EnableMenuItem(IDML_COPY_DATA,TRUE);
-		m_PopupMenu.EnableMenuItem(IDML_DATA_PASTE,(BOOL)m_hCopyData);
-		m_PopupMenu.EnableMenuItem(IDML_CHECK_ITEM,TRUE);
+		m_PopupMenu.EnableMenuItem(IDML_MAKE_PERMANENT, MF_GRAYED);
+		m_PopupMenu.EnableMenuItem(IDML_MAKE_ONETIME, MF_GRAYED);
 	}
+	m_PopupMenu.EnableMenuItem(IDML_ICON_KEY, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_DATE, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_EXE, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_RELATE, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_SELECT, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_CLIP, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_PLUGIN, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_ICON_KEYMACRO, isData ? MF_ENABLED : MF_GRAYED);
+	m_PopupMenu.EnableMenuItem(IDML_FOLDER_CLEAR, isFolder ? MF_ENABLED : MF_GRAYED);
 	m_PopupMenu.GetSubMenu(0)->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON,point.x, point.y, this);
 }
 
 //---------------------------------------------------
-//関数名	ShowWindowPos(POINT pos,int nCmdShow)
+//関数名	showWindowPos(POINT pos,int nCmdShow)
 //機能		ウィンドウを移動して表示
 //---------------------------------------------------
-BOOL CMyTreeDialog::showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelect,HTREEITEM hOpenItem)
+BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keepSelection, HTREEITEM hOpenItem)
 {
 	m_pTreeCtrl->OnWindowPosChanging(NULL);
 	m_toolTip.SetDelayTime(theApp.m_ini.m_nToolTipDelay);
 	m_toolTip.SetDelayTime(TTDT_AUTOPOP,theApp.m_ini.m_nToolTipTime);
 	
-	m_pTreeCtrl->SetBkColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackColor)));
+	m_pTreeCtrl->SetBkColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackgroundColor)));
 	m_pTreeCtrl->SetTextColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nTextColor)));
 	m_pTreeCtrl->SetInsertMarkColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor)));
 	m_pTreeCtrl->ModifyStyle(NULL,TVS_TRACKSELECT,NULL);
-	if(theApp.m_ini.m_pop.m_nSingleExpand) {
+	if(theApp.m_ini.m_pop.m_bSingleExpand) {
 		m_pTreeCtrl->ModifyStyle(NULL,TVS_SINGLEEXPAND,NULL);
 	}
 	else {
 		m_pTreeCtrl->ModifyStyle(TVS_SINGLEEXPAND,NULL,NULL);
 	}
-
+	CWnd* cpDataName = GetDlgItem(IDC_DATA_NAME);
+	if (cpDataName) {
+		TCHAR buf[MAX_PATH];
+		TCHAR* pFileName;
+		GetFullPathName(theApp.m_ini.m_strDataPath.GetString(), MAX_PATH, buf, &pFileName);
+		cpDataName->SetWindowText(pFileName);
+	}
 
 	HTREEITEM hSelectItem = m_pTreeCtrl->GetSelectedItem();
-	if(!isSelect)	m_pTreeCtrl->SelectItem(m_pTreeCtrl->GetRootItem());
-	if(!theApp.m_ini.m_pop.m_nFolderSW)	{
+	if (!keepSelection) {
+		m_pTreeCtrl->SelectItem(m_pTreeCtrl->GetRootItem());
+	}
+	if (!theApp.m_ini.m_pop.m_bKeepFolders) {
 		m_pTreeCtrl->closeFolder(m_pTreeCtrl->GetRootItem());
-		if(isSelect) m_pTreeCtrl->SelectItem(hSelectItem);
+		if (keepSelection) {
+			m_pTreeCtrl->SelectItem(hSelectItem);
+		}
 	}
-	else if(hSelectItem && !hOpenItem) {
+	else if (hSelectItem && !hOpenItem) {
 		RECT rSelItem;
-		m_pTreeCtrl->GetItemRect(hSelectItem, &rSelItem,NULL);
-		if(size.y < rSelItem.top  || rSelItem.bottom < 0)
-			m_pTreeCtrl->EnsureVisible(hSelectItem);//EnsureVisibleするとフォルダは開かれる
+		m_pTreeCtrl->GetItemRect(hSelectItem, &rSelItem, NULL);
+		if (size.y < rSelItem.top || rSelItem.bottom < 0)
+			m_pTreeCtrl->EnsureVisible(hSelectItem); //EnsureVisibleするとフォルダは開かれる
 	}
-	if(hOpenItem) m_pTreeCtrl->Expand(hOpenItem,TVE_EXPAND);
+	if (hOpenItem) m_pTreeCtrl->Expand(hOpenItem, TVE_EXPAND);
 
 	m_colFrame   = CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor);
 	m_colFrameL  = CGeneral::upDownLight(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor),1.2);
@@ -208,7 +218,7 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelec
 		m_brBack.m_hObject = NULL;
 	}
 	if(m_brBack.m_hObject == NULL)
-		m_brBack.CreateSolidBrush(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackColor)));
+		m_brBack.CreateSolidBrush(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackgroundColor)));
 	
 	CGeneral::setAbsoluteForegroundWindow(theApp.m_pMainFrame->m_hWnd);
 	m_pTreeCtrl->SetFocus();
@@ -223,57 +233,9 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos,POINT size,int nCmdShow,bool isSelec
 	if(theApp.m_ini.m_visual.m_nToolTip == 2)	m_toolTip.Activate(FALSE);
 	else	m_toolTip.Activate(TRUE);
 	SetWindowPos(&wndTopMost,pos.x,pos.y,size.x,size.y,NULL);
-	m_pTreeCtrl->setScrollBar();
 
 	return ShowWindow(nCmdShow);
 }
-
-
-//---------------------------------------------------
-//関数名	changeTipString(CString strData)
-//機能		引数のテキストをツールチップに設定
-//---------------------------------------------------
-void CMyTreeDialog::changeTipString(STRING_DATA data) 
-{
-	CString strTip = _T("");
-	CString strRes;
-	bool gap = false;
-
-	m_toolTip.Activate(FALSE);
-	if(theApp.m_ini.m_visual.m_nToolTip == 0) {
-		(void)strRes.LoadString(APP_INF_TIP_DATA01);
-		strTip += strRes + data.m_strTitle;
-		gap = true;
-	}
-	if(theApp.m_ini.m_visual.m_nToolTip != 2) {
-		if (data.m_strData != _T("")) {
-			if (gap) strTip += _T("\n\n");
-			CString s = data.m_strData;
-			(void)s.Replace(_T("\t"), _T("    "));
-			strTip += s;
-			gap = true;
-		}
-		if(data.m_strMacro != _T("")) {
-			(void)strRes.LoadString(APP_INF_TIP_DATA02);
-			CString s = data.m_strMacro;
-			(void)s.Replace(_T("\t"), _T("    "));
-			(void)s.Replace(_T("\n"), _T("\n  "));
-			if (gap) strTip += _T("\n");
-			strTip += strRes + s;
-			gap = true;
-		}
-	}
-	if(theApp.m_ini.m_visual.m_nToolTip == 0) {
-		if (gap) strTip += _T("\n");
-		(void)strRes.LoadString(APP_INF_TIP_DATA03);
-		strTip += strRes + CTime(data.m_timeCreate).Format(_T("%x %X"));
-		(void)strRes.LoadString(APP_INF_TIP_DATA04);
-		strTip += strRes + CTime(data.m_timeEdit).Format(_T("%x %X"));
-	}
-	m_toolTip.UpdateTipText(strTip,m_pTreeCtrl);
-	m_toolTip.Activate(TRUE);
-}
-
 
 //---------------------------------------------------
 // CMyTreeDialog メッセージ ハンドラ
@@ -281,69 +243,17 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 void CMyTreeDialog::OnNcPaint()
 {
 	CDialog::OnNcPaint();
-	DrawBorder();
-}
-
-void CMyTreeDialog::DrawBorder()
-{
-	CRect rect;
-	GetWindowRect(rect);
-	rect -= rect.TopLeft();
-	CDC* pDC = GetWindowDC();
-	drawFrame(pDC, rect);
-	ReleaseDC(pDC);
-}
-
-//---------------------------------------------------
-//関数名	drawFrame(CDC* pDC, CRect& rect)
-//機能		枠を描く
-//---------------------------------------------------
-void CMyTreeDialog::drawFrame(CDC* pDC, CRect& rect)
-{
-	CPoint point[3];
-	COLORREF colRD[5];
-	COLORREF colLU[5];
-
-	colLU[0] = m_colFrameL;
-	colLU[1] = m_colFrame;
-	colLU[2] = m_colFrameD;
-	
-	colRD[0] = m_colFrameD;
-	colRD[1] = m_colFrameL;
-	colRD[2] = m_colFrame;
-	for(int i = 1; i <= 3; i++) {
-		point[0].x = rect.left + i;
-		point[0].y = rect.bottom - i;
-		point[1].x = rect.right - i;
-		point[1].y = rect.bottom - i;
-		point[2].x = rect.right - i;
-		point[2].y = rect.top + i - 1;
-	    drawLline(pDC, point, colRD[i-1]);
+	// set scrollbars
+	m_pTreeCtrl->setScrollBar();
+	// draw border
+	{
+		CRect rect;
+		GetWindowRect(rect);
+		CRect localRect = rect - rect.TopLeft();
+		CDC* pDC = GetWindowDC();
+		drawFrame(pDC, localRect);
+		ReleaseDC(pDC);
 	}
-
-	for(int i = 0; i <= 2; i++) {
-		point[0].x = rect.left + i;
-		point[0].y = rect.bottom - i - 1;
-		point[1].x = rect.left + i;
-		point[1].y = rect.top + i;
-		point[2].x = rect.right - i;
-		point[2].y = rect.top + i;
-	    drawLline(pDC, point, colLU[i]);
-	}
-}
-
-//---------------------------------------------------
-//関数名	drawLline(CDC* pDC, CPoint* point, COLORREF col)
-//機能		線を描く
-//---------------------------------------------------
-void CMyTreeDialog::drawLline(CDC* pDC, CPoint* point, COLORREF col)
-{
-    CPen pen(PS_SOLID, 1, col);
-    CPen* old_pen = pDC->SelectObject(&pen);
-    pDC->MoveTo(point[0]);
-    pDC->LineTo(point[1]);
-    pDC->LineTo(point[2]);
-    pDC->SelectObject(old_pen);
 }
 
 //---------------------------------------------------
@@ -352,32 +262,11 @@ void CMyTreeDialog::drawLline(CDC* pDC, CPoint* point, COLORREF col)
 //---------------------------------------------------
 void CMyTreeDialog::OnSize(UINT nType, int cx, int cy) 
 {
-	CDialog::OnSize(nType, cx, cy);	
+	CDialog::OnSize(nType, cx, cy);
 	if(m_pTreeCtrl->m_hWnd) {
 		m_pTreeCtrl->SetWindowPos(&wndTop,0,0,cx,cy,SWP_NOMOVE);
 		m_pTreeCtrl->setScrollBar();
 	}
-}
-
-//---------------------------------------------------
-//関数名	OnInitDialog()
-//機能		ダイアログの初期化
-//---------------------------------------------------
-BOOL CMyTreeDialog::OnInitDialog() 
-{
-	CDialog::OnInitDialog();
-
-	m_toolTip.Create(this, TTS_ALWAYSTIP);
-	m_toolTip.SetMaxTipWidth(400);
-
-	m_toolTip.Activate(TRUE);
-
-	m_toolTip.AddTool(m_pTreeCtrl, _T("")); 
-
-	m_hDLL = ::LoadLibrary(_T("user32"));
-	m_pExStyle = m_hDLL != 0 ? (PFUNC)::GetProcAddress(m_hDLL,"SetLayeredWindowAttributes") : NULL;
-	m_PopupMenu.LoadMenu(MAKEINTRESOURCE(IDR_LISTMENU));//メニュークラスにメニューを読む
-	return TRUE;
 }
 
 //---------------------------------------------------
@@ -412,7 +301,7 @@ void CMyTreeDialog::OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 	if(m_isModal || m_pTreeCtrl->IsDragging()) return;
 	POINT point;
 	::GetCursorPos(&point);
-	pouupMenu(point);	
+	popupMenu(point);	
 	*pResult = 0;
 }
 
@@ -434,16 +323,18 @@ void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 	pCursolPos.y -= TreeRect.top;
 
 	hClickItem = m_pTreeCtrl->HitTest(pCursolPos,&Flags);
-	if(hClickItem) {
-		if(m_pTreeCtrl->GetItemRect(hClickItem,&ItemRect,true)) {
+	if (hClickItem) {
+		if (m_pTreeCtrl->GetItemRect(hClickItem,&ItemRect,true)) {
 			//アイコンをクリックした
 			if(TVHT_ONITEMICON & Flags) {
-				STRING_DATA data = m_pTreeCtrl->getData(hClickItem);
-				if(data.m_cKind & KIND_ONETIME) data.m_cKind = KIND_LOCK;
-				m_pTreeCtrl->editData(hClickItem,data);
+				STRING_DATA* pData = m_pTreeCtrl->getDataPtr(hClickItem);
+				if (pData->m_cKind & KIND_ONETIME) {
+					pData->m_cKind = KIND_LOCK;
+					m_pTreeCtrl->editData2(hClickItem);
+				}
 			}
 			//チェックボックス
-			if(TVHT_ONITEMSTATEICON & Flags) {
+			if (TVHT_ONITEMSTATEICON & Flags) {
 				m_pTreeCtrl->checkItem(hClickItem);
 				m_pTreeCtrl->SetCheck(hClickItem,!m_pTreeCtrl->GetCheck(hClickItem));
 			}
@@ -454,71 +345,631 @@ void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 //---------------------------------------------------
-//関数名	enterData(list<STRING_DATA>::iterator it)
-//機能		データを決定してダイアログを隠蔽
+//関数名	OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+//機能		ツリーのフォーカスが外れたら隠す
 //---------------------------------------------------
-void CMyTreeDialog::enterData(STRING_DATA *dataPtr)
-{		
-	m_selectDataPtr = dataPtr;
-	::PostMessage(theApp.getAppWnd(),WM_TREE_CLOSE,IDOK,NULL);
-	m_isInitOK = false;
-	this->KillTimer(CHARU_QUICK_TIMER);
+void CMyTreeDialog::OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+
+	if (m_isInitOK && !m_isModal) {
+		::PostMessage(theApp.getAppWnd(), WM_TREE_CLOSE, IDCANCEL, NULL);
+		KillTimer(CHARU_QUICK_TIMER);
+		m_isInitOK = false;
+	}
+	*pResult = 0;
+}
+
+//---------------------------------------------------
+//関数名	OnShowWindow(BOOL bShow, UINT nStatus)
+//機能		ウィンドウ表示時処理
+//---------------------------------------------------
+void CMyTreeDialog::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+	if (bShow) {
+		//半透明処理
+		LONG lExStyle = ::GetWindowLong(this->m_hWnd, GWL_EXSTYLE);
+		if (m_pExStyle && theApp.m_ini.m_visual.m_nOpacity < 100) {
+			SetWindowLong(this->m_hWnd, GWL_EXSTYLE, lExStyle | 0x80000);
+			int nTansparent = 255 * theApp.m_ini.m_visual.m_nOpacity / 100;
+			m_pExStyle(this->m_hWnd, 0, nTansparent, 2);
+		}
+		else {
+			SetWindowLong(this->m_hWnd, GWL_EXSTYLE, lExStyle & 0xfff7ffff);
+		}
+		m_cOlgFont = m_pTreeCtrl->GetFont();
+		m_cFont = new CFont;
+		if (m_cFont) {
+			m_cFont->CreatePointFont(theApp.m_ini.m_visual.m_nFontSize, theApp.m_ini.m_visual.m_strFontName);
+			m_pTreeCtrl->SetFont(m_cFont, TRUE);
+		}
+	}
+	else if (m_cFont) {
+		RECT rect;
+		GetWindowRect(&rect);
+		theApp.m_ini.m_DialogSize.x = rect.right - rect.left;
+		theApp.m_ini.m_DialogSize.y = rect.bottom - rect.top;
+		//		if(m_cOlgFont) m_pTreeCtrl->SetFont(m_cOlgFont,FALSE);	
+		delete m_cFont;
+	}
+	CDialog::OnShowWindow(bShow, nStatus);
+}
+
+//---------------------------------------------------
+//関数名	OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+//機能		背景色を変える
+//---------------------------------------------------
+HBRUSH CMyTreeDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	if (m_brBack.GetSafeHandle()) hbr = m_brBack;
+	return hbr;
+}
+
+//---------------------------------------------------
+//関数名	OnBeginlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+//機能		ラベル編集開始
+//---------------------------------------------------
+void CMyTreeDialog::OnBeginlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	TV_DISPINFO* pTVDispInfo = (TV_DISPINFO*)pNMHDR;
+	m_isModal = true;
+
+	*pResult = 0;
+}
+
+//---------------------------------------------------
+//関数名	OnEndlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+//機能		ラベル編集終了
+//---------------------------------------------------
+void CMyTreeDialog::OnEndlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	TV_DISPINFO* pTVDispInfo = (TV_DISPINFO*)pNMHDR;
+
+	//変更をツリーに反映
+	m_pTreeCtrl->SetFocus();
+	TV_ITEM* item = &(pTVDispInfo->item);
+	if (item->pszText && *(item->pszText)) {
+		HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+		STRING_DATA* pData = m_pTreeCtrl->getDataPtr(hTreeItem);
+		pData->m_strTitle = item->pszText;
+		m_pTreeCtrl->editData2(hTreeItem);
+	}
+	m_isModal = false;
+
+	*pResult = 0;
+}
+
+//---------------------------------------------------
+//関数名	PreTranslateMessage(MSG* pMsg)
+//機能		メッセージ前処理
+//---------------------------------------------------
+BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
+{
+	m_toolTip.RelayEvent(pMsg);
+	//閉じる指令受信
+	if (pMsg->message == WM_TREE_CLOSE) {
+		closePopup();
+		return TRUE;
+	}
+	//左ボタンダブルクリック
+	else if (pMsg->message == WM_LBUTTONDBLCLK && !m_pTreeCtrl->IsDragging()) {
+		if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+		//データ取得
+		HTREEITEM hTreeItem;
+		hTreeItem = m_pTreeCtrl->GetSelectedItem();
+		if (hTreeItem) {
+			STRING_DATA* dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
+			if (!(dataPtr->m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ決定
+				m_dataPtrDbClick = dataPtr;
+			}
+		}
+	}
+	else if (pMsg->message == WM_LBUTTONUP && m_dataPtrDbClick != nullptr && !m_pTreeCtrl->IsDragging()) {
+		enterData(m_dataPtrDbClick);
+		return TRUE;
+	}
+	//ALTかメニューキーポップアップメニューを出す
+	if (pMsg->message == WM_SYSKEYDOWN) m_isAltDown = true;
+	else if (((pMsg->message == WM_SYSKEYUP && m_isAltDown) || (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_APPS)) && !theApp.isCloseKey() && !m_pTreeCtrl->IsDragging()) {
+		if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+		m_isAltDown = false;
+		CPoint point;
+		ZeroMemory(&point, sizeof(point));
+		RECT rSelItem;
+		HTREEITEM hSelectItem = m_pTreeCtrl->GetSelectedItem();//選択位置を取得
+		if (hSelectItem) {
+			m_pTreeCtrl->GetItemRect(hSelectItem, &rSelItem, NULL);
+			point.x = 0;
+			point.y = rSelItem.bottom - 5;
+		}
+		ClientToScreen(&point);
+		popupMenu(point);
+		//		return true;
+	}
+
+	if (pMsg->message == WM_KEYDOWN) {
+		if (!m_pTreeCtrl->IsDragging()) {
+			MSG msg;
+			ZeroMemory(&msg, sizeof(msg));
+			msg.message = WM_LBUTTONDOWN;
+			msg.hwnd = this->m_hWnd;
+			m_toolTip.RelayEvent(&msg);
+
+			::PostMessage(m_pTreeCtrl->m_hWnd, WM_MOUSEMOVE, 0, 0);
+			::SetCursor(NULL);
+		}
+		//ESCで閉じる
+		if (pMsg->wParam == VK_ESCAPE && !m_isModal && !m_pTreeCtrl->IsDragging()) {
+			closePopup();
+			return TRUE;
+		}
+		//ラベル編集中なら編集終了
+		else if (pMsg->wParam == VK_RETURN && m_isModal) {
+			m_pTreeCtrl->SetFocus();
+			return TRUE;
+		}
+		//リターンキーを押したら決定
+		else if (pMsg->wParam == VK_RETURN && !m_pTreeCtrl->IsDragging()) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+			//データ取得
+			HTREEITEM hTreeItem;
+			hTreeItem = m_pTreeCtrl->GetSelectedItem();
+			if (hTreeItem) {
+				STRING_DATA* dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
+
+				//フォルダか確認
+				if (!(dataPtr->m_cKind & KIND_FOLDER_ALL) || (m_pTreeCtrl->GetStyle() & TVS_CHECKBOXES && m_pTreeCtrl->GetCheck(hTreeItem))) {
+					enterData(dataPtr);//データを決定
+				}
+				else
+					m_pTreeCtrl->Expand(hTreeItem, TVE_TOGGLE);
+				return TRUE;
+			}
+		}
+		//スペースキー
+		else if (pMsg->wParam == VK_SPACE && !m_isModal) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+			HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+			if (hTreeItem != NULL) {//選択されてるか?
+				if (::GetKeyState(VK_CONTROL) < 0) {//CTRLが押されている
+					HTREEITEM hSelItem = m_pTreeCtrl->GetSelectedItem();
+					m_pTreeCtrl->checkItem(hSelItem);
+					hSelItem = m_pTreeCtrl->GetNextVisibleItem(hTreeItem);
+					if (hSelItem) hTreeItem = hSelItem;
+				}
+				else if (::GetKeyState(VK_SHIFT) < 0) {//シフトが押されている
+					hTreeItem = m_pTreeCtrl->GetPrevVisibleItem(hTreeItem);//前のアイテムを取得
+					if (!hTreeItem) {
+						hTreeItem = m_pTreeCtrl->getLastVisibleItem();//一番上まで行ったら最後にループ
+					}
+				}
+				else {
+					hTreeItem = m_pTreeCtrl->GetNextVisibleItem(hTreeItem);
+					if (!hTreeItem) hTreeItem = m_pTreeCtrl->GetRootItem();
+				}
+				m_pTreeCtrl->SelectItem(hTreeItem);
+			}
+			else {//選択されてなかったら0番目を選択
+				m_pTreeCtrl->Select(m_pTreeCtrl->GetRootItem(), TVGN_FIRSTVISIBLE);
+			}
+			return true;
+		}
+		//デリートキー(データ削除)
+		else if (pMsg->wParam == VK_DELETE && !m_pTreeCtrl->IsDragging() && !m_isModal) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+			OnDelete();
+		}
+		//F1キー 内容表示
+		else if (pMsg->wParam == VK_F1 && !m_pTreeCtrl->IsDragging()) {
+			CPoint point;
+			ZeroMemory(&point, sizeof(point));
+			RECT rSelItem;
+			HTREEITEM hSelectItem = m_pTreeCtrl->GetSelectedItem();//選択位置を取得
+			if (hSelectItem) {
+				m_pTreeCtrl->GetItemRect(hSelectItem, &rSelItem, true);
+				point.x = rSelItem.left + ((rSelItem.right - rSelItem.left) / 2);
+				point.y = rSelItem.top + ((rSelItem.bottom - rSelItem.top) / 2);
+
+				MSG msg;
+				ZeroMemory(&msg, sizeof(msg));
+				msg.message = WM_MOUSEMOVE;
+				msg.wParam = NULL;
+				msg.lParam = point.y;
+				msg.lParam = (msg.lParam << 16) + point.x;
+				msg.hwnd = m_pTreeCtrl->m_hWnd;
+
+				::PostMessage(msg.hwnd, msg.message, msg.wParam, msg.lParam);
+				ClientToScreen(&point);
+				::SetCursorPos(point.x, point.y);
+			}
+		}
+		// F2 : Rename
+		else if (pMsg->wParam == VK_F2 && !m_pTreeCtrl->IsDragging()) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+			if (m_pTreeCtrl->GetSelectedItem())
+				m_pTreeCtrl->EditLabel(m_pTreeCtrl->GetSelectedItem());
+		}
+		// F3 : Find Next
+		else if (pMsg->wParam == VK_F3 && !m_pTreeCtrl->IsDragging() && !m_isModal) {
+			HTREEITEM hSearchItem = m_pTreeCtrl->GetSelectedItem();
+			hSearchItem = m_pTreeCtrl->searchItem(theApp.m_ini.m_nSearchTarget, theApp.m_ini.m_nSearchLogic, theApp.m_ini.m_strSearchKeywords, hSearchItem);
+			if (hSearchItem) {
+				m_pTreeCtrl->SelectItem(hSearchItem);
+			}
+		}
+		// Ctrl+F : Open Find dialog
+		else if (::GetKeyState(VK_CONTROL) < 0 && pMsg->wParam == 'F' && !m_pTreeCtrl->IsDragging() && !m_isModal) {
+			OnListSearch();
+			return true;
+		}
+		//TABキーでチェック
+		else if (pMsg->wParam == VK_TAB && !m_pTreeCtrl->IsDragging() && !m_isModal) {
+			HTREEITEM hSelItem = m_pTreeCtrl->GetSelectedItem();
+			m_pTreeCtrl->checkItem(hSelItem);
+			return true;
+		}
+		//上下
+		else if (pMsg->wParam == VK_DOWN || pMsg->wParam == VK_UP && !m_isModal) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+
+			HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem(), hTreeItemTmp;
+			if (hTreeItem != NULL && ::GetKeyState(VK_SHIFT) < 0) {//選択されていて、SHIFTを押してる
+				do {
+					hTreeItemTmp = hTreeItem;
+					if (pMsg->wParam == VK_DOWN)	hTreeItem = m_pTreeCtrl->GetNextVisibleItem(hTreeItem);
+					else							hTreeItem = m_pTreeCtrl->GetPrevVisibleItem(hTreeItem);
+					if (m_pTreeCtrl->GetChildItem(hTreeItem)) break;
+				} while (hTreeItem);
+				if (hTreeItem) {
+					m_pTreeCtrl->SelectItem(hTreeItem);
+					return true;
+				}
+			}
+		}
+		//左
+		else if (pMsg->wParam == VK_LEFT && !m_isModal) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) KillTimer(CHARU_QUICK_TIMER);
+			if (::GetKeyState(VK_SHIFT) < 0) {
+				if (::GetKeyState(VK_CONTROL) < 0) {
+					m_pTreeCtrl->closeFolder(m_pTreeCtrl->GetRootItem()); // Ctrl+Shift+Left: collapse all
+				}
+				else {
+					HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+					if (hTreeItem) {
+						hTreeItem = m_pTreeCtrl->searchMyRoots(hTreeItem);
+						if (hTreeItem) {
+							m_pTreeCtrl->SelectItem(hTreeItem); // Shift+Left: collapse parent
+						}
+					}
+				}
+			}
+		}
+		// "select by typing"
+		else if (!m_isModal && !m_pTreeCtrl->IsDragging()) {
+			if (selectByTyping((UINT)pMsg->wParam)) return TRUE;
+		}
+	}
+	// "select by typing" 確定処理
+	else if (pMsg->message == WM_TIMER && pMsg->wParam == CHARU_QUICK_TIMER && !m_pTreeCtrl->IsDragging()) {
+		BOOL retval = FALSE;
+		if (m_hQuickItem) {
+			STRING_DATA* dataPtr = m_pTreeCtrl->getDataPtr(m_hQuickItem);
+			if (dataPtr->m_cKind & KIND_DATA_ALL) {
+				if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste) {
+					enterData(dataPtr);
+				}
+			}
+			else if (dataPtr->m_cKind & KIND_FOLDER_ALL) {
+				if (theApp.m_ini.m_pop.m_bSelectByTypingAutoExpand) {
+					m_pTreeCtrl->Expand(m_hQuickItem, TVE_EXPAND);
+				}
+			}
+			retval = TRUE;
+		}
+		this->KillTimer(CHARU_QUICK_TIMER);
+		return retval;
+	}
+	//TIPSの変更
+	else if (WM_TIPS_CHANGE == pMsg->message) {
+		HTREEITEM hTarget = (HTREEITEM)pMsg->wParam;
+		if (hTarget) {
+			STRING_DATA data = m_pTreeCtrl->getData(hTarget);
+			changeTipString(data);
+		}
+		else {
+			m_toolTip.Activate(FALSE);
+		}
+	}
+	return CDialog::PreTranslateMessage(pMsg);
 }
 
 void CMyTreeDialog::closePopup()
 {
-	::PostMessage(theApp.getAppWnd(),WM_TREE_CLOSE,IDCANCEL,NULL);
+	::PostMessage(theApp.getAppWnd(), WM_TREE_CLOSE, IDCANCEL, NULL);
 	m_isInitOK = false;
 	KillTimer(CHARU_QUICK_TIMER);
 }
 
 //---------------------------------------------------
-//関数名	OnAdd()
-//機能		データ追加処理
+//関数名	enterData(list<STRING_DATA>::iterator it)
+//機能		データを決定してダイアログを隠蔽
 //---------------------------------------------------
-void CMyTreeDialog::OnAdd() 
+void CMyTreeDialog::enterData(STRING_DATA* dataPtr)
 {
-	if(m_isModal) return;
+	m_selectDataPtr = dataPtr;
+	::PostMessage(theApp.getAppWnd(), WM_TREE_CLOSE, IDOK, NULL);
+	m_isInitOK = false;
+	this->KillTimer(CHARU_QUICK_TIMER);
+}
+
+//---------------------------------------------------
+//関数名	OnEdit()
+//機能		選択項目を編集
+//---------------------------------------------------
+void CMyTreeDialog::OnEdit()
+{
+	if (m_isModal) return;
 	m_isModal = true;
-
 	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-
-	CAddDialog addDialog(this,hTreeItem);
-	addDialog.setMacroTempate(&theApp.m_ini.m_vctMacro,&theApp.m_ini.m_vctDataMacro);
-
-	//追加ダイアログを開く
-	int nRet = addDialog.DoModal();
-	m_isModal = false;		
+	CEditDialog dlgEdit(this, m_pTreeCtrl->getDataPtr(hTreeItem), false);
+	if (dlgEdit.DoModal() == IDOK) {
+		m_pTreeCtrl->editData2(hTreeItem);
+	}
+	m_isModal = false;
 }
 
 //---------------------------------------------------
-//関数名	OnChangeOnetime()
-//機能		一時項目に変更
+//関数名	OnDelete()
+//機能		選択項目を削除
 //---------------------------------------------------
-void CMyTreeDialog::OnChangeOnetime() 
+void CMyTreeDialog::OnDelete()
 {
 	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem) {
-		STRING_DATA data = m_pTreeCtrl->getData(hTreeItem);
+	if (!hTreeItem) {
+		return;
+	}
+	if (m_isModal) {
+		return;
+	}
+	m_isModal = true;
+	STRING_DATA data = m_pTreeCtrl->getData(hTreeItem);
+	CString strMessage;
+	strMessage.Format(APP_MES_DELETE_OK, data.m_strTitle);
+	int nRet = AfxMessageBox(strMessage, MB_YESNO | MB_ICONEXCLAMATION | MB_APPLMODAL);
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+	if (nRet == IDYES) {
+		if ((data.m_cKind & KIND_FOLDER_ALL) && m_pTreeCtrl->ItemHasChildren(hTreeItem)) {
+			strMessage.LoadString(APP_MES_DELETE_FOLDER);
+			nRet = AfxMessageBox(strMessage, MB_YESNO | MB_ICONEXCLAMATION | MB_APPLMODAL);
+			RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+		}
+	}
+	if (nRet == IDYES) {
+		m_pTreeCtrl->deleteData(hTreeItem);
+	}
+	m_pTreeCtrl->SetFocus();
+	m_isModal = false;
+}
 
-		data.m_cKind = KIND_ONETIME;
-		m_pTreeCtrl->editData(hTreeItem,data);
+//---------------------------------------------------
+//関数名	OnRename()
+//機能		選択項目の名前の変更
+//---------------------------------------------------
+void CMyTreeDialog::OnRename()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (!hTreeItem) return;
+
+	m_pTreeCtrl->EditLabel(hTreeItem);
+}
+
+//---------------------------------------------------
+//関数名	OnIcon～
+//機能		データアイコンを変更
+//---------------------------------------------------
+
+//クリップボードマクロ
+void CMyTreeDialog::OnIconClip()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_CLIP);
+}
+//日付マクロ
+void CMyTreeDialog::OnIconDate()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_DATE);
+}
+//シェルマクロ
+void CMyTreeDialog::OnIconExe()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_EXE);
+}
+//普通項目
+void CMyTreeDialog::OnIconKey()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, 0);
+}
+//キーボードマクロ
+void CMyTreeDialog::OnIconKeymacro()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_KEY);
+}
+//プラグイン
+void CMyTreeDialog::OnIconPlugin()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_PLUG);
+}
+//関連付け実行マクロ
+void CMyTreeDialog::OnIconRelate()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_RELATE);
+}
+//選択テキストマクロ
+void CMyTreeDialog::OnIconSelect()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem, KIND_SELECT);
+}
+
+//---------------------------------------------------
+//関数名	OnMakeOnetime()
+//機能		ワンタイムデータに変更
+//---------------------------------------------------
+void CMyTreeDialog::OnMakeOnetime()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem) {
+		STRING_DATA* pData = m_pTreeCtrl->getDataPtr(hTreeItem);
+		pData->m_cKind = KIND_ONETIME;
+		m_pTreeCtrl->editData2(hTreeItem);
 	}
 }
 
 //---------------------------------------------------
-//関数名	OnChangeLock()
-//機能		ロック項目に変更
+//関数名	OnMakePermanent()
+//機能		恒久データに変更
 //---------------------------------------------------
-void CMyTreeDialog::OnChangeLock() 
+void CMyTreeDialog::OnMakePermanent()
 {
 	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem) {
-		STRING_DATA data = m_pTreeCtrl->getData(hTreeItem);
-
-		data.m_cKind = KIND_LOCK;
-		m_pTreeCtrl->editData(hTreeItem,data);
+	if (hTreeItem) {
+		STRING_DATA* pData = m_pTreeCtrl->getDataPtr(hTreeItem);
+		pData->m_cKind = KIND_LOCK;
+		m_pTreeCtrl->editData2(hTreeItem);
 	}
+}
+
+//---------------------------------------------------
+//関数名	OnFolderClear()
+//機能		選択フォルダをクリア
+//---------------------------------------------------
+void CMyTreeDialog::OnFolderClear()
+{
+	if (m_isModal) {
+		return;
+	}
+	m_isModal = true;
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (hTreeItem) {
+		//フォルダを再帰で削除
+		CString strRes;
+		strRes.LoadString(APP_MES_FOLDER_CLEAR);
+		int nRet = AfxMessageBox(strRes, MB_YESNO | MB_ICONEXCLAMATION | MB_APPLMODAL);
+		RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+		if (nRet == IDYES) {
+			HTREEITEM hChildItem = m_pTreeCtrl->GetChildItem(hTreeItem);
+			m_pTreeCtrl->clearFolder(hChildItem);
+		}
+	}
+	m_pTreeCtrl->SetFocus();
+	m_isModal = false;
+}
+
+//---------------------------------------------------
+//関数名	OnAdd()
+//機能		新規データを追加
+//---------------------------------------------------
+void CMyTreeDialog::OnNewData()
+{
+	if (m_isModal) {
+		return;
+	}
+	m_isModal = true;
+	STRING_DATA data;
+	CEditDialog editDialog(this, &data, true);
+	if (editDialog.DoModal() == IDOK) {
+		HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+		m_pTreeCtrl->SelectItem(theApp.m_pTree->addData(hTreeItem, data));
+	}
+	m_isModal = false;
+}
+
+//---------------------------------------------------
+//関数名	OnNewFolder()
+//機能		新規フォルダを追加
+//---------------------------------------------------
+void CMyTreeDialog::OnNewFolder()
+{
+	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
+	if (!hTreeItem) {
+		return;
+	}
+	CString strRes;
+	strRes.LoadString(APP_INF_NEW_FOLDER);
+	m_pTreeCtrl->EditLabel(m_pTreeCtrl->addNewFolder(hTreeItem, strRes));
+}
+
+void CMyTreeDialog::OnReselectIcons()
+{
+	if (m_isModal) {
+		return;
+	}
+	m_isModal = true;
+	CString strRes;
+	strRes.LoadString(APP_MES_DECIDE_ICONS);
+	int nRet = AfxMessageBox(strRes, MB_YESNO | MB_ICONEXCLAMATION | MB_APPLMODAL);
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+	if (nRet == IDYES) {
+		m_pTreeCtrl->allIconCheck();
+	}
+	m_isModal = false;
+}
+
+void CMyTreeDialog::OnCleanupAllOnetime()
+{
+	m_pTreeCtrl->cleanupOneTimeItems(m_pTreeCtrl->GetRootItem());
+}
+
+void CMyTreeDialog::OnMakeAllOnetimePermanent()
+{
+	m_pTreeCtrl->cleanupOneTimeItems(m_pTreeCtrl->GetRootItem(), KIND_LOCK);
+}
+
+void CMyTreeDialog::OnCloseAll()
+{
+	m_pTreeCtrl->closeFolder(m_pTreeCtrl->GetRootItem());
+}
+
+//---------------------------------------------------
+//関数名	OnListSearch()
+//機能		検索処理
+//---------------------------------------------------
+void CMyTreeDialog::OnListSearch()
+{
+	if (m_isModal) {
+		return;
+	}
+	m_isModal = true;
+	CSearchDialog SearchDlg(this);
+	SearchDlg.m_strSearchKeywords = theApp.m_ini.m_strSearchKeywords;
+	int nRet = SearchDlg.DoModal();
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+	if (nRet == IDOK) {
+		theApp.m_ini.m_nSearchTarget = SearchDlg.GetTarget();
+		theApp.m_ini.m_nSearchLogic = SearchDlg.GetSearchLogic();
+		theApp.m_ini.m_strSearchKeywords = SearchDlg.m_strSearchKeywords;
+
+		HTREEITEM hSearchItem = m_pTreeCtrl->searchItem(theApp.m_ini.m_nSearchTarget, theApp.m_ini.m_nSearchLogic, theApp.m_ini.m_strSearchKeywords, NULL);
+		if (hSearchItem) {
+			m_pTreeCtrl->SelectItem(hSearchItem);
+		}
+	}
+	m_isModal = false;
+}
+
+void CMyTreeDialog::OnCheckItem()
+{
+	HTREEITEM hSelItem = m_pTreeCtrl->GetSelectedItem();
+	m_pTreeCtrl->checkItem(hSelItem);
+	m_bCheckbox = true;
 }
 
 //---------------------------------------------------
@@ -546,7 +997,6 @@ void CMyTreeDialog::OnDataPaste()
 		CString strRes;
 		strRes.LoadString(APP_INF_COPY_APPEND);
 		data.m_strTitle = data.m_strTitle + strRes;
-
 		if(m_pTreeCtrl->ItemHasChildren(m_hCopyData)) {
 			if(!m_pTreeCtrl->checkMyChild(m_hCopyData,hTreeItem)) {
 				hTreeItem = m_pTreeCtrl->addData(hTreeItem,data);
@@ -557,7 +1007,6 @@ void CMyTreeDialog::OnDataPaste()
 				CString strRes;
 				strRes.LoadString(APP_MES_CANT_COPY);
 				AfxMessageBox(strRes,MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
-				DrawBorder(); // Resume the border erased by MessageBox
 				m_pTreeCtrl->SetFocus();
 				m_isModal = false;
 			}
@@ -569,119 +1018,67 @@ void CMyTreeDialog::OnDataPaste()
 }
 
 //---------------------------------------------------
-//関数名	OnDelete()
-//機能		選択データを削除
-//---------------------------------------------------
-void CMyTreeDialog::OnDelete() 
-{
-	list<STRING_DATA>::iterator it;
-	STRING_DATA data;
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(!hTreeItem) return;
-
-	if(m_isModal) return;
-	m_isModal = true;
-
-	data = m_pTreeCtrl->getData(hTreeItem);
-	CString strMessage;
-	strMessage.Format(APP_MES_DELETE_OK,data.m_strTitle);
-	int nRet = AfxMessageBox(strMessage,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
-	DrawBorder(); // Resume the border erased by MessageBox
-
-	if(nRet == IDYES) {
-		if(data.m_cKind & KIND_FOLDER_ALL) {
-			//フォルダを再帰で削除
-			CString strRes;
-			strRes.LoadString(APP_MES_DELETE_FOLDER);
-			int nRet = AfxMessageBox(strRes,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
-			DrawBorder(); // Resume the border erased by MessageBox
-			if(nRet != IDYES) {
-				m_pTreeCtrl->SetFocus();
-				m_isModal = false;		
-				return;
-			}
-		}
-		m_pTreeCtrl->deleteData(hTreeItem);
-	}
-	m_pTreeCtrl->SetFocus();
-	m_isModal = false;		
-}
-
-//---------------------------------------------------
-//関数名	OnEdit()
-//機能		選択データを編集
-//---------------------------------------------------
-void CMyTreeDialog::OnEdit() 
-{
-	if(m_isModal) return;
-	m_isModal = true;
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	STRING_DATA data = m_pTreeCtrl->getData(hTreeItem);
-
-	CEditDialog dlgEdit(this,data);
-	dlgEdit.setMacroTempate(&theApp.m_ini.m_vctMacro,&theApp.m_ini.m_vctDataMacro);
-
-	if(dlgEdit.DoModal() == IDOK) {
-		data = dlgEdit.m_data;
-		m_pTreeCtrl->editData(hTreeItem,data);
-	}
-	m_isModal = false;		
-}
-
-//---------------------------------------------------
 //関数名	OnImport()
 //機能		インポート処理
 //---------------------------------------------------
 void CMyTreeDialog::OnImport() 
 {
-	if(m_isModal) return;
-	m_isModal = true;
-	
-	CString strFilter,strBuff,strPluginName;
-
-	strFilter = "";
-	RW_PLUGIN plugin;
-	vector<RW_PLUGIN>::iterator it;
-	CString strRes;
-	strRes.LoadString(APP_INF_FILE_FILTER2);
-	for(it = m_pTreeCtrl->m_rwPlugin.begin(); it != m_pTreeCtrl->m_rwPlugin.end(); it++) {
-		strBuff.Format(strRes,it->m_strSoftName,it->m_strExtension,it->m_strExtension);
-		strFilter = strFilter + strBuff;
+	if (m_isModal) {
+		return;
 	}
+	m_isModal = true;
 
-	CMyFileDialog *pFileDialog;
-	strRes.LoadString(APP_INF_FILE_FILTER);
-	pFileDialog = new CMyFileDialog(TRUE,_T("c3d"),NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,strRes + _T("|") + strFilter,NULL,TRUE);
+	CString strDisplay, strPattern;
+	strDisplay.LoadString(APP_INF_FILE_FILTER_C3D_DISPLAY);
+	strPattern.LoadString(APP_INF_FILE_FILTER_C3D_PATTERN);
+	CString strFilter = strDisplay + _T('\0') + strPattern + _T('\0');
+	for (std::vector<RW_PLUGIN>::iterator it = m_pTreeCtrl->m_rwPlugin.begin(); it != m_pTreeCtrl->m_rwPlugin.end(); it++) {
+		CString strFormat, strDisplay, strPattern;
+		strFormat.LoadString(APP_INF_FILE_FILTER_FMT_DISPLAY);
+		strDisplay.Format(strFormat, it->m_strFormatName, it->m_strExtension);
+		strFormat.LoadString(APP_INF_FILE_FILTER_FMT_PATTERN);
+		strPattern.Format(strFormat, it->m_strExtension);
+		strFilter = strFilter + strDisplay + _T('\0') + strPattern + _T('\0'); // NOTE: Don't use operator +=
+	}
+	strFilter = strFilter + _T('\0') + _T('\0'); // NOTE: Don't use operator +=
 
-	if(pFileDialog) {
-		pFileDialog->m_ofn.lpstrInitialDir = theApp.m_ini.m_strAppPath;
-		strRes.LoadString(APP_INF_CHECKBOX_IMPORT);
-		if(IDOK == pFileDialog->DoModal(FALSE,strRes)) {
-			//適合プラグインを検索
-			bool isFound = false;
-			OPENFILENAME fileName;
-			list<STRING_DATA> tmplist;
-			CString strMessage;
-
-			//ソフト名を設定
-			fileName = pFileDialog->getFileName();
-			if(fileName.nFilterIndex == 1)
-				strPluginName = DAT_FORMAT;
-			else
-				strPluginName = m_pTreeCtrl->m_rwPlugin[fileName.nFilterIndex - 2].m_strSoftName;
-
-			m_pTreeCtrl->loadDataFile(pFileDialog->GetPathName(),strPluginName,&tmplist);//読み込み
-
-			//リストとツリーに追加する
-			HTREEITEM hTreeItem = m_pTreeCtrl->mergeTreeData(m_pTreeCtrl->GetSelectedItem(),&tmplist,pFileDialog->m_isAutoMacro);
-			strRes.LoadString(APP_MES_IMPORT_OK);
-			strMessage.Format(strRes,tmplist.size());
-			AfxMessageBox(strMessage,MB_OK|MB_APPLMODAL);
-			DrawBorder(); // Resume the border erased by MessageBox
-			if(hTreeItem) 	m_pTreeCtrl->SelectItem(hTreeItem);//対象を選択
+	OPENFILENAME param;
+	ZeroMemory(&param, sizeof param);
+	TCHAR tcPath[MAX_PATH] = _T("");
+	param.lStructSize = sizeof param;
+	param.hwndOwner = theApp.m_hSelfWnd;
+	param.lpstrFilter = strFilter.GetBuffer();
+	param.lpstrCustomFilter = NULL;
+	param.nFilterIndex = 1;
+	param.lpstrFile = tcPath;
+	param.nMaxFile = MAX_PATH;
+	param.lpstrFileTitle = NULL;
+	param.lpstrInitialDir = NULL;
+	param.lpstrTitle = NULL;
+	param.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	param.nFileOffset = 0;
+	param.nFileExtension = 0;
+	param.lpstrDefExt = NULL;
+	if (GetOpenFileName(&param)) {
+		if (theApp.m_ini.m_bDebug) {
+			CString strText;
+			strText.Format(_T("OnImport \"%s\"\n"), tcPath);
+			CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
 		}
-		delete pFileDialog;
-	}	
+
+		CString format = param.nFilterIndex < 2 ? DAT_FORMAT : m_pTreeCtrl->m_rwPlugin[param.nFilterIndex - 2].m_strFormatName;
+		std::list<STRING_DATA> tmplist;
+		m_pTreeCtrl->loadDataFile(CString(tcPath), format, &tmplist);
+		HTREEITEM hTreeItem = m_pTreeCtrl->mergeTreeData(m_pTreeCtrl->GetSelectedItem(), &tmplist, false);
+
+		CString strRes;
+		CString strMessage;
+		strRes.LoadString(APP_MES_IMPORT_OK);
+		strMessage.Format(strRes, tmplist.size());
+		AfxMessageBox(strMessage, MB_OK | MB_APPLMODAL);
+
+		if (hTreeItem) m_pTreeCtrl->SelectItem(hTreeItem);
+	}
 	m_pTreeCtrl->SetFocus();
 	m_isModal = false;
 }
@@ -692,143 +1089,23 @@ void CMyTreeDialog::OnImport()
 //---------------------------------------------------
 void CMyTreeDialog::OnExport() 
 {
-	if(m_isModal) return;
+	if (m_isModal) {
+		return;
+	}
 	m_isModal = true;
 	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	//選択アイテムのハンドルを取る
-	if(hTreeItem) {
-		CFileDialog *pFileDialog;
-		CString strFilter;
-		strFilter.LoadString(APP_INF_FILE_FILTER);
-		pFileDialog = new CFileDialog(FALSE,_T("c3d"),NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,strFilter + _T("||"));
-
-		if(pFileDialog) {
-			pFileDialog->m_ofn.lpstrInitialDir = theApp.m_ini.m_strAppPath;
-			//ファイル選択ダイアログを出す
-			if(IDOK == pFileDialog->DoModal()) {
-				m_pTreeCtrl->saveDataFile(pFileDialog->GetPathName(),DAT_FORMAT,hTreeItem);	
+	if (hTreeItem) {
+		CString file = theApp.NewFile();
+		if (file != _T("")) {
+			if (!m_pTreeCtrl->saveDataToFile(file, DAT_FORMAT, hTreeItem)) {
+				CString strRes;
+				strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
+				AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
 			}
-			delete pFileDialog;
-		}
-	}	
-	m_pTreeCtrl->SetFocus();
-	m_isModal = false;
-}
-
-//---------------------------------------------------
-//関数名	OnFolderClear()
-//機能		選択フォルダをクリア
-//---------------------------------------------------
-void CMyTreeDialog::OnFolderClear() 
-{
-	if(m_isModal) return;
-	m_isModal = true;
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem) {
-		//フォルダを再帰で削除
-		CString strRes;
-		strRes.LoadString(APP_MES_FOLDER_CLEAR);
-		int nRet = AfxMessageBox(strRes,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
-		DrawBorder(); // Resume the border erased by MessageBox
-		if(nRet == IDYES) {
-			HTREEITEM hChildItem = m_pTreeCtrl->GetChildItem(hTreeItem);
-			m_pTreeCtrl->clearFolder(hChildItem);
 		}
 	}
 	m_pTreeCtrl->SetFocus();
 	m_isModal = false;
-}
-
-//---------------------------------------------------
-//関数名	OnIcon～
-//機能		データアイコンを変更
-//---------------------------------------------------
-
-
-//クリップボードマクロ
-void CMyTreeDialog::OnIconClip() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_CLIP);
-}
-//日付マクロ
-void CMyTreeDialog::OnIconDate() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_DATE);
-}
-//シェルマクロ
-void CMyTreeDialog::OnIconExe() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_EXE);
-}
-//普通項目
-void CMyTreeDialog::OnIconKey() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,0);
-}
-//キーボードマクロ
-void CMyTreeDialog::OnIconKeymacro() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_KEY);
-}
-//プラグイン
-void CMyTreeDialog::OnIconPlugin() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_PLUG);
-}
-//関連付け実行マクロ
-void CMyTreeDialog::OnIconRelate() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_RELATE);
-}
-//選択テキストマクロ
-void CMyTreeDialog::OnIconSelect() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if(hTreeItem)	m_pTreeCtrl->changeIcon(hTreeItem,KIND_SELECT);
-}
-
-//---------------------------------------------------
-//関数名	OnListSerch()
-//機能		検索処理
-//---------------------------------------------------
-void CMyTreeDialog::OnListSerch() 
-{
-	if(m_isModal) return;
-	m_isModal = true;
-	CSerchDialog SerchDlg(this);
-
-	SerchDlg.m_strSerchKey = theApp.m_ini.m_strSerchKey;
-	int nRet = SerchDlg.DoModal();
-	if(nRet == IDOK) {
-		theApp.m_ini.m_nSerchKind  = SerchDlg.m_nSerchKind;
-		theApp.m_ini.m_nSerchLogic = SerchDlg.m_nSerchLogic;
-		theApp.m_ini.m_strSerchKey = SerchDlg.m_strSerchKey;
-
-		HTREEITEM hSerchItem = m_pTreeCtrl->serchItem(theApp.m_ini.m_nSerchKind,theApp.m_ini.m_nSerchLogic,theApp.m_ini.m_strSerchKey,NULL);
-		if(hSerchItem) {
-			m_pTreeCtrl->SelectItem(hSerchItem);
-		}
-	}
-	m_isModal = false;
-}
-
-//---------------------------------------------------
-//関数名	OnNewFolder()
-//機能		新しいフォルダを作る
-//---------------------------------------------------
-void CMyTreeDialog::OnNewFolder() 
-{
-	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	CString strRes;
-	strRes.LoadString(APP_INF_NEW_FOLDER);
-	m_pTreeCtrl->EditLabel(m_pTreeCtrl->addNewFolder(hTreeItem,strRes));
 }
 
 //---------------------------------------------------
@@ -844,292 +1121,10 @@ void CMyTreeDialog::OnOption()
 }
 
 //---------------------------------------------------
-//関数名	OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
-//機能		ツリーのフォーカスが外れたら隠す
+//関数名	selectByTyping(UINT uKeyCode)
+//機能		"select by typing" 処理
 //---------------------------------------------------
-void CMyTreeDialog::OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	if(m_isInitOK && !m_isModal) {
-	
-		::PostMessage(theApp.getAppWnd(),WM_TREE_CLOSE,IDCANCEL,NULL);
-		KillTimer(CHARU_QUICK_TIMER);
-		m_isInitOK = false;
-	}
-	*pResult = 0;
-}
-
-//---------------------------------------------------
-//関数名	OnShowWindow(BOOL bShow, UINT nStatus)
-//機能		ウィンドウ表示時処理
-//---------------------------------------------------
-void CMyTreeDialog::OnShowWindow(BOOL bShow, UINT nStatus) 
-{
-	if(bShow) {
-		//半透明処理
-		LONG lExStyle = ::GetWindowLong(this->m_hWnd,GWL_EXSTYLE);
-		if(m_pExStyle && theApp.m_ini.m_visual.m_nSemitransparent < 100) {
-			SetWindowLong(this->m_hWnd,GWL_EXSTYLE,lExStyle|0x80000);
-			int nTansparent = 255 * theApp.m_ini.m_visual.m_nSemitransparent / 100;
-			m_pExStyle(this->m_hWnd,0,nTansparent,2);
-		}
-		else {
-			SetWindowLong(this->m_hWnd,GWL_EXSTYLE,lExStyle & 0xfff7ffff);
-		}
-		m_cOlgFont = m_pTreeCtrl->GetFont();
-		m_cFont = new CFont;
-		if(m_cFont) {
-			m_cFont->CreatePointFont(theApp.m_ini.m_visual.m_nFontSize,theApp.m_ini.m_visual.m_strFontName);
-			m_pTreeCtrl->SetFont(m_cFont,TRUE);
-		}
-	}
-	else if(m_cFont) {
-		RECT rect;
-		GetWindowRect(&rect);
-		theApp.m_ini.m_DialogSize.x = rect.right - rect.left;
-		theApp.m_ini.m_DialogSize.y = rect.bottom - rect.top;
-//		if(m_cOlgFont) m_pTreeCtrl->SetFont(m_cOlgFont,FALSE);	
-		delete m_cFont;
-	}
-	CDialog::OnShowWindow(bShow, nStatus);
-}
-
-//---------------------------------------------------
-//関数名	PreTranslateMessage(MSG* pMsg)
-//機能		メッセージ前処理
-//---------------------------------------------------
-BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg) 
-{
-	m_toolTip.RelayEvent(pMsg);
-	//閉じる指令受信
-	if(pMsg->message == WM_TREE_CLOSE) {
-		closePopup();
-		return TRUE;
-	}
-	//左ボタンダブルクリック
-	else if(pMsg->message == WM_LBUTTONDBLCLK && !m_pTreeCtrl->IsDragging()){
-		if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-		//データ取得
-		HTREEITEM hTreeItem;
-		hTreeItem = m_pTreeCtrl->GetSelectedItem();
-		if(hTreeItem) {
-			STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
-			if(!(dataPtr->m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ決定
-				m_dataPtrDbClick = dataPtr;
-			}
-		}
-	}
-	else if(pMsg->message == WM_LBUTTONUP && m_dataPtrDbClick != nullptr && !m_pTreeCtrl->IsDragging()) {
-		enterData(m_dataPtrDbClick);
-		return TRUE;
-	}
-	//ALTかメニューキーポップアップメニューを出す
-	if(pMsg->message == WM_SYSKEYDOWN) m_isAltDown = true;
-	else if(((pMsg->message == WM_SYSKEYUP && m_isAltDown) || (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_APPS)) && !theApp.isCloseKey() && !m_pTreeCtrl->IsDragging()) {
-		if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-		m_isAltDown = false;
-		CPoint point;
-		ZeroMemory(&point,sizeof(point));
-		RECT rSelItem;
-		HTREEITEM hSelectItem = m_pTreeCtrl->GetSelectedItem();//選択位置を取得
-		if (hSelectItem) {
-			m_pTreeCtrl->GetItemRect(hSelectItem, &rSelItem,NULL);
-			point.x = 0;
-			point.y = rSelItem.bottom - 5;
-		}
-		ClientToScreen(&point);
-		pouupMenu(point);
-//		return true;
-	}
-
-	if( pMsg->message == WM_KEYDOWN) {
-		if(!m_pTreeCtrl->IsDragging()) {
-			MSG msg;
-			ZeroMemory(&msg,sizeof(msg));
-			msg.message =WM_LBUTTONDOWN;
-			msg.hwnd = this->m_hWnd;
-			m_toolTip.RelayEvent(&msg);
-
-			::PostMessage(m_pTreeCtrl->m_hWnd,WM_MOUSEMOVE,0,0);
-			::SetCursor(NULL);
-		}
-		//ESCで閉じる
-		if(pMsg->wParam == VK_ESCAPE && !m_isModal && !m_pTreeCtrl->IsDragging()) {
-			closePopup();
-			return TRUE;
-		}
-		//ラベル編集中なら編集終了
-		else if(pMsg->wParam == VK_RETURN && m_isModal) {
-			m_pTreeCtrl->SetFocus();
-			return TRUE;
-		}
-		//リターンキーを押したら決定
-		else if(pMsg->wParam == VK_RETURN && !m_pTreeCtrl->IsDragging()) {
-			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-			//データ取得
-			HTREEITEM hTreeItem;
-			hTreeItem = m_pTreeCtrl->GetSelectedItem();
-			if(hTreeItem) {
-				STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(hTreeItem);
-
-				//フォルダか確認
-				if(!(dataPtr->m_cKind & KIND_FOLDER_ALL) || (m_pTreeCtrl->GetStyle() & TVS_CHECKBOXES && m_pTreeCtrl->GetCheck(hTreeItem))) {
-					enterData(dataPtr);//データを決定
-				}
-				else 
-					m_pTreeCtrl->Expand(hTreeItem,TVE_TOGGLE);
-				return TRUE;
-			}
-		}
-		//スペースキー
-		else if(pMsg->wParam == VK_SPACE && !m_isModal) {
-			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-			HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-			if(hTreeItem != NULL) {//選択されてるか?
-				if(::GetKeyState(VK_CONTROL) < 0) {//CTRLが押されている
-					HTREEITEM hSelItem  = m_pTreeCtrl->GetSelectedItem();
-					m_pTreeCtrl->checkItem(hSelItem);
-					hSelItem = m_pTreeCtrl->GetNextVisibleItem(hTreeItem);
-					if(hSelItem) hTreeItem = hSelItem;
-				}
-				else if(::GetKeyState(VK_SHIFT) < 0) {//シフトが押されている
-					hTreeItem = m_pTreeCtrl->GetPrevVisibleItem(hTreeItem);//前のアイテムを取得
-					if(!hTreeItem) {
-						hTreeItem = m_pTreeCtrl->getLastVisibleItem();//一番上まで行ったら最後にループ
-					}
-				}
-				else {
-					hTreeItem = m_pTreeCtrl->GetNextVisibleItem(hTreeItem);
-					if(!hTreeItem) hTreeItem = m_pTreeCtrl->GetRootItem();
-				}
-				m_pTreeCtrl->SelectItem(hTreeItem);
-			}
-			else {//選択されてなかったら0番目を選択
-				m_pTreeCtrl->Select(m_pTreeCtrl->GetRootItem(),TVGN_FIRSTVISIBLE);
-			}
-			return true;
-		}
-		//デリートキー(データ削除)
-		else if(pMsg->wParam ==  VK_DELETE && !m_pTreeCtrl->IsDragging() && !m_isModal) {
-			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-			OnDelete();
-		}
-		//F1キー 内容表示
-		else if(pMsg->wParam ==  VK_F1 && !m_pTreeCtrl->IsDragging()) {
-			CPoint point;
-			ZeroMemory(&point,sizeof(point));
-			RECT rSelItem;
-			HTREEITEM hSelectItem = m_pTreeCtrl->GetSelectedItem();//選択位置を取得
-			if (hSelectItem) {
-				m_pTreeCtrl->GetItemRect(hSelectItem, &rSelItem,true);
-				point.x = rSelItem.left + ((rSelItem.right - rSelItem.left) / 2);
-				point.y = rSelItem.top + ((rSelItem.bottom - rSelItem.top) / 2);
-
-				MSG msg;
-				ZeroMemory(&msg,sizeof(msg));
-				msg.message = WM_MOUSEMOVE;
-				msg.wParam = NULL;
-				msg.lParam = point.y;
-				msg.lParam = (msg.lParam << 16) + point.x;
-				msg.hwnd = m_pTreeCtrl->m_hWnd;
-
-				::PostMessage(msg.hwnd,msg.message,msg.wParam,msg.lParam);
-				ClientToScreen(&point);
-				::SetCursorPos(point.x,point.y);
-			}
-		}
-		//F2キー リネーム
-		else if(pMsg->wParam ==  VK_F2 && !m_pTreeCtrl->IsDragging()) {
-			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-			if(m_pTreeCtrl->GetSelectedItem())
-				m_pTreeCtrl->EditLabel(m_pTreeCtrl->GetSelectedItem());
-		}
-		//F3キー
-		else if(pMsg->wParam ==  VK_F3 && !m_pTreeCtrl->IsDragging() && !m_isModal) {
-			if(::GetKeyState(VK_SHIFT) < 0) {
-				OnListSerch();
-				return true;
-			}
-			else {
-				HTREEITEM hSerchItem = m_pTreeCtrl->GetSelectedItem();
-				hSerchItem = m_pTreeCtrl->serchItem(theApp.m_ini.m_nSerchKind,theApp.m_ini.m_nSerchLogic,theApp.m_ini.m_strSerchKey,hSerchItem);
-				if(hSerchItem) 	m_pTreeCtrl->SelectItem(hSerchItem);
-			}
-		}
-		//TABキーでチェック
-		else if(pMsg->wParam ==  VK_TAB && !m_pTreeCtrl->IsDragging() && !m_isModal) {
-			HTREEITEM hSelItem  = m_pTreeCtrl->GetSelectedItem();
-			m_pTreeCtrl->checkItem(hSelItem);
-			return true;
-		}
-		//上下
-		else if(pMsg->wParam ==  VK_DOWN || pMsg->wParam ==  VK_UP && !m_isModal) {
-			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-
-			HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem(),hTreeItemTmp;
-			if(hTreeItem != NULL && ::GetKeyState(VK_SHIFT) < 0) {//選択されていて、SHIFTを押してる
-				do {
-					hTreeItemTmp = hTreeItem;
-					if(pMsg->wParam ==  VK_DOWN)	hTreeItem = m_pTreeCtrl->GetNextVisibleItem(hTreeItem);
-					else							hTreeItem = m_pTreeCtrl->GetPrevVisibleItem(hTreeItem);
-					if(m_pTreeCtrl->GetChildItem(hTreeItem)) break;
-				}while(hTreeItem);
-				if(hTreeItem) {
-					m_pTreeCtrl->SelectItem(hTreeItem);
-					return true;
-				}
-			}
-		}
-		//左
-		else if(pMsg->wParam ==  VK_LEFT && !m_isModal) {
-			if(theApp.m_ini.m_pop.m_nQuickEnter) KillTimer(CHARU_QUICK_TIMER);
-
-			HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-			if(hTreeItem  && ::GetKeyState(VK_SHIFT) < 0) {//選択されていて、SHIFTを押してる
-				hTreeItem = m_pTreeCtrl->serchMyRoots(hTreeItem);
-				if(hTreeItem) m_pTreeCtrl->SelectItem(hTreeItem);
-			}
-		}
-		//クイックアクセス処理
-		else if(!m_isModal && !m_pTreeCtrl->IsDragging()){
-			if(quickAccess((UINT)pMsg->wParam)) return TRUE;
-		}
-	}
-	//クイック確定処理
-	else if(pMsg->message == WM_TIMER && pMsg->wParam == CHARU_QUICK_TIMER && !m_pTreeCtrl->IsDragging()){
-		if(!m_hQuickItem) {
-			this->KillTimer(CHARU_QUICK_TIMER);
-			return FALSE;
-		}
-		//データ取得
-		STRING_DATA *dataPtr = m_pTreeCtrl->getDataPtr(m_hQuickItem);
-		if(!(dataPtr->m_cKind & KIND_FOLDER_ALL)) {//フォルダじゃなければ
-			enterData(dataPtr);
-		}
-		else {
-			m_pTreeCtrl->Expand(m_hQuickItem,TVE_EXPAND);
-			this->KillTimer(CHARU_QUICK_TIMER);
-		}
-		return TRUE;
-	}
-	//TIPSの変更
-	else if(WM_TIPS_CHANGE == pMsg->message) {
-		HTREEITEM hTarget = (HTREEITEM)pMsg->wParam;
-		if(hTarget) {
-			STRING_DATA data = m_pTreeCtrl->getData(hTarget);
-			changeTipString(data);
-		}
-		else {
-			m_toolTip.Activate(FALSE);
-		}
-	}
-	return CDialog::PreTranslateMessage(pMsg);
-}
-
-//---------------------------------------------------
-//関数名	quickAccess(UINT uKeyCode)
-//機能		クイックアクセス処理
-//---------------------------------------------------
-bool CMyTreeDialog::quickAccess(UINT uKeyCode)
+bool CMyTreeDialog::selectByTyping(UINT uKeyCode)
 {
 	bool isRet = false;
 	BYTE byteKey[256];
@@ -1139,27 +1134,26 @@ bool CMyTreeDialog::quickAccess(UINT uKeyCode)
 	//キーを文字に変換 API使用
 	if(ToAsciiEx(uKeyCode,0,byteKey,(LPWORD)strbuff,0,theApp.m_ini.m_keyLayout) == 1) {
 		strbuff[1] = NULL;
-		DWORD dwNow = timeGetTime();
-		dwNow -= m_dwStartTime;
+		DWORD span = timeGetTime() - m_dwStartTime;
 		m_dwStartTime = timeGetTime();
-		if(dwNow > (DWORD)theApp.m_ini.m_pop.m_nQuickTime) {//確定時間を過ぎた
+		if(span >= static_cast<DWORD>(theApp.m_ini.m_pop.m_nSelectByTypingFinalizePeriod)) {
 			m_strQuickKey = "";//キー、タイマーを再設定
-			if(theApp.m_ini.m_pop.m_nQuickEnter) {
+			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste || theApp.m_ini.m_pop.m_bSelectByTypingAutoExpand) {
 				this->KillTimer(CHARU_QUICK_TIMER);
-				this->SetTimer(CHARU_QUICK_TIMER,theApp.m_ini.m_pop.m_nQuickTime,NULL);//タイマーセット
+				this->SetTimer(CHARU_QUICK_TIMER, theApp.m_ini.m_pop.m_nSelectByTypingFinalizePeriod, NULL);//タイマーセット
 			}
 		}
 		CString strKey;
 		strKey = strbuff;
-		if(theApp.m_ini.m_pop.m_nQuickChar) {//大文字小文字を区別しない
-			strKey.MakeLower();//小文字にする
+		if (theApp.m_ini.m_pop.m_bSelectByTypingCaseInsensitive) {
+			strKey.MakeLower();
 		}
 		m_strQuickKey = m_strQuickKey + strKey;
 		m_hQuickItem = m_pTreeCtrl->GetSelectedItem();//選択位置を基準に検索
 		if(!m_hQuickItem) m_hQuickItem = m_pTreeCtrl->GetRootItem();
 
 		if(m_hQuickItem) {
-			m_hQuickItem = m_pTreeCtrl->serchTitle(m_hQuickItem,m_strQuickKey,theApp.m_ini.m_pop.m_nQuickChar);//検索
+			m_hQuickItem = m_pTreeCtrl->searchTitle(m_hQuickItem, m_strQuickKey, theApp.m_ini.m_pop.m_bSelectByTypingCaseInsensitive);//検索
 			if(m_hQuickItem) {
 				m_pTreeCtrl->SelectItem(m_hQuickItem);
 				isRet = true;//標準のインクリメンタルサーチをキャンセル
@@ -1169,54 +1163,99 @@ bool CMyTreeDialog::quickAccess(UINT uKeyCode)
 	return isRet;
 }
 
-
 //---------------------------------------------------
-//関数名	OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-//機能		背景色を変える
+//関数名	changeTipString(CString strData)
+//機能		引数のテキストをツールチップに設定
 //---------------------------------------------------
-HBRUSH CMyTreeDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+void CMyTreeDialog::changeTipString(STRING_DATA data)
 {
-	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
-	if(m_brBack.GetSafeHandle()) hbr = m_brBack;
-	return hbr;
-}
+	CString strTip = _T("");
+	CString strRes;
+	bool gap = false;
 
-//---------------------------------------------------
-//関数名	OnBeginlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult)
-//機能		ラベル編集開始
-//---------------------------------------------------
-void CMyTreeDialog::OnBeginlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	TV_DISPINFO* pTVDispInfo = (TV_DISPINFO*)pNMHDR;
-	m_isModal = true;		
-	
-	*pResult = 0;
-}
-
-//---------------------------------------------------
-//関数名	OnEndlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult)
-//機能		ラベル編集終了
-//---------------------------------------------------
-void CMyTreeDialog::OnEndlabeleditMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	TV_DISPINFO* pTVDispInfo = (TV_DISPINFO*)pNMHDR;
-
-	//変更をツリーに反映
-	m_pTreeCtrl->SetFocus();
-	TV_ITEM* item = &(pTVDispInfo->item );
-	if(item->pszText && *(item->pszText)) {
-		HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-		STRING_DATA Data = m_pTreeCtrl->getData(hTreeItem);
-		Data.m_strTitle = item->pszText;
-		m_pTreeCtrl->editData(hTreeItem,Data);
+	m_toolTip.Activate(FALSE);
+	if (theApp.m_ini.m_visual.m_nToolTip == 0) {
+		(void)strRes.LoadString(APP_INF_TIP_DATA01);
+		strTip += strRes + data.m_strTitle;
+		gap = true;
 	}
-	m_isModal = false;		
-	
-	*pResult = 0;
+	if (theApp.m_ini.m_visual.m_nToolTip != 2) {
+		if (data.m_strData != _T("")) {
+			if (gap) strTip += _T("\n\n");
+			CString s = data.m_strData;
+			(void)s.Replace(_T("\t"), _T("    "));
+			strTip += s;
+			gap = true;
+		}
+		if (data.m_strMacro != _T("")) {
+			(void)strRes.LoadString(APP_INF_TIP_DATA02);
+			CString s = data.m_strMacro;
+			(void)s.Replace(_T("\t"), _T("    "));
+			(void)s.Replace(_T("\n"), _T("\n  "));
+			if (gap) strTip += _T("\n");
+			strTip += strRes + s;
+			gap = true;
+		}
+	}
+	if (theApp.m_ini.m_visual.m_nToolTip == 0) {
+		if (gap) strTip += _T("\n");
+		(void)strRes.LoadString(APP_INF_TIP_DATA03);
+		strTip += strRes + CTime(data.m_timeCreate).Format(_T("%x %X"));
+		(void)strRes.LoadString(APP_INF_TIP_DATA04);
+		strTip += strRes + CTime(data.m_timeEdit).Format(_T("%x %X"));
+	}
+	m_toolTip.UpdateTipText(strTip, m_pTreeCtrl);
+	m_toolTip.Activate(TRUE);
 }
 
-void CMyTreeDialog::OnCheckItem() 
+//---------------------------------------------------
+//関数名	drawFrame(CDC* pDC, CRect& rect)
+//機能		枠を描く
+//---------------------------------------------------
+void CMyTreeDialog::drawFrame(CDC* pDC, CRect& rect)
 {
-	HTREEITEM hSelItem  = m_pTreeCtrl->GetSelectedItem();
-	m_pTreeCtrl->checkItem(hSelItem);
+	CPoint point[3];
+	COLORREF colRD[5];
+	COLORREF colLU[5];
+
+	colLU[0] = m_colFrameL;
+	colLU[1] = m_colFrame;
+	colLU[2] = m_colFrameD;
+
+	colRD[0] = m_colFrameD;
+	colRD[1] = m_colFrameL;
+	colRD[2] = m_colFrame;
+	for (int i = 1; i <= 3; i++) {
+		point[0].x = rect.left + i;
+		point[0].y = rect.bottom - i;
+		point[1].x = rect.right - i;
+		point[1].y = rect.bottom - i;
+		point[2].x = rect.right - i;
+		point[2].y = rect.top + i - 1;
+		drawLline(pDC, point, colRD[i - 1]);
+	}
+
+	for (int i = 0; i <= 2; i++) {
+		point[0].x = rect.left + i;
+		point[0].y = rect.bottom - i - 1;
+		point[1].x = rect.left + i;
+		point[1].y = rect.top + i;
+		point[2].x = rect.right - i;
+		point[2].y = rect.top + i;
+		drawLline(pDC, point, colLU[i]);
+	}
+}
+
+//---------------------------------------------------
+//関数名	drawLline(CDC* pDC, CPoint* point, COLORREF col)
+//機能		線を描く
+//---------------------------------------------------
+void CMyTreeDialog::drawLline(CDC* pDC, CPoint* point, COLORREF col)
+{
+	CPen pen(PS_SOLID, 1, col);
+	CPen* old_pen = pDC->SelectObject(&pen);
+	pDC->MoveTo(point[0]);
+	pDC->LineTo(point[1]);
+	pDC->LineTo(point[2]);
+	pDC->SelectObject(old_pen);
 }

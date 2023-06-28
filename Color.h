@@ -4,6 +4,7 @@
 
 namespace Color {
 
-    uint32_t parse(const std::string str);
+    uint32_t Parse(const std::string str);
+    std::string String(uint32_t color);
 
 } // namespace Color

@@ -4,9 +4,12 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
 #include "OptVisual.h"
 #include "General.h"
+#include "Color.h"
+#include "Charu3.h"
+#include "nlomann/json.hpp"
+#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,18 +27,13 @@ COptVisual::COptVisual(CWnd* pParent /*=NULL*/)
 	: CDialog(COptVisual::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(COptVisual)
-	m_strBackColor = _T("");
-	m_strTextColor = _T("");
-	m_strBorderColor = _T("");
-	m_n = 0;
 	//}}AFX_DATA_INIT
-	m_nScrollH = 0;
-	m_nScrollV = 0;
-
-	if(theApp.m_ini.m_visual.m_nScrollbar == SB_VERT || theApp.m_ini.m_visual.m_nScrollbar == SB_BOTH)
-		m_nScrollV = 1;
-	if(theApp.m_ini.m_visual.m_nScrollbar == SB_HORZ || theApp.m_ini.m_visual.m_nScrollbar == SB_BOTH)
-		m_nScrollH = 1;
+	m_strBorderColor.Format(_T("%.6x"), theApp.m_ini.m_visual.m_nBorderColor);
+	m_ctrlBorderPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor));
+	m_strBackgroundColor.Format(_T("%.6x"), theApp.m_ini.m_visual.m_nBackgroundColor);
+	m_ctrlBackgroundPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackgroundColor));
+	m_strTextColor.Format(_T("%.6x"), theApp.m_ini.m_visual.m_nTextColor);
+	m_ctrlTextPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nTextColor));
 }
 
 //---------------------------------------------------
@@ -45,61 +43,46 @@ COptVisual::COptVisual(CWnd* pParent /*=NULL*/)
 void COptVisual::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(COptVisual)
-	if(GetDlgItem(IDC_OPT_BORDER_COLOR_PAL))
-		DDX_Control(pDX, IDC_OPT_BORDER_COLOR_PAL, m_ctrlBorderPal);
-	if(GetDlgItem(IDC_OPT_TEXT_COLOR_PAL))
-		DDX_Control(pDX, IDC_OPT_TEXT_COLOR_PAL, m_ctrlTextPal);
-	if(GetDlgItem(IDC_OPT__BACK_COLOR_PAL))
-		DDX_Control(pDX, IDC_OPT__BACK_COLOR_PAL, m_ctrlBackPal);
 
-	if(GetDlgItem(IDC_OPT_FONT_NAME))
+	//{{AFX_DATA_MAP(COptVisual)
+	if (GetDlgItem(IDC_OPT_FONT_NAME))
 		DDX_Control(pDX, IDC_OPT_FONT_NAME, m_ctrlFontCombo);
 	if (GetDlgItem(IDC_OPT_FONT_SIZE))
 		DDX_Text(pDX, IDC_OPT_FONT_SIZE, theApp.m_ini.m_visual.m_nFontSize);
-
 	if (GetDlgItem(IDC_OPT_ICON_FILE_NAME))
 		DDX_Text(pDX, IDC_OPT_ICON_FILE_NAME, theApp.m_ini.m_visual.m_strResourceName);
-
-	if(GetDlgItem(IDC_OPT__BACK_COLOR))
-		DDX_Text(pDX, IDC_OPT__BACK_COLOR, m_strBackColor);
-	if(GetDlgItem(IDC_OPT_TEXT_COLOR))
-		DDX_Text(pDX, IDC_OPT_TEXT_COLOR, m_strTextColor);
-	if(GetDlgItem(IDC_OPT_BORDER_COLOR))
+	if (GetDlgItem(IDC_OPT_BORDER_COLOR))
 		DDX_Text(pDX, IDC_OPT_BORDER_COLOR, m_strBorderColor);
+	if(GetDlgItem(IDC_OPT_BORDER_COLOR_PAL))
+		DDX_Control(pDX, IDC_OPT_BORDER_COLOR_PAL, m_ctrlBorderPal);
+	if (GetDlgItem(IDC_OPT_BACKGROUND_COLOR))
+		DDX_Text(pDX, IDC_OPT_BACKGROUND_COLOR, m_strBackgroundColor);
+	if (GetDlgItem(IDC_OPT_BACKGROUND_COLOR_PAL))
+		DDX_Control(pDX, IDC_OPT_BACKGROUND_COLOR_PAL, m_ctrlBackgroundPal);
+	if (GetDlgItem(IDC_OPT_TEXT_COLOR))
+		DDX_Text(pDX, IDC_OPT_TEXT_COLOR, m_strTextColor);
+	if(GetDlgItem(IDC_OPT_TEXT_COLOR_PAL))
+		DDX_Control(pDX, IDC_OPT_TEXT_COLOR_PAL, m_ctrlTextPal);
 
 	if(GetDlgItem(IDC_OPT_TOUMEI_SLIDER))
-		DDX_Slider(pDX,IDC_OPT_TOUMEI_SLIDER,theApp.m_ini.m_visual.m_nSemitransparent);
-
-	if (GetDlgItem(IDC_OPT_RESET_TREE))
-		DDX_Check(pDX, IDC_OPT_RESET_TREE, theApp.m_ini.m_visual.m_nResetTree);
-
-	if (GetDlgItem(IDC_OPT_SCROLBAR1))
-		DDX_Check(pDX, IDC_OPT_SCROLBAR1, m_nScrollV);
-	if (GetDlgItem(IDC_OPT_SCROLBAR2))
-		DDX_Check(pDX, IDC_OPT_SCROLBAR2, m_nScrollH);
-
-	if(GetDlgItem(IDC_OPT_TOOLTIP_01))
-		DDX_Radio(pDX, IDC_OPT_TOOLTIP_01, theApp.m_ini.m_visual.m_nToolTip);
+		DDX_Slider(pDX, IDC_OPT_TOUMEI_SLIDER, theApp.m_ini.m_visual.m_nOpacity);
 	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(COptVisual, CDialog)
 	//{{AFX_MSG_MAP(COptVisual)
-	ON_BN_CLICKED(IDC_OPT__BACK_COLOR_PAL, OnOptBackColorPal)
-	ON_BN_CLICKED(IDC_OPT_BORDER_COLOR_PAL, OnOptBorderColorPal)
-	ON_BN_CLICKED(IDC_OPT_TEXT_COLOR_PAL, OnOptTextColorPal)
 	ON_BN_CLICKED(IDC_OPT_VS_BROWS, OnOptVsBrows)
-	ON_EN_CHANGE(IDC_OPT_TEXT_COLOR, OnChangeOptTextColor)
 	ON_EN_CHANGE(IDC_OPT_BORDER_COLOR, OnChangeOptBorderColor)
-	ON_EN_CHANGE(IDC_OPT__BACK_COLOR, OnChangeOptBackColor)
+	ON_EN_CHANGE(IDC_OPT_BACKGROUND_COLOR, OnChangeOptBackColor)
+	ON_EN_CHANGE(IDC_OPT_TEXT_COLOR, OnChangeOptTextColor)
+	ON_BN_CLICKED(IDC_OPT_BORDER_COLOR_PAL, OnOptBorderColorPal)
+	ON_BN_CLICKED(IDC_OPT_BACKGROUND_COLOR_PAL, OnOptBackgroundColorPal)
+	ON_BN_CLICKED(IDC_OPT_TEXT_COLOR_PAL, OnOptTextColorPal)
+	ON_BN_CLICKED(IDC_OPT_LOAD_VISUAL, OnBnClickedOptLoadStyle)
 	ON_WM_SHOWWINDOW()
-	ON_BN_CLICKED(IDC_OPT_LOAD_VISUAL, &COptVisual::OnBnClickedOptLoadVisual)
 	ON_WM_HSCROLL()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
 
 //---------------------------------------------------
 // フォント列挙コールバック関数
@@ -122,18 +105,24 @@ int CALLBACK EnumFontProc(ENUMLOGFONT *lpelf,NEWTEXTMETRIC *lpntm,int FontType,L
 //---------------------------------------------------
 
 //---------------------------------------------------
+//関数名	PreTranslateMessage(MSG* pMsg)
+//機能		メッセージ前処理
+//---------------------------------------------------
+BOOL COptVisual::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB && ::GetKeyState(VK_CONTROL) < 0) {
+		::PostMessage(::GetParent(this->m_hWnd), pMsg->message, VK_PRIOR, pMsg->lParam);
+	}
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+//---------------------------------------------------
 //関数名	OnInitDialog()
 //機能		初期化
 //---------------------------------------------------
 BOOL COptVisual::OnInitDialog() 
 {
-	m_strBackColor.Format(_T("%.6x"),theApp.m_ini.m_visual.m_nBackColor);
-	m_strBorderColor.Format(_T("%.6x"),theApp.m_ini.m_visual.m_nBorderColor);
-	m_strTextColor.Format(_T("%.6x"),theApp.m_ini.m_visual.m_nTextColor);
-	m_ctrlBackPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackColor));
-	m_ctrlBorderPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor));
-	m_ctrlTextPal.setColor((COLORREF)CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nTextColor));
-
 	CDialog::OnInitDialog();
 
 	//フォント名を列挙
@@ -143,21 +132,38 @@ BOOL COptVisual::OnInitDialog()
 	EnumFontFamilies(hDC,NULL,(FONTENUMPROC)EnumFontProc,(LPARAM)this);
 	::ReleaseDC(NULL,hDC);
 	
-	SetOpacityText(theApp.m_ini.m_visual.m_nSemitransparent);
+	SetOpacityText(theApp.m_ini.m_visual.m_nOpacity);
 	return TRUE;
+}
+
+void COptVisual::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CDialog::OnShowWindow(bShow, nStatus);
+	if (bShow) {
+		CWnd* w = GetDlgItem(IDC_OPT_FONT_NAME);
+		if (w) w->SetFocus();
+	}
+}
+
+void COptVisual::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	void* pOpacitySlider = GetDlgItem(IDC_OPT_TOUMEI_SLIDER);
+	if (pScrollBar == pOpacitySlider) {
+		SetOpacityText(static_cast<CSliderCtrl*>(pOpacitySlider)->GetPos());
+	}
 }
 
 //---------------------------------------------------
 //関数名	DestroyWindow()
 //機能		終了処理
 //---------------------------------------------------
-BOOL COptVisual::DestroyWindow() 
+BOOL COptVisual::DestroyWindow()
 {
 	CString strBuff;
 	CEdit *edit;
-	edit = (CEdit*)GetDlgItem(IDC_OPT__BACK_COLOR);
+	edit = (CEdit*)GetDlgItem(IDC_OPT_BACKGROUND_COLOR);
 	edit->GetWindowText(strBuff);
-	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBackColor);
+	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBackgroundColor);
 	
 	edit = (CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR);
 	edit->GetWindowText(strBuff);
@@ -172,35 +178,67 @@ BOOL COptVisual::DestroyWindow()
 	m_ctrlFontCombo.GetLBText(nCursel,strBuff);
 	theApp.m_ini.m_visual.m_strFontName = strBuff;
 
-
-	CButton* pScroll1 = (CButton*)GetDlgItem(IDC_OPT_SCROLBAR1);
-	CButton* pScroll2 = (CButton*)GetDlgItem(IDC_OPT_SCROLBAR2);
-	if(pScroll1 && pScroll2) {
-		if(pScroll1->GetCheck() && pScroll2->GetCheck()) theApp.m_ini.m_visual.m_nScrollbar = SB_BOTH;
-		else if(pScroll1->GetCheck()) theApp.m_ini.m_visual.m_nScrollbar = SB_VERT;
-		else if(pScroll2->GetCheck()) theApp.m_ini.m_visual.m_nScrollbar = SB_HORZ;
-		else theApp.m_ini.m_visual.m_nScrollbar = SB_CTL;
-	}
-
 	return CDialog::DestroyWindow();
 }
 
 //---------------------------------------------------
-//関数名	OnOptBackColorPal()
-//機能		背景色パレット
+//関数名	OnOptVsBrows()
+//機能		参照ボタン
 //---------------------------------------------------
-void COptVisual::OnOptBackColorPal() 
+void COptVisual::OnOptVsBrows()
 {
-	setPalet((CEdit*)GetDlgItem(IDC_OPT__BACK_COLOR),&m_ctrlBackPal);
+	CString strRes;
+	strRes.LoadString(APP_INF_FILE_FILTER5);
+	CFileDialog openFileDialog(TRUE, _T("bmp"), NULL, OFN_FILEMUSTEXIST, strRes);
+
+	openFileDialog.m_ofn.lpstrInitialDir = theApp.m_ini.m_strAppPath;
+	if (openFileDialog.DoModal() == IDOK)
+		SetDlgItemText(IDC_OPT_ICON_FILE_NAME, openFileDialog.GetPathName());
+}
+
+//---------------------------------------------------
+//関数名	OnChangeOptBorderColor() 
+//機能		枠色変更時にパレットチェンジ
+//---------------------------------------------------
+void COptVisual::OnChangeOptBorderColor()
+{
+	setTextToPalet((CEdit*)GetDlgItem(IDC_OPT_BORDER_COLOR), &m_ctrlBorderPal);
+}
+
+//---------------------------------------------------
+//関数名	OnChangeOptBackColor() 
+//機能		背景色変更時にパレットチェンジ
+//---------------------------------------------------
+void COptVisual::OnChangeOptBackColor()
+{
+	setTextToPalet((CEdit*)GetDlgItem(IDC_OPT_BACKGROUND_COLOR), &m_ctrlBackgroundPal);
+}
+
+//---------------------------------------------------
+//関数名	OnChangeOptTextColor() 
+//機能		テキスト色変更時にパレットチェンジ
+//---------------------------------------------------
+void COptVisual::OnChangeOptTextColor()
+{
+	setTextToPalet((CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR), &m_ctrlTextPal);
 }
 
 //---------------------------------------------------
 //関数名	OnOptBorderColorPal()
 //機能		枠色パレット
 //---------------------------------------------------
-void COptVisual::OnOptBorderColorPal() 
+void COptVisual::OnOptBorderColorPal()
 {
-	setPalet((CEdit*)GetDlgItem(IDC_OPT_BORDER_COLOR),&m_ctrlBorderPal);
+	setPalet((CEdit*)GetDlgItem(IDC_OPT_BORDER_COLOR), &m_ctrlBorderPal);
+}
+
+//---------------------------------------------------
+//関数名	OnOptBackColorPal()
+//機能		背景色パレット
+//---------------------------------------------------
+void COptVisual::OnOptBackgroundColorPal() 
+{
+	setPalet((CEdit*)GetDlgItem(IDC_OPT_BACKGROUND_COLOR),&m_ctrlBackgroundPal);
 }
 
 //---------------------------------------------------
@@ -212,68 +250,11 @@ void COptVisual::OnOptTextColorPal()
 	setPalet((CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR),&m_ctrlTextPal);
 }
 
-//---------------------------------------------------
-//関数名	setPalet(CEdit *edit,CPaletStatic *stPal)
-//機能		色セット
-//---------------------------------------------------
-void COptVisual::setPalet(CEdit *edit,CPaletStatic *stPal)
+void COptVisual::OnBnClickedOptLoadStyle()
 {
-	CColorDialog dlgColor;
-
-	if(dlgColor.DoModal() == IDOK) {
-		CString strBuff;
-		COLORREF col;
-		int nColor;
-		col= dlgColor.GetColor();
-		stPal->setColor(col);//パレットに色を設定
-		nColor = CGeneral::BGR2RGB((int)col);//変換
-		strBuff.Format(_T("%06x"),nColor);//テキストにする
-		//エディットボックスに設定
-		edit->SetWindowText(strBuff);
-		stPal->Invalidate();
-	}	
-}
-
-//---------------------------------------------------
-//関数名	OnOptVsBrows()
-//機能		参照ボタン
-//---------------------------------------------------
-void COptVisual::OnOptVsBrows() 
-{
-	CString strRes;
-	strRes.LoadString(APP_INF_FILE_FILTER5);
-	CFileDialog openFileDialog(TRUE,_T("bmp"),NULL,OFN_FILEMUSTEXIST,strRes);
-
-	openFileDialog.m_ofn.lpstrInitialDir = theApp.m_ini.m_strAppPath;
-	if(openFileDialog.DoModal() == IDOK)
-		SetDlgItemText(IDC_OPT_ICON_FILE_NAME,openFileDialog.GetPathName());		
-}
-
-//---------------------------------------------------
-//関数名	OnChangeOptTextColor() 
-//機能		テキスト色変更時にパレットチェンジ
-//---------------------------------------------------
-void COptVisual::OnChangeOptTextColor() 
-{
-	setTextToPalet((CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR),&m_ctrlTextPal);
-}
-
-//---------------------------------------------------
-//関数名	OnChangeOptBorderColor() 
-//機能		枠色変更時にパレットチェンジ
-//---------------------------------------------------
-void COptVisual::OnChangeOptBorderColor() 
-{
-	setTextToPalet((CEdit*)GetDlgItem(IDC_OPT_BORDER_COLOR),&m_ctrlBorderPal);
-}
-
-//---------------------------------------------------
-//関数名	OnChangeOptBackColor() 
-//機能		背景色変更時にパレットチェンジ
-//---------------------------------------------------
-void COptVisual::OnChangeOptBackColor() 
-{
-	setTextToPalet((CEdit*)GetDlgItem(IDC_OPT__BACK_COLOR),&m_ctrlBackPal);
+	ReadStyleFile();
+	OnInitDialog();
+	InvalidateRect(NULL, false);
 }
 
 //---------------------------------------------------
@@ -293,35 +274,64 @@ void COptVisual::setTextToPalet(CEdit *edit,CPaletStatic *stPal)
 	stPal->Invalidate();
 }
 
-
-BOOL COptVisual::PreTranslateMessage(MSG* pMsg) 
+//---------------------------------------------------
+//関数名	setPalet(CEdit *edit,CPaletStatic *stPal)
+//機能		色セット
+//---------------------------------------------------
+void COptVisual::setPalet(CEdit* edit, CPaletStatic* stPal)
 {
-	if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB && ::GetKeyState(VK_CONTROL) < 0){
-		::PostMessage(::GetParent(this->m_hWnd),pMsg->message,VK_PRIOR,pMsg->lParam);
+	CColorDialog dlgColor;
+
+	if (dlgColor.DoModal() == IDOK) {
+		CString strBuff;
+		COLORREF col;
+		int nColor;
+		col = dlgColor.GetColor();
+		stPal->setColor(col);//パレットに色を設定
+		nColor = CGeneral::BGR2RGB((int)col);//変換
+		strBuff.Format(_T("%06x"), nColor);//テキストにする
+		//エディットボックスに設定
+		edit->SetWindowText(strBuff);
+		stPal->Invalidate();
 	}
-	
-	return CDialog::PreTranslateMessage(pMsg);
 }
 
-void COptVisual::OnShowWindow(BOOL bShow, UINT nStatus) 
+//---------------------------------------------------
+//関数名	ReadStyleFile() 
+//機能		スタイル設定を読み込み
+//---------------------------------------------------
+void COptVisual::ReadStyleFile()
 {
-	CDialog::OnShowWindow(bShow, nStatus);
-	if(bShow)	GetDlgItem(IDC_OPT_BORDER_COLOR)->SetFocus();	
-}
+	CString strFileName;
+	CFileDialog* pFileDialog;
+	CString strRes;
+	strRes.LoadString(APP_INF_FILE_FILTER_VISUAL_PREF);
+	pFileDialog = new CFileDialog(TRUE, _T("json"), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, strRes, NULL);
 
+	if (pFileDialog) {
+		CString prevIconResourceName = theApp.m_ini.m_visual.m_strResourceName;
+		pFileDialog->m_ofn.lpstrInitialDir = theApp.m_ini.m_strAppPath;
+		if (IDOK == pFileDialog->DoModal()) {
+			if (theApp.m_ini.m_bDebug) {
+				CString strText;
+				strText.Format(_T("OnVisualFile \"%s\"\n"), pFileDialog->GetPathName().GetString());
+				CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+			}
 
-void COptVisual::OnBnClickedOptLoadVisual()
-{
-	theApp.OnVisualFile();
-	OnInitDialog();
-	InvalidateRect(NULL, false);
-}
+			strFileName = pFileDialog->GetPathName();
+			nlohmann::json j = nlohmann::json::parse(std::ifstream(strFileName));
+			theApp.m_ini.m_visual.m_nBorderColor = Color::Parse(CGeneral::getSettingString(j, "BorderColor", Color::String(theApp.m_ini.m_visual.m_nBorderColor)));
+			theApp.m_ini.m_visual.m_nBackgroundColor = Color::Parse(CGeneral::getSettingString(j, "BackColor", Color::String(theApp.m_ini.m_visual.m_nBackgroundColor)));
+			theApp.m_ini.m_visual.m_nTextColor = Color::Parse(CGeneral::getSettingString(j, "TextColor", Color::String(theApp.m_ini.m_visual.m_nTextColor)));
+			theApp.m_ini.m_visual.m_strFontName = CGeneral::getSettingCString(j, "FontName", theApp.m_ini.m_visual.m_strFontName);
+			theApp.m_ini.m_visual.m_nFontSize = static_cast<int>(CGeneral::getSettingNumber(j, "FontSize", theApp.m_ini.m_visual.m_nFontSize));
+			theApp.m_ini.m_visual.m_strResourceName = CGeneral::getSettingCString(j, "IconFile", theApp.m_ini.m_visual.m_strResourceName);
+		}
+		delete pFileDialog;
 
-void COptVisual::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
-{
-	void* pOpacitySlider = GetDlgItem(IDC_OPT_TOUMEI_SLIDER);
-	if (pScrollBar == pOpacitySlider) {
-		SetOpacityText(static_cast<CSliderCtrl*>(pOpacitySlider)->GetPos());
+		if (theApp.m_ini.m_visual.m_strResourceName != prevIconResourceName) {
+			theApp.resetTreeDialog();
+		}
 	}
 }
 

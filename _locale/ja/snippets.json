@@ -1,0 +1,72 @@
+[
+	{
+		"caption": "西暦4桁",
+		"data": "<charuMACRO>$Y/$M/$D</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "和暦",
+		"data": "<charuMACRO>平成$WH年$M月$D日</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "曜日",
+		"data": "<charuMACRO>$d曜日</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "曜日(英語)",
+		"data": "<charuMACRO>$ddd</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "時間(23:59:59)",
+		"data": "<charuMACRO>$H:$m:$s</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "時間(11:59:59 PM)",
+		"data": "<charuMACRO>$h:$m:$s $AMPM</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "時間(午後 11時 59分)",
+		"data": "<charuMACRO>$ampm $h時 $m分</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "シェル実行",
+		"data": "<charuMACRO>$SHELL<実行ファイル名>$SHELL</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "関連付け実行",
+		"data": "<charuMACRO>$RELATE<ファイル名>$RELATE</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "選択文字列",
+		"data": "<charuMACRO>$SEL</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "クリップボード",
+		"data": "<charuMACRO>$CLIP</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "プラグイン",
+		"data": "<charuMACRO>$PLUG-IN<DLL,文字列>$PLUG-IN</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "キー入力",
+		"data": "<charuMACRO_KEY>キー;回数;待ち</charuMACRO_KEY>",
+		"mode": 3
+	},
+	{
+		"caption": "入力プラグイン",
+		"data": "<charuMACRO>$PLUG-IN<.\\plugin\\input.dll,タイトル>$PLUG-IN</charuMACRO>",
+		"mode": 3
+	}
+]

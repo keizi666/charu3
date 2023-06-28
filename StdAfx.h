@@ -24,7 +24,6 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <windows.h>
 #include <mmsystem.h>
-#include <imm.h>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。

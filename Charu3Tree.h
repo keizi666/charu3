@@ -12,22 +12,41 @@
 // Charu3Tree.h : ヘッダー ファイル
 //
 
-#include "Charu3.h"
-
-
 #include <list>
 #include <vector>
-using namespace std;
 
+//データ種別
+#define KIND_ONETIME 0x01	//ワンタイム項目
+#define KIND_LOCK    0x02	//ノーマル項目
+#define KIND_FOLDER  0x04	//フォルダ項目
+#define KIND_RIREKI  0x08	//履歴フォルダ
+
+#define KIND_DATA_ALL	 0x03	//データ
+#define KIND_FOLDER_ALL  0x0C	//フォルダ
+
+#define FOLDER_OPEN 0x10	//フォルダオープンマスク
+
+//データアイコン種別
+#define KIND_DEFAULT 0  //アイコン指定無し
+
+#define KIND_DATE	1	//日付
+#define KIND_EXE    2	//実行
+#define KIND_RELATE 3	//関連付け
+#define KIND_SELECT 4	//選択
+#define KIND_CLIP   5	//クリップボード
+#define KIND_PLUG   6   //プラグイン
+#define KIND_KEY    7   //キーマクロ
 
 //---------------------------------------------------
 // プラグイン構造体
 //---------------------------------------------------
 struct RW_PLUGIN
 {
-	CString m_strPluginName;
-	CString m_strSoftName;
-	CString m_strExtension;
+	CString m_strPluginFilePath; // Pathname of the plugin
+	CString m_strFormatName; // Data format name
+	CString m_strExtension; // Extension of data file
+	RW_PLUGIN(CString path, TCHAR* format, TCHAR* ext) : m_strPluginFilePath(CString(path)), m_strFormatName(CString(format)), m_strExtension(CString(ext)) {}
+	RW_PLUGIN() {}
 };
 
 //---------------------------------------------------
@@ -44,10 +63,13 @@ struct STRING_DATA
 	CString  m_strTitle;	//設定データタイトル
 	CString  m_strData;		//設定データ文字列
 	CString  m_strMacro;	//拡張用文字列データ
+
+	STRING_DATA() : m_cKind(KIND_LOCK), m_cIcon(0), m_nMyID(0), m_nParentID(0), m_timeCreate(0), m_timeEdit(0)
+		, m_strTitle(_T("")), m_strData(_T("")), m_strMacro(_T("")) {}
 };
 
-typedef bool (*writeDataFile)(CString strFileName,list<STRING_DATA> *pList);
-typedef list<STRING_DATA> * (*readDataFile)(CString strFileName,bool isImport);
+typedef bool (*writeDataFile)(CString strFileName, std::list<STRING_DATA> *pList);
+typedef std::list<STRING_DATA> * (*readDataFile)(CString strFileName,bool isImport);
 typedef bool (*convertMacro)(TCHAR *szSource,TCHAR *szRet,int nSize,TCHAR *szSelect,TCHAR *szClip);
 typedef void (*getExtension)(TCHAR *szBuff,int nSize);
 typedef void (*getFormatName)(TCHAR *szBuff,int nSize);
@@ -66,30 +88,31 @@ public:
 	virtual ~CCharu3Tree();
 
 public:
-	bool setPlugin(CString strPath);
+	void setPlugin(CString strPath);
 	bool getPlugin(CString strName,RW_PLUGIN* pPlugin);
 	void setImageList(POINT posSize,CString strFileName,CString strPath);
-	HTREEITEM addData(HTREEITEM hTreeItem,STRING_DATA Data,bool isNewID = true,bool isChild = false);
-	HTREEITEM addNewFolder(HTREEITEM hTreeItem,CString strName);
 
+	HTREEITEM addNewFolder(HTREEITEM hTreeItem, CString strName);
+	HTREEITEM addData(HTREEITEM hTreeItem, STRING_DATA Data, bool isNewID = true, bool isChild = false);
+	void editData(HTREEITEM hTreeItem, STRING_DATA Data);
+	void editData2(HTREEITEM hTreeItem);
 	void deleteData(HTREEITEM hTreeItem);
 	void clearFolder(HTREEITEM hItem);
 	void closeFolder(HTREEITEM hStartItem);
-	void checkFolder(HTREEITEM hStartItem,bool isCheck,list<HTREEITEM> *listItem);
-	void clearOneTime(HTREEITEM hStartItem,int nKind = 0);
-	void removeCheck();
+	void checkFolder(HTREEITEM hStartItem, bool isCheck, std::list<HTREEITEM> *listItem);
+	void cleanupOneTimeItems(HTREEITEM hStartItem,int nKind = 0);
+	void ClearChecks();
 
 	void changeIcon(HTREEITEM hTreeItem,int nID);
-	void editData(HTREEITEM hTreeItem,STRING_DATA Data);
-	void tree2List(HTREEITEM hStartItem,list<STRING_DATA> *tmplist,bool isAll=false);
-	void data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem,list<STRING_DATA>::iterator it);
-	list<STRING_DATA>::iterator findData(STRING_DATA* dataPtr);
+	void tree2List(HTREEITEM hStartItem, std::list<STRING_DATA> *tmplist, bool isAll = false);
+	void data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem, std::list<STRING_DATA>::iterator it);
+	std::list<STRING_DATA>::iterator findData(STRING_DATA* dataPtr);
 
 	STRING_DATA getData(HTREEITEM hTreeItem);
 	STRING_DATA* getDataPtr(HTREEITEM hTreeItem);
 
-	HTREEITEM serchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem);
-	HTREEITEM serchTitle(HTREEITEM hStartItem,CString strKey,int isLower = 0);
+	HTREEITEM searchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem);
+	HTREEITEM searchTitle(HTREEITEM hStartItem, CString strKey, bool caseInsensitive = false);
 	HTREEITEM getTrueNextItem(HTREEITEM hTreeItem);
 	HTREEITEM getLastVisibleItem();
 	HTREEITEM getFirstFolder(HTREEITEM hStartItem);
@@ -110,18 +133,18 @@ public:
 	}
 
 	void deleteExcessChildren(HTREEITEM hTreeItem,int *nCount);
-	void copyData(int nParentID,HTREEITEM hParentTreeItem,list<STRING_DATA> *pList);
-	HTREEITEM mergeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pList,bool isRoot);
-	int  mergeList(list<STRING_DATA> *pMainList,list<STRING_DATA> *pList,int nParent);
+	void copyData(int nParentID,HTREEITEM hParentTreeItem, std::list<STRING_DATA> *pList);
+	HTREEITEM mergeTreeData(HTREEITEM hTreeItem, std::list<STRING_DATA> *pList, bool isRoot);
+	int mergeList(std::list<STRING_DATA> *pMainList, std::list<STRING_DATA> *pList, int nParent);
 
 	bool loadDataFileDef(CString strFileName,CString strPlugin);
-	bool loadDataFilePlugin(CString strFileName,CString strPlugin,list<STRING_DATA> *tmplist);
-	bool loadDataFile(CString strFileName,CString strPlugin,list<STRING_DATA> *tmplist);
-	void normalizationID(list<STRING_DATA>* pList,int nParentID);
+	bool LoadDataWithPlugin(CString strFileName, CString strPlugin, std::list<STRING_DATA> *tmplist);
+	bool loadDataFile(CString strFileName, CString strPlugin, std::list<STRING_DATA> *tmplist);
+	void normalizationID(std::list<STRING_DATA>* pList, int nParentID);
 	bool convertMacroPlugin(STRING_DATA *SourceData,CString *strRet,CString strSelect,CString strClip,CString strSoftName);
 
-	bool saveDataFilePlugin(CString strFileName,CString strPlugin,list<STRING_DATA> *tmplist);
-	bool saveDataFile(CString strFileName,CString strPlugin,HTREEITEM hStartItem);
+	bool SaveDataWithPlugin(CString strFileName, CString strPlugin, std::list<STRING_DATA> *tmplist);
+	bool saveDataToFile(CString strFileName,CString strPlugin,HTREEITEM hStartItem);
 	int  makeNewID(){
 		(*m_nMaxID)++;
 		while(checkRedundancyID(*m_nMaxID)) {
@@ -129,18 +152,6 @@ public:
 		}
 		return *m_nMaxID;
 	}
-	void initStringData(STRING_DATA *pData){
-		pData->m_cKind = 0;		//データ種別
-		pData->m_cIcon = 0;	//アイコン種別
-		pData->m_nMyID = 0;		//データのID
-		pData->m_nParentID = 0;	//親データのID
-		pData->m_timeCreate = 0;	//作成日時
-		pData->m_timeEdit = 0;		//変更日時
-		pData->m_strTitle = "";	//設定データタイトル
-		pData->m_strData = "";		//設定データ文字列
-		pData->m_strMacro = "";	//拡張用文字列データ
-	}
-	
 		
 	void setInitInfo(int *nMaxID,int *nSelectID,int *nRecNumber){
 		m_nMaxID = nMaxID;
@@ -151,8 +162,8 @@ public:
 	
 	bool checkRedundancyID(int nID);
 	bool checkMyChild(HTREEITEM hMeItem,HTREEITEM hChildItem);
-	HTREEITEM serchMyRoots(HTREEITEM hStartItem);
-	HTREEITEM serchParentOption(HTREEITEM hStartItem,CString strOption);
+	HTREEITEM searchMyRoots(HTREEITEM hStartItem);
+	HTREEITEM searchParentOption(HTREEITEM hStartItem,CString strOption);
 
 	void allIconCheck();
 	char decideIcon(CString strData);
@@ -168,9 +179,9 @@ public:
 	void checkItem(HTREEITEM hItem);
 	void checkOut(HTREEITEM hItem);
 
-	list<STRING_DATA> m_MyStringList;//データリスト
-	vector<RW_PLUGIN>  m_rwPlugin;
-	list<HTREEITEM> m_ltCheckItems;
+	std::list<STRING_DATA> m_MyStringList;//データリスト
+	std::vector<RW_PLUGIN>  m_rwPlugin;
+	std::list<HTREEITEM> m_ltCheckItems;
 	void setScrollBar();
 	bool IsDragging() { return m_dragState != DRAGSTATE_NOT_DRAGGING; }
 

@@ -8,6 +8,8 @@
 #include "EditDialog.h"
 #include "ClipBord.h"
 
+#include <vector>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -20,16 +22,16 @@ extern CCharu3App theApp;
 //関数名	CEditDialog
 //機能		コンストラクタ
 //---------------------------------------------------
-CEditDialog::CEditDialog(CWnd* pParent /*=NULL*/,STRING_DATA data) : CDialog(CEditDialog::IDD, pParent)
+CEditDialog::CEditDialog(CWnd* pParent, STRING_DATA* pData, bool newData)
+    : CDialog(CEditDialog::IDD, pParent)
+    , m_pData(pData)
+    , m_bNewData(newData)
 {
 	//{{AFX_DATA_INIT(CEditDialog)
-	m_strDataName = _T("");
-	m_strDataMacro = _T("");
-	m_strData = _T("");
 	//}}AFX_DATA_INIT
-	m_data = data;
-	m_vctDataMacro = NULL;
-	m_vctDataMacro = NULL;
+	m_vctMacro = &theApp.m_ini.m_vctMacro;
+	m_vctDataMacro = &theApp.m_ini.m_vctDataMacro;
+	m_nKind = m_pData->m_cKind;
 }
 
 //---------------------------------------------------
@@ -41,35 +43,33 @@ void CEditDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CEditDialog)
 	
-	DDX_Control(pDX, IDC_EDIT_DATA, m_ctrlDataEdit);
-	DDX_Control(pDX, IDC_EDIT_MACRO, m_ctrlMacroEdit);
+	if (GetDlgItem(IDC_EDIT_DATA))
+		DDX_Control(pDX, IDC_EDIT_DATA, m_ctrlDataEdit);
+	if (GetDlgItem(IDC_NAME))
+		DDX_Control(pDX, IDC_NAME, m_ctrlNameEdit);
+	if (GetDlgItem(IDC_EDIT_MACRO))
+		DDX_Control(pDX, IDC_EDIT_MACRO, m_ctrlMacroEdit);
+	if (GetDlgItem(IDC_KIND_COMBO))
+		DDX_Control(pDX, IDC_EDIT_PASTE_FILE, m_ctrlPasteFile);
 	if(GetDlgItem(IDC_KIND_COMBO))
 		DDX_Control(pDX, IDC_KIND_COMBO, m_ctrlKindCombo);
 	if(GetDlgItem(IDC_ICON_COMBO))
 		DDX_Control(pDX, IDC_ICON_COMBO, m_ctrlIconCombo);
-	if(GetDlgItem(IDC_RIREKI_CHECK))
-		DDX_Control(pDX, IDC_RIREKI_CHECK, m_ctrlRirekiChk);
 	if(GetDlgItem(IDC_EDIT_MACRO_COMBO))
 		DDX_Control(pDX, IDC_EDIT_MACRO_COMBO, m_ctrlMacro);
 	if(GetDlgItem(IDC_EDIT_DATA_MACRO_COMBO))
 		DDX_Control(pDX, IDC_EDIT_DATA_MACRO_COMBO, m_ctrlDataMacro);
-	if(GetDlgItem(IDC_NAME))
-		DDX_Text(pDX, IDC_NAME, m_strDataName);
-	if(GetDlgItem(IDC_EDIT_MACRO))
-		DDX_Text(pDX, IDC_EDIT_MACRO, m_strDataMacro);
-	if(GetDlgItem(IDC_EDIT_DATA))
-		DDX_Text(pDX, IDC_EDIT_DATA, m_strData);
 	//}}AFX_DATA_MAP
 
 }
-
 
 BEGIN_MESSAGE_MAP(CEditDialog, CDialog)
 	//{{AFX_MSG_MAP(CEditDialog)
 	ON_BN_CLICKED(IDC_EDIT_PASTE_FILE, OnEditPasteFile)
 	ON_CBN_SELCHANGE(IDC_EDIT_MACRO_COMBO, OnSelchangeEditMacroCombo)
 	ON_CBN_SELCHANGE(IDC_EDIT_DATA_MACRO_COMBO, OnSelchangeEditDataMacroCombo)
-	ON_WM_SHOWWINDOW()
+	ON_CBN_SELCHANGE(IDC_KIND_COMBO, OnKindChanged)
+	ON_WM_GETMINMAXINFO()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -79,16 +79,21 @@ END_MESSAGE_MAP()
 
 void CEditDialog::OnEditPasteFile() 
 {
-	CFileDialog *pFileDialog;
+	CFileDialog* pFileDialog;
 	CString strRes;
 	strRes.LoadString(APP_INF_FILE_FILTER6);
-	pFileDialog = new CFileDialog(TRUE,_T("*.*"),NULL,NULL,strRes);
 
-	if(pFileDialog) {
-		if(IDOK == pFileDialog->DoModal()) {
-			pasteMacro(IDC_EDIT_DATA,pFileDialog->GetPathName());
-		}	
-		delete pFileDialog;		
+
+	pFileDialog = new CFileDialog(TRUE, _T("*.*"), NULL, NULL, strRes);
+
+	if (pFileDialog) {
+		int selStart, selEnd;
+		m_ctrlDataEdit.GetSel(selStart, selEnd); // save caret position
+		if (IDOK == pFileDialog->DoModal()) {
+			m_ctrlDataEdit.SetSel(selStart, selEnd, FALSE); // resume caret position
+			InsertText(m_ctrlDataEdit, pFileDialog->GetPathName());
+		}
+		delete pFileDialog;
 	}
 }
 
@@ -96,110 +101,126 @@ void CEditDialog::OnEditPasteFile()
 //関数名	OnInitDialog()
 //機能		ダイアログの初期化
 //---------------------------------------------------
-BOOL CEditDialog::OnInitDialog() 
+BOOL CEditDialog::OnInitDialog()
 {
-	m_strData = m_data.m_strData;
-	m_strDataName = m_data.m_strTitle;
-	m_strDataMacro = m_data.m_strMacro;
-
-	m_cOlgFontEdit = GetDlgItem(IDC_EDIT_DATA)->GetFont();
-	m_cFontEdit = new CFont;
-	if(m_cFontEdit) {
-		m_cFontEdit->CreatePointFont(theApp.m_ini.m_visual.m_nFontSize,theApp.m_ini.m_visual.m_strFontName);
-		GetDlgItem(IDC_EDIT_DATA)->SetFont(m_cFontEdit,TRUE);
-		GetDlgItem(IDC_EDIT_MACRO)->SetFont(m_cFontEdit,TRUE);
-	}
-	m_cOlgFontTitle = GetDlgItem(IDC_NAME)->GetFont();
-	m_cFontTitle = new CFont;
-	if(m_cFontTitle) {
-		m_cFontTitle->CreatePointFont(TEXTBOX_FONT_SIZE,theApp.m_ini.m_visual.m_strFontName);
-		GetDlgItem(IDC_NAME)->SetFont(m_cFontTitle,TRUE);
-	}
+	CString strRes;
 
 	CDialog::OnInitDialog();
-	
-	CString strSelText;
-	if(m_data.m_cKind & KIND_FOLDER_ALL) {
-		if(m_data.m_cKind & KIND_RIREKI) 	m_ctrlRirekiChk.SetCheck(TRUE);
+
+	strRes.LoadString(m_bNewData ? APP_INF_CAPTION_NEWITEM : APP_INF_CAPTION_EDITITEM);
+	SetWindowText(strRes);
+
+	m_ctrlDataEdit.SetWindowText(m_pData->m_strData);
+	m_ctrlNameEdit.SetWindowText(m_pData->m_strTitle);
+	m_ctrlMacroEdit.SetWindowText(m_pData->m_strMacro);
+
+	if (m_nKind & KIND_FOLDER_ALL) {
+		CString strRes;
+		strRes.LoadString(APP_INF_FOLDER_REGULAR);
+		m_ctrlKindCombo.AddString(strRes);
+		strRes.LoadString(APP_INF_FOLDER_HISTORY);
+		m_ctrlKindCombo.AddString(strRes);
+		m_ctrlKindCombo.SetCurSel(m_nKind & KIND_RIREKI ? 1 : 0);
+		GetDlgItem(IDC_STATIC_ICON)->ShowWindow(SW_HIDE);
 		m_ctrlIconCombo.EnableWindow(FALSE);
 		m_ctrlIconCombo.ShowWindow(SW_HIDE);
-		m_ctrlKindCombo.EnableWindow(FALSE);
-		m_ctrlKindCombo.ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_STATIC_KIND)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_STATIC_ICON)->ShowWindow(SW_HIDE);
+		m_ctrlDataEdit.ShowWindow(SW_HIDE);
+		m_ctrlMacro.ShowWindow(SW_HIDE);
+		m_ctrlPasteFile.ShowWindow(SW_HIDE);
+		m_ctrlNameEdit.SetFocus();
 	}
 	else {
-		m_ctrlRirekiChk.EnableWindow(FALSE);
-		m_ctrlRirekiChk.ShowWindow(SW_HIDE);
-		if(m_data.m_cKind & KIND_ONETIME)	m_ctrlKindCombo.SetCurSel(0);
-		else								m_ctrlKindCombo.SetCurSel(1);
-		m_ctrlIconCombo.SetCurSel(m_data.m_cIcon+1);
-	}
+		strRes.LoadString(APP_INF_DATA_PERMANENT);
+		m_ctrlKindCombo.AddString(strRes);
+		strRes.LoadString(APP_INF_DATA_ONETIME);
+		m_ctrlKindCombo.AddString(strRes);
+		m_ctrlKindCombo.SetCurSel(m_pData->m_cKind & KIND_ONETIME ? 1 : 0);
+		m_ctrlIconCombo.SetCurSel(m_bNewData ? 0 : (1 + m_pData->m_cIcon));
 
-	//マクロテンプレートを初期化
-	vector<MACRO_STRUCT>::iterator it;
-	int i;
-	if(m_vctMacro) {
-		for(it = m_vctMacro->begin(),i = 0; it != m_vctMacro->end(); it++,i++){
-			if(m_data.m_cKind & it->m_cKind) {
-				m_ctrlMacro.AddString(it->m_strName);
-				m_ctrlMacro.SetItemData(m_ctrlMacro.GetCount()-1,i);
+		std::vector<MACRO_STRUCT>::iterator it;
+		int i;
+		//int filter = m_bNewData ? KIND_DATA_ALL : m_nKind;
+		int filter = KIND_DATA_ALL;
+		if (m_vctMacro) {
+			for (it = m_vctMacro->begin(), i = 0; it != m_vctMacro->end(); it++, i++) {
+				if (it->m_cKind & filter) {
+					m_ctrlMacro.AddString(it->m_strName);
+					m_ctrlMacro.SetItemData(m_ctrlMacro.GetCount() - 1, i);
+				}
 			}
 		}
+		if (m_ctrlMacro.GetCount() == 0) m_ctrlMacro.EnableWindow(FALSE);
+		m_ctrlDataEdit.SetFocus();
 	}
-	if(m_vctDataMacro) {
-		m_ctrlDataMacro.Clear();
-		for(it = m_vctDataMacro->begin(),i = 0; it != m_vctDataMacro->end(); it++,i++){
-			if(m_data.m_cKind & it->m_cKind) {
-				m_ctrlDataMacro.AddString(it->m_strName);
-				m_ctrlDataMacro.SetItemData(m_ctrlDataMacro.GetCount()-1,i);
-			}
-		}
-	}
-	if(m_ctrlMacro.GetCount() == 0) m_ctrlMacro.EnableWindow(FALSE);
-	if(m_ctrlDataMacro.GetCount() == 0) m_ctrlDataMacro.EnableWindow(FALSE);
-	return TRUE;
+	ResetExtendedSettingItems();
+	return FALSE;
+}
+
+void CEditDialog::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
+{
+	CDialog::OnGetMinMaxInfo(lpMMI);
+	lpMMI->ptMinTrackSize.x = 368;
+	lpMMI->ptMinTrackSize.y = 460;
 }
 
 //---------------------------------------------------
 //関数名	OnOK()
 //機能		OK処理
 //---------------------------------------------------
-void CEditDialog::OnOK() 
+void CEditDialog::OnOK()
 {
-	CString strBuff;
-	GetDlgItem(IDC_NAME)->GetWindowText(strBuff);
-	if (strBuff == _T("")) {
-		CString strRes;
-		strRes.LoadString(APP_MES_NAME_EMPTY);
-		AfxMessageBox(strRes);
-		return;
-	}
-	m_data.m_strTitle = strBuff;
-	GetDlgItem(IDC_EDIT_MACRO)->GetWindowText(strBuff);
-	m_data.m_strMacro = strBuff;
-	GetDlgItem(IDC_EDIT_DATA)->GetWindowText(strBuff);
-	m_data.m_strData = strBuff;
+	CString strData;
+	CString strName;
+	CString strMacro;
+	m_ctrlDataEdit.GetWindowText(strData);
+	m_ctrlNameEdit.GetWindowText(strName);
+	m_ctrlMacroEdit.GetWindowText(strMacro);
 
-	int nCursel;
-	if(m_data.m_cKind & KIND_FOLDER_ALL) {
-		if(!m_ctrlRirekiChk.GetCheck())	m_data.m_cKind = KIND_FOLDER;
-		else							m_data.m_cKind = KIND_RIREKI;
-		m_data.m_cIcon = KIND_DEFAULT;
+	if (strName == _T("")) {
+		if (!m_bNewData) {
+			CString strRes;
+			strRes.LoadString(APP_MES_NAME_EMPTY);
+			AfxMessageBox(strRes);
+			m_ctrlNameEdit.SetFocus();
+			return;
+		}
+		if (strData == _T("")) {
+			CString strRes;
+			strRes.LoadString(APP_MES_ALL_EMPTY);
+			AfxMessageBox(strRes);
+			m_ctrlDataEdit.SetFocus();
+			return;
+		}
+		m_pData->m_strTitle = theApp.m_pTree->makeTitle(strData);
 	}
 	else {
-		nCursel = m_ctrlKindCombo.GetCurSel();
-		if(nCursel == 0)	m_data.m_cKind = KIND_ONETIME;
-		else				m_data.m_cKind = KIND_LOCK;
-		m_data.m_cIcon = m_ctrlIconCombo.GetCurSel() - 1;
+		m_pData->m_strTitle = strName;
+	}
+	m_pData->m_strData = strData;
+	m_pData->m_strMacro = strMacro;
+
+	if (m_pData->m_cKind & KIND_FOLDER_ALL) {
+		m_pData->m_cKind = m_ctrlKindCombo.GetCurSel() == 1 ? KIND_RIREKI : KIND_FOLDER;
+		m_pData->m_cIcon = KIND_DEFAULT;
+	}
+	else {
+		m_pData->m_cKind = m_ctrlKindCombo.GetCurSel() == 1 ? KIND_ONETIME : KIND_LOCK;
+
+		int icon = m_ctrlIconCombo.GetCurSel();
+		if (icon > 0) {
+			m_pData->m_cIcon = icon - 1;
+		}
+		else {
+			m_pData->m_cIcon = theApp.m_pTree->decideIcon(m_pData->m_strData);
+		}
 	}
 
 	CDialog::OnOK();
 }
 
 //---------------------------------------------------
-//関数名	OnEditchangeEditMacroCombo() 
-//機能		マクロコンボ変更処理
+//関数名	OnSelchangeEditMacroCombo()
+//機能		マクロコンボボックス変更
 //---------------------------------------------------
 void CEditDialog::OnSelchangeEditMacroCombo() 
 {
@@ -208,14 +229,25 @@ void CEditDialog::OnSelchangeEditMacroCombo()
 		if(nSelect >= 0) {
 			MACRO_STRUCT macro;
 			macro = m_vctMacro->at(nSelect);
-			pasteMacro(IDC_EDIT_DATA,macro.m_strMacro);
+			InsertText(m_ctrlDataEdit, macro.m_strMacro);
 		}
 	}	
 }
 
+void CEditDialog::OnKindChanged()
+{
+	if (m_nKind & KIND_FOLDER_ALL) {
+		m_nKind = m_ctrlKindCombo.GetCurSel() == 1 ? KIND_RIREKI : KIND_FOLDER;
+		ResetExtendedSettingItems();
+	}
+	else if (m_nKind & KIND_DATA_ALL) {
+		m_nKind = m_ctrlKindCombo.GetCurSel() == 1 ? KIND_ONETIME : KIND_LOCK;
+	}
+}
+
 //---------------------------------------------------
-//関数名	OnEditchangeEditDataMacroCombo() 
-//機能		マクロコンボ変更処理
+//関数名	OnSelchangeEditDataMacroCombo()
+//機能		マクロコンボボックス変更
 //---------------------------------------------------
 void CEditDialog::OnSelchangeEditDataMacroCombo() 
 {
@@ -224,44 +256,42 @@ void CEditDialog::OnSelchangeEditDataMacroCombo()
 		if(nSelect >= 0) {
 			MACRO_STRUCT macro;
 			macro = m_vctDataMacro->at(nSelect);
-			pasteMacro(IDC_EDIT_MACRO,macro.m_strMacro);
+			InsertText(m_ctrlMacroEdit, macro.m_strMacro);
 		}
 	}	
 }
 
 //---------------------------------------------------
-//関数名	pasteMacro(int nCtrlID,CString strString)
-//機能		コントロール指定貼り付け
+//関数名	InsertText(CMyEditCtrl& ctrl, CString strString)
 //---------------------------------------------------
-void CEditDialog::pasteMacro(int nCtrlID,CString strString)
+void CEditDialog::InsertText(CEdit& ctrl, CString strString)
 {
-	CString strBkup;
-	CClipBord clip;
-	clip.getClipboardText(strBkup);
-	clip.setClipboardText(strString);
-
-	GetDlgItem(nCtrlID)->SendMessage(WM_PASTE,0,0);
-	GetDlgItem(nCtrlID)->SetFocus();
-	clip.setClipboardText(strBkup);
+	ctrl.ReplaceSel(strString.GetString(), TRUE);
+	ctrl.SetFocus();
 }
 
-
-void CEditDialog::OnShowWindow(BOOL bShow, UINT nStatus)
+BOOL CEditDialog::DestroyWindow()
 {
-	CDialog::OnShowWindow(bShow, nStatus);
-	theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
-}
+	theApp.m_pTreeDlg->RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
 
-BOOL CEditDialog::DestroyWindow() 
-{
-	theApp.m_pTreeDlg->DrawBorder(); // The border somehow disappears, so redraw it as a workaround
-
-	GetDlgItem(IDC_EDIT_DATA)->SetFont(m_cOlgFontEdit,FALSE);	
-	GetDlgItem(IDC_EDIT_MACRO)->SetFont(m_cOlgFontEdit,TRUE);
-	if(m_cFontEdit) delete m_cFontEdit;	
-
-	GetDlgItem(IDC_NAME)->SetFont(m_cOlgFontTitle,TRUE);
-	if(m_cFontTitle) delete m_cFontTitle;
-	
 	return CDialog::DestroyWindow();
+}
+
+void CEditDialog::ResetExtendedSettingItems()
+{
+	for (int i = m_ctrlDataMacro.GetCount() - 1; i >= 0; i--) {
+		m_ctrlDataMacro.DeleteString(i);
+	}
+	std::vector<MACRO_STRUCT>::iterator it;
+	int i;
+	int filter = m_bNewData ? KIND_DATA_ALL : m_nKind;
+	if (m_vctDataMacro) {
+		for (it = m_vctDataMacro->begin(), i = 0; it != m_vctDataMacro->end(); it++, i++) {
+			if (it->m_cKind & filter) {
+				m_ctrlDataMacro.AddString(it->m_strName);
+				m_ctrlDataMacro.SetItemData(m_ctrlDataMacro.GetCount() - 1, i);
+			}
+		}
+	}
+	m_ctrlDataMacro.EnableWindow(m_ctrlDataMacro.GetCount() > 0);
 }

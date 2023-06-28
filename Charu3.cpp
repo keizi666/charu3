@@ -3,21 +3,19 @@
 	アプリケーション用クラスの機能定義	'2002.11.15 (c)C+ Factory
 ----------------------------------------------------------*/
 #include "stdafx.h"
-#include "Charu3.h"
-#include "MainFrm.h"
-#include "AddDialog.h"
+#include "InitialDialog.h"
+#include "EditDialog.h"
 #include "OptMainDialog.h"
-#include "MyFileDialog.h"
 #include "StringWork.h"
-#include "General.h"
-#include "Color.h"
-#include "nlomann/json.hpp"
-#include <fstream>
+#include "Charu3.h"
 #if false
 // TODO: Did not handle this well with Visual Studio 2019.
 #include <MULTIMON.H>
 #endif
 #include <dwmapi.h>
+
+#include <list>
+#include <vector>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,19 +53,15 @@ BOOL CALLBACK MonitorEnumFunc(HMONITOR hMonitor,HDC hdc,LPRECT rect,LPARAM lPara
 //---------------------------------------------------
 BEGIN_MESSAGE_MAP(CCharu3App, CWinApp)
 	//{{AFX_MSG_MAP(CCharu3App)
+	//ON_COMMAND(IDM_EXIT, OnExit)
+	ON_COMMAND(IDM_OPTION, OnOption)
 	ON_COMMAND(IDM_ABOUT, OnAbout)
 	ON_COMMAND(IDM_HELP, OnHelp)
-	ON_COMMAND(IDM_EXIT, OnExit)
-	ON_COMMAND(IDM_OPTION, OnOption)
-	ON_COMMAND(IDM_DATA_SAVE, OnDataSave)
-	ON_COMMAND(IDM_ONETIME_CLEAR, OnOnetimeClear)
-	ON_COMMAND(IDM_ALL_LOCK, OnAllLock)
-	ON_COMMAND(IDM_CHANG_DATA, OnChangData)
-	ON_COMMAND(IDM_ADD_DATA, OnAddData)
-	ON_COMMAND(IDM_ICON_DECIDE, OnIconDecide)
-	ON_COMMAND(IDM_BBS_OPEN, OnBbsOpen)
 	ON_COMMAND(IDM_STOCK_STOP, OnStockStop)
+	ON_COMMAND(IDM_ADD_DATA, OnAddData)
+	ON_COMMAND(IDM_CHANG_DATA, OnChangData)
 	ON_COMMAND(IDM_RESET_TREE, OnResetTree)
+	ON_COMMAND(IDM_DATA_SAVE, OnExport)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -76,15 +70,14 @@ END_MESSAGE_MAP()
 //機能		CCharu3Appクラスのコンストラクタ
 //---------------------------------------------------
 CCharu3App::CCharu3App()// : m_treeDlg(&m_tree)
+	: m_isCloseKey(false)
+	, m_isStockMode(false)
+	, m_nPhase(PHASE_START)
+	, m_dwDoubleKeyPopTime(0)
+	, m_dwDoubleKeyFifoTime(0)
+	, m_hSelectItemBkup(NULL)
 {
-	m_isCloseKey = false;
-	m_isStockMode = false;
-	m_isCornerPopup = false;
-	m_nPhase = PHASE_START;
-	m_dwDoubleKeyPopTime = 0;
-	m_dwDoubleKeyFifoTime = 0;
-	m_hSelectItemBkup = NULL;
-	m_focusInfo.m_hActiveWnd  = NULL;
+	m_focusInfo.m_hActiveWnd = NULL;
 	m_focusInfo.m_hFocusWnd = NULL;
 
 	int i,nCount = 0,nSize;
@@ -173,14 +166,11 @@ BOOL CCharu3App::InitInstance()
 		AfxSetResourceHandle(m_hLangDll);
 	}
 
-	//メインフォームの作成
+		   //メインフォームの作成
 	CMainFrame* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
 	// フレームをリソースからロードして作成します
-	pFrame->LoadFrame(IDR_MAINFRAME,WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,	NULL);
-
-	// メイン ウィンドウは最小化して隠しておきます
-	pFrame->ShowWindow(SW_MINIMIZE);
+	pFrame->LoadFrame(IDR_MAINFRAME,WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL, NULL);
 	pFrame->ShowWindow(SW_HIDE);
 	pFrame->UpdateWindow();
 	m_pMainFrame = pFrame;
@@ -189,21 +179,36 @@ BOOL CCharu3App::InitInstance()
 	m_hSelfWnd = CWnd::GetSafeOwner_(NULL, &hWndTop);
 
 	m_pTreeDlg->setTree(m_pTree);
-    m_pTreeDlg->Create(IDD_POPUP_DIALOG,this->m_pMainWnd);
+    m_pTreeDlg->Create(IDD_DATA_TREE_VIEW, this->m_pMainWnd);
 //	::SetForegroundWindow(hActiveWnd);
-	DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
-	DwmSetWindowAttribute(m_pTreeDlg->m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
 
-	pFrame->setMenu();
-	init();//初期化
-	CGeneral::setFocusInfo(&m_focusInfo);
-//	setAppendKeyInit(m_focusInfo.m_hActiveWnd,&m_keySet);//キー設定を変更
+	{
+		// Countermeasure for the problem of not being able to draw borders in
+		// Vista or later
 
-	m_nPhase = PHASE_IDOL;
+		// -- Even with this countermeasure, there are still occasional cases
+		// where the border is hidden by overwriting. In such cases, I have
+		// taken the countermeasure of calling RedrawWindow.
 
-	pFrame->ShowWindow(SW_MINIMIZE);
-	pFrame->ShowWindow(SW_HIDE);
-	return TRUE;
+		DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
+		DwmSetWindowAttribute(m_pTreeDlg->m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
+		BOOL allow = FALSE;
+		DwmSetWindowAttribute(m_pTreeDlg->m_hWnd, DWMWA_ALLOW_NCPAINT, &allow, sizeof allow);
+	}
+
+	if (init()) {
+		CGeneral::setFocusInfo(&m_focusInfo);
+		//	setAppendKeyInit(m_focusInfo.m_hActiveWnd,&m_keySet);//キー設定を変更
+
+		m_nPhase = PHASE_IDOL;
+		return TRUE;
+	}
+	else {
+		if (m_hLangDll) {
+			FreeLibrary(m_hLangDll);
+		}
+		return FALSE;
+	}
 }
 
 int CCharu3App::ExitInstance() 
@@ -216,10 +221,9 @@ int CCharu3App::ExitInstance()
 //---------------------------------------------------
 // アプリケーションのバージョン情報で使われる CAboutDlg ダイアログ
 //---------------------------------------------------
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD), m_strVersion(_T(""))
 {
 	//{{AFX_DATA_INIT(CAboutDlg)
-	m_strVersion = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -229,18 +233,18 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	::GetModuleFileName(NULL, fileName, sizeof(fileName));
 	DWORD bufSize = ::GetFileVersionInfoSize(fileName, NULL);
 	BYTE* pVersion = new BYTE[bufSize];
-	::GetFileVersionInfo(fileName, NULL, bufSize, pVersion);
-	VS_FIXEDFILEINFO* pFileInfo;
-	UINT queryLen;
-	::VerQueryValue(pVersion, _T("\\"), (void**)&pFileInfo, &queryLen);
-	m_strVersion.Format(_T("%s Version %u.%u (%u.%u.%u.%u)"),
-		ABOUT_NAME,
-		LOWORD(pFileInfo->dwFileVersionMS),
-		LOWORD(pFileInfo->dwFileVersionLS),
-		HIWORD(pFileInfo->dwFileVersionMS),
-		LOWORD(pFileInfo->dwFileVersionMS),
-		HIWORD(pFileInfo->dwFileVersionLS),
-		LOWORD(pFileInfo->dwFileVersionLS));
+	if (::GetFileVersionInfo(fileName, NULL, bufSize, pVersion)) {
+		UINT queryLen;
+		VS_FIXEDFILEINFO* pFileInfo;
+		::VerQueryValue(pVersion, _T("\\"), (void**)&pFileInfo, &queryLen);
+		WORD* pLangCode;
+		::VerQueryValue(pVersion, _T("\\VarFileInfo\\Translation"), (void**)&pLangCode, &queryLen);
+		CString subBlock;
+		subBlock.Format(_T("\\StringFileInfo\\%04X%04X\\ProductVersion"), pLangCode[0], pLangCode[1]);
+		TCHAR* pStrInfo;
+		::VerQueryValue(pVersion, (LPTSTR)(LPCTSTR)subBlock, (void**)&pStrInfo, &queryLen);
+		m_strVersion.Format(_T("%s Version %s"), ABOUT_NAME, pStrInfo);
+	}
 	delete[] pVersion;
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAboutDlg)
@@ -252,81 +256,199 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 //関数名	init()
 //機能		初期化
 //---------------------------------------------------
-void CCharu3App::init()
+bool CCharu3App::init()
 {
-	TCHAR wcAppDataPath[MAX_PATH];
-	SHGetSpecialFolderPath(NULL, wcAppDataPath, CSIDL_APPDATA, 0);
-	CString strAppDataPath = CString(wcAppDataPath) + "\\" + NAME;
-	if (!FILEEXIST(strAppDataPath)) {
-		CreateDirectory(strAppDataPath, NULL);
-	}
-	CString strUserIniFile = strAppDataPath + "\\" + INI_FILE;
-
-	//設定クラスを初期化
 	m_ini.initialize();
-
-	// Read .ini file
-	m_ini.setIniFileName(strUserIniFile);
-	m_ini.readAllInitData();
 
 	m_pTree->setImageList(theApp.m_ini.m_IconSize,theApp.m_ini.m_visual.m_strResourceName,m_ini.m_strAppPath);
 	m_pTree->setInitInfo(&m_ini.m_nTreeID,&m_ini.m_nSelectID,&m_ini.m_nRecNumber);//ID初期値を設定
 
-	//デバッグログ処理
-	m_ini.m_strDebugLog = strAppDataPath + "\\" + m_ini.m_strDebugLog;
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("start \"%s\"\n"),ABOUT_NAME);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-		strText.Format(_T("ini file name \"%s\"\n"), strUserIniFile.GetString());
+		strText.Format(_T("ini file name \"%s\"\n"), m_ini.m_strIniFile.GetString());
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
-	//データ互換プラグインを初期化
-	if(!m_pTree->setPlugin(m_ini.m_strRwPluginFolder)){
-		m_ini.m_strRwPluginFolder = m_ini.m_strAppPath + "rw_plugin";
-		m_pTree->setPlugin(m_ini.m_strRwPluginFolder);
-		m_ini.writeEnvInitData();
+	m_pTree->setPlugin(m_ini.m_strRwPluginFolder);
+
+	{
+		bool ok = m_pTree->loadDataFileDef(m_ini.m_strDataPath, m_ini.m_strDataFormat);
+		while (!ok) {
+			CInitialDialog dlg;
+			int ret = dlg.DoModal();
+			switch (ret) {
+			case IDC_NEW:
+			{
+				CString file = NewFile();
+				if (file != _T("")) {
+					m_ini.m_strDataPath = file;
+					m_ini.m_strDataFormat = DAT_FORMAT;
+					m_ini.writeEnvInitData();
+					CString text, caption;
+					text.LoadString(APP_MES_NEWFILE_READY);
+					caption.LoadStringW(AFX_IDS_APP_TITLE);
+					MessageBox(m_hSelfWnd, text, caption, MB_OK | MB_ICONINFORMATION);
+					ok = true;
+				}
+				break;
+			}
+			case IDC_OPEN:
+				if (SelectFile()) {
+					CString text, caption;
+					text.LoadString(APP_MES_DATA_READY);
+					caption.LoadStringW(AFX_IDS_APP_TITLE);
+					MessageBox(m_hSelfWnd, text, caption, MB_OK | MB_ICONINFORMATION);
+					ok = true;
+				}
+				break;
+			case IDC_QUIT:
+			case IDCANCEL:
+			default:
+				return false;
+			}
+		}
 	}
 
-	//データ読み込み
-	(void)m_pTree->loadDataFileDef(m_ini.m_strDataFile, m_ini.m_strPluginName);
-
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CString strText;
-		strText.Format(_T("read data file\"%s\" %s\n"),m_ini.m_strDataFile.GetString(),m_ini.m_strPluginName.GetString());
+		strText.Format(_T("read data file\"%s\" %s\n"), m_ini.m_strDataPath.GetString(), m_ini.m_strDataFormat.GetString());
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
 	//クリップボードクラスの初期化 変更検知を設定(メインフレームでメッセージ処理をしてます)
-	m_clipbord.getClipboardText(m_strlClipBackup);
-	m_clipbord.setParent(this->m_pMainWnd->m_hWnd);
+	m_clipboard.getClipboardText(m_strClipBackup, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);
+	m_clipboard.setParent(this->m_pMainWnd->m_hWnd);
 	m_keySet = m_ini.m_key.m_defKeySet;
 
 	TCHAR strKeyLayoutName[256];
 	GetKeyboardLayoutName(strKeyLayoutName);
 	m_ini.m_keyLayout = LoadKeyboardLayout(strKeyLayoutName,KLF_REPLACELANG);
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("KeyLayoutName \"%s\"\n"),strKeyLayoutName);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
-
-	//自己診断タイマーセット
-	if(m_ini.m_etc.m_nSelfDiagnosisTime)
-		SetTimer(m_pMainWnd->m_hWnd,TIMER_SELF_DIAGNOSIS,m_ini.m_etc.m_nSelfDiagnosisTime,NULL);
-
-	//マウス監視タイマー
-	if(m_ini.m_pop.m_nCornerPopup)
-		SetTimer(m_pMainWnd->m_hWnd,TIMER_MOUSE,m_ini.m_pop.m_nCornerPopupTime,NULL);
 
 	m_ini.setHookKey(m_hSelfWnd);
 
 	//ホットキーを設定
 	registerHotkey();
 	setAppendHotKey();
+
+	return true;
+}
+
+bool CCharu3App::SelectFile()
+{
+	CString strDisplay, strPattern;
+	strDisplay.LoadString(APP_INF_FILE_FILTER_C3D_DISPLAY);
+	strPattern.LoadString(APP_INF_FILE_FILTER_C3D_PATTERN);
+	CString strFilter = strDisplay + _T('\0') + strPattern + _T('\0');
+	for (std::vector<RW_PLUGIN>::iterator it = m_pTree->m_rwPlugin.begin(); it != m_pTree->m_rwPlugin.end(); it++) {
+		CString strFormat, strDisplay, strPattern;
+		strFormat.LoadString(APP_INF_FILE_FILTER_FMT_DISPLAY);
+		strDisplay.Format(strFormat, it->m_strFormatName, it->m_strExtension);
+		strFormat.LoadString(APP_INF_FILE_FILTER_FMT_PATTERN);
+		strPattern.Format(strFormat, it->m_strExtension);
+		strFilter = strFilter + strDisplay + _T('\0') + strPattern + _T('\0'); // NOTE: Don't use operator +=
+	}
+	strFilter = strFilter + _T('\0') + _T('\0'); // NOTE: Don't use operator +=
+
+	OPENFILENAME param;
+	ZeroMemory(&param, sizeof param);
+	TCHAR tcPath[MAX_PATH] = _T("");
+	param.lStructSize = sizeof param;
+	param.hwndOwner = m_hSelfWnd;
+	param.lpstrFilter = strFilter.GetBuffer();
+	param.lpstrCustomFilter = NULL;
+	param.nFilterIndex = 1;
+	param.lpstrFile = tcPath;
+	param.nMaxFile = MAX_PATH;
+	param.lpstrFileTitle = NULL;
+	param.lpstrInitialDir = NULL;
+	param.lpstrTitle = NULL;
+	param.Flags = OFN_FILEMUSTEXIST;
+	param.nFileOffset = 0;
+	param.nFileExtension = 0;
+	param.lpstrDefExt = NULL;
+	if (GetOpenFileName(&param)) {
+		if (m_ini.m_bDebug) {
+			CString strText;
+			strText.Format(_T("SelectFile \"%s\"\n"), tcPath);
+			CGeneral::writeLog(m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+		}
+
+		CString path = CString(tcPath);
+		CString format = param.nFilterIndex < 2 ? DAT_FORMAT : m_pTree->m_rwPlugin[param.nFilterIndex - 2].m_strFormatName;
+
+		if (m_pTree->loadDataFileDef(path, format)) {
+			m_ini.m_strDataPath = path;
+			m_ini.m_strDataFormat = format;
+			m_ini.m_bReadOnly = ((param.Flags & OFN_READONLY) != 0);
+			m_ini.writeEnvInitData();
+			return true;
+		}
+		else {
+			CString strRes;
+			strRes.LoadString(APP_MES_UNKNOWN_FORMAT);
+			AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
+			return false;
+		}
+	}
+	else {
+		if (m_ini.m_bDebug) {
+			CGeneral::writeLog(m_ini.m_strDebugLog, _T("SelectFile failed\n"), _ME_NAME_, __LINE__);
+		}
+		return false;
+	}
+}
+
+CString CCharu3App::NewFile()
+{
+	CString strTitle, strDisplay, strPattern;
+	strTitle.LoadString(APP_INF_EXPORT_CAPTION);
+	strDisplay.LoadString(APP_INF_FILE_FILTER_C3D_DISPLAY);
+	strPattern.LoadString(APP_INF_FILE_FILTER_C3D_PATTERN);
+	CString strFilter = strDisplay + _T('\0') + strPattern + _T('\0') + _T('\0') + _T('\0');
+
+		OPENFILENAME param;
+	ZeroMemory(&param, sizeof param);
+	TCHAR tcPath[MAX_PATH] = _T("");
+	param.lStructSize = sizeof param;
+	param.hwndOwner = m_hSelfWnd;
+	param.lpstrTitle = strTitle.GetBuffer();
+	param.lpstrFilter = strFilter.GetBuffer();
+	param.lpstrDefExt = _T(DAT_EXT);
+	param.lpstrCustomFilter = NULL;
+	param.nFilterIndex = 1;
+	param.lpstrFile = tcPath;
+	param.nMaxFile = MAX_PATH;
+	param.lpstrFileTitle = NULL;
+	param.lpstrInitialDir = NULL;
+	param.Flags = OFN_OVERWRITEPROMPT;
+	param.nFileOffset = 0;
+	param.nFileExtension = 0;
+	if (GetSaveFileName(&param)) {
+		//if (param.Flags & OFN_EXTENSIONDIFFERENT) {
+		//	_tcscat_s(tcPath, MAX_PATH, _T("."));
+		//	_tcscat_s(tcPath, MAX_PATH, _T(DAT_EXT));
+		//}
+		if (m_ini.m_bDebug) {
+			CString strText;
+			strText.Format(_T("NewFile \"%s\"\n"), tcPath);
+			CGeneral::writeLog(m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+		}
+		return CString(tcPath);
+	}
+	else {
+		if (m_ini.m_bDebug) {
+			CGeneral::writeLog(m_ini.m_strDebugLog, _T("NewFile failed\n"), _ME_NAME_, __LINE__);
+		}
+		return CString(_T(""));
+	}
 }
 
 //---------------------------------------------------
@@ -349,8 +471,8 @@ void CCharu3App::registerHotkey()
 	if(!RegisterHotKey(NULL,HOTKEY_POPUP,uMod,uVK)) {//ポップアップキー
 		CString strRes;
 		strRes.LoadString(APP_MES_FAILURE_HOTKEY);
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+
+		if(m_ini.m_bDebug) {
 			CGeneral::writeLog(m_ini.m_strDebugLog,_T("False hotkey setting popup\n"),_ME_NAME_,__LINE__);
 		}
 //		AfxMessageBox(strRes + _T("Popup Key"),MB_ICONEXCLAMATION,0);
@@ -370,14 +492,14 @@ void CCharu3App::registerHotkey()
 	if(!RegisterHotKey(NULL,HOTKEY_FIFO,uMod,uVK)) {//履歴FIFOキー
 		CString strRes;
 		strRes.LoadString(APP_MES_FAILURE_HOTKEY);
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+
+		if(m_ini.m_bDebug) {
 			CGeneral::writeLog(m_ini.m_strDebugLog,_T("False hotkey setting stuckmode\n"),_ME_NAME_,__LINE__);
 		}
 //		AfxMessageBox(strRes + _T("Stock mode Key"),MB_ICONEXCLAMATION,0);
 	}
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+
+	if(m_ini.m_bDebug) {
 		CGeneral::writeLog(m_ini.m_strDebugLog,_T("registerHotkey\n"),_ME_NAME_,__LINE__);
 	}
 }
@@ -390,8 +512,8 @@ void CCharu3App::stopHotkey()
 {
 	UnregisterHotKey(NULL,HOTKEY_POPUP);
 	UnregisterHotKey(NULL,HOTKEY_FIFO);
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+
+	if(m_ini.m_bDebug) {
 		CGeneral::writeLog(m_ini.m_strDebugLog,_T("stopHotkey\n"),_ME_NAME_,__LINE__);
 	}
 }
@@ -403,7 +525,7 @@ void CCharu3App::stopHotkey()
 void CCharu3App::setAppendHotKey() 
 {
 	HOT_KEY_CODE keyData;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 
 	m_hotkeyVector.clear();
 
@@ -429,8 +551,8 @@ void CCharu3App::setAppendHotKey()
 				keyData.m_dwDoubleKeyTime = 0;
 				m_hotkeyVector.insert(m_hotkeyVector.end(),keyData);//設定アレイに追加
 				int nret = RegisterHotKey(NULL,HOT_ITEM_KEY+m_hotkeyVector.size()-1,keyData.m_uModKey,keyData.m_uVkCode);//ホットキーをレジスト
-				//デバッグログ処理
-				if(m_ini.m_nDebug) {
+
+				if(m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("setAppendHotKey hotkey \"%s\" %d\n"),strKey.GetString(),nret);
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -446,8 +568,8 @@ void CCharu3App::setAppendHotKey()
 				keyData.m_dwDoubleKeyTime = 0;
 				m_hotkeyVector.insert(m_hotkeyVector.end(),keyData);//設定アレイに追加
 				int nret = RegisterHotKey(NULL,HOT_ITEM_KEY+m_hotkeyVector.size()-1,keyData.m_uModKey,keyData.m_uVkCode);//ホットキーをレジスト
-				//デバッグログ処理
-				if(m_ini.m_nDebug) {
+
+				if(m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("setAppendHotKey directcopy \"%s\" %d\n"),strKey.GetString(),nret);
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -467,8 +589,8 @@ void CCharu3App::stopAppendHotKey()
 	for(int i = 0; i < nSize; i++) {
 		UnregisterHotKey(NULL,HOT_ITEM_KEY+i);
 	}
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+
+	if(m_ini.m_bDebug) {
 		CGeneral::writeLog(m_ini.m_strDebugLog,_T("stopAppendHotKey\n"),_ME_NAME_,__LINE__);
 	}
 }
@@ -574,8 +696,7 @@ bool CCharu3App::setAppendKeyInit(HWND hTopWindow,COPYPASTE_KEY *keySet)
 	if(keySet->m_nMessage <= -1)	*keySet = m_ini.m_key.m_defKeySet;
 	m_hActiveKeyWnd = hTopWindow;
 
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("setAppendKeyInit %s %d %d %d %d %d\n"),strWinName.GetString(),keySet->m_uMod_Copy,keySet->m_uVK_Copy,keySet->m_uMod_Paste,keySet->m_uVK_Paste,keySet->m_nMessage);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -586,10 +707,10 @@ bool CCharu3App::setAppendKeyInit(HWND hTopWindow,COPYPASTE_KEY *keySet)
 }
 
 //---------------------------------------------------
-//関数名	popupTreeWindow(POINT pos)
+//関数名	popupTreeWindow
 //機能		ポップアップを表示
 //---------------------------------------------------
-void CCharu3App::popupTreeWindow(POINT pos,int nSelect,HTREEITEM hOpenItem)
+void CCharu3App::popupTreeWindow(POINT pos, bool keepSelection, HTREEITEM hOpenItem)
 {
 	if(m_nPhase != PHASE_IDOL) return;
 	m_nPhase = PHASE_POPUP;
@@ -604,24 +725,15 @@ void CCharu3App::popupTreeWindow(POINT pos,int nSelect,HTREEITEM hOpenItem)
 	}
 
 	if(m_isStockMode)	KillTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE);//監視タイマー停止
-	//IMEをOFFにする
-	if(m_ini.m_pop.m_nAutoImeOff) {
-		HIMC hIMC = ImmGetContext(m_pTreeDlg->m_hWnd);
-		m_isImeStatus = ImmGetOpenStatus(hIMC);
-		if(m_isImeStatus) ImmSetOpenStatus(hIMC,FALSE);
-	}
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+
+	if(m_ini.m_bDebug) {
 		CString strText;
-		strText.Format(_T("popupTreeWindow %d %d %d\n"),pos.x,pos.y,nSelect);
+		strText.Format(_T("popupTreeWindow x=%d y=%d keep=%s\n"), pos.x, pos.y, keepSelection ? "true" : "false");
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
 	CGeneral::setAbsoluteForegroundWindow(m_pMainWnd->m_hWnd);//自分をアクティブに設定
-	if(nSelect)
-		m_pTreeDlg->showWindowPos(pos,m_ini.m_DialogSize,SW_SHOW,true,hOpenItem);//ダイアログを表示
-	else
-		m_pTreeDlg->showWindowPos(pos,m_ini.m_DialogSize,SW_SHOW,false,hOpenItem);//ダイアログを表示
+	m_pTreeDlg->showWindowPos(pos, m_ini.m_DialogSize, SW_SHOW, keepSelection, hOpenItem);
 }
 
 //---------------------------------------------------
@@ -634,15 +746,15 @@ void CCharu3App::popupTreeWinMC(HWND hForeground)
 	GetCursorPos(&pos);
 	pos.x -=  m_ini.m_DialogSize.x;
 	pos.y -=  m_ini.m_DialogSize.y;
-	if(m_ini.m_pop.m_nOutRevice)	reviseWindowPos(&pos);
+	adjustLocation(&pos);
 //	CGeneral::getFocusInfo(&theApp.m_focusInfo,hForeground);
-	popupTreeWindow(pos,m_ini.m_pop.m_nSelectSW);//ポップアップ
+	popupTreeWindow(pos, m_ini.m_pop.m_bKeepSelection);
 }
 //---------------------------------------------------
-//関数名	reviseWindowPos(POINT pos)
-//機能		ポップアップ位置を補正
+//関数名	adjustLocation(POINT pos)
+//機能		ポップアップ位置を必ずデスクトップ内にする
 //---------------------------------------------------
-void CCharu3App::reviseWindowPos(POINT *pos)
+void CCharu3App::adjustLocation(POINT *pos)
 {
 	RECT DeskTopSize;
 	int nMonCount = GetSystemMetrics(SM_CMONITORS);
@@ -654,12 +766,13 @@ void CCharu3App::reviseWindowPos(POINT *pos)
 		//解像度の取得
 		int nScreenWidth = GetSystemMetrics( SM_CXSCREEN );
 		int nScreenHeight = GetSystemMetrics( SM_CYSCREEN );
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+
+		if(m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("reviseWindowPos %d %d %d %d\n"),nDektopWidth,nDesktopHeight,nScreenWidth,nScreenHeight);
 			CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
+
 		HWND hDeskTop = GetDesktopWindow();
 		if(hDeskTop) ::GetWindowRect(hDeskTop,&DeskTopSize);
 		else return;
@@ -710,8 +823,7 @@ void CCharu3App::closeTreeWindow(int nRet)
 	bool isPaste = true;
 	if(::GetAsyncKeyState(VK_SHIFT) < 0) isPaste = false;
 
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("closeTreeWindow %d\n"),nRet);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -720,35 +832,36 @@ void CCharu3App::closeTreeWindow(int nRet)
 	//アクティブウィンドウを復帰
 	if(nRet == IDOK)  {
 		CString strClip,strSelect;
-		m_clipbord.getClipboardText(strClip);//クリップボードを保存
+		m_clipboard.getClipboardText(strClip, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);//クリップボードを保存
 
 		setAppendKeyInit(m_focusInfo.m_hActiveWnd,&m_keySet);//キー設定を変更
 		//キーが離されるのを待つ
 		while(::GetAsyncKeyState(VK_MENU) < 0 || ::GetAsyncKeyState(VK_CONTROL) < 0 ||
 			::GetAsyncKeyState(VK_SHIFT) < 0 || ::GetAsyncKeyState(VK_RETURN) < 0) Sleep(50);
 		CGeneral::setFocusInfo(&m_focusInfo);//ターゲットをフォーカス
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+
+		if(m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("setFocusInfo %x %x\n"),m_focusInfo.m_hActiveWnd,m_focusInfo.m_hActiveWnd);
 			CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
+
 		//貼り付け処理
 		if(m_pTree->m_ltCheckItems.size() > 0) {//複数選択データがある
 			strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択テキスト取得
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
+
+			if(m_ini.m_bDebug) {
 				CString strText;
 				strText.Format(_T("closeTreeWindow sel:%s clip:%s\n"),strSelect.GetString(),strClip.GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 
-			list<HTREEITEM>::iterator it;
+			std::list<HTREEITEM>::iterator it;
 			for(it = m_pTree->m_ltCheckItems.begin(); it != m_pTree->m_ltCheckItems.end(); it++) {
 				if(m_pTree->GetItemState(*it,TVIF_HANDLE)) {
 					data = m_pTree->getData(*it);
-					//デバッグログ処理
-					if(m_ini.m_nDebug) {
+
+					if(m_ini.m_bDebug) {
 						CString strText;
 						strText.Format(_T("closeTreeWindow check paste %s\n"),data.m_strTitle.GetString());
 						CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -771,10 +884,10 @@ void CCharu3App::closeTreeWindow(int nRet)
 		else if(m_pTreeDlg->m_selectDataPtr != nullptr) {//通常選択データ
 			strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択テキスト取得
 			data = *(m_pTreeDlg->m_selectDataPtr);
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
+
+			if(m_ini.m_bDebug) {
 				CString strText;
-				strText.Format(_T("closeTreeWindow sel:%s clip:%s title:\n"),strSelect.GetString(),strClip,data.m_strTitle.GetString());
+				strText.Format(_T("closeTreeWindow sel:%s clip:%s title:\n"),strSelect.GetString(),strClip.GetString(),data.m_strTitle.GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 			playData(data,strClip,strSelect,isPaste);
@@ -790,89 +903,90 @@ void CCharu3App::closeTreeWindow(int nRet)
 
 	
 	//データを保存
-	if (!m_ini.m_strDataFile.IsEmpty()) {
-		if (!m_pTree->saveDataFile(m_ini.m_strDataFile, m_ini.m_strPluginName, NULL)) {
-			CString strRes;
-			strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
-			AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
-		}
-	}
+	SaveData();
 	m_ini.writeEnvInitData();//環境設定を保存
 
 	//監視タイマーセット
-	if(m_isStockMode && m_ini.m_etc.m_nActiveTime)
-		SetTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE,m_ini.m_etc.m_nActiveTime,NULL);
+	if (m_isStockMode && m_ini.m_nWindowCheckInterval > 0) {
+		SetTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE, m_ini.m_nWindowCheckInterval, NULL);
+	}
 	
 	setAppendHotKey();//追加ホットキーを設定
 	m_ini.setHookKey(m_hSelfWnd);
 
-	//チェックボックス付きだった場合はチェックをクリア
-	if(m_pTree->GetStyle() & TVS_CHECKBOXES) {
-		if(m_ini.m_visual.m_nResetTree) {
-			resetTreeDialog();
-			CGeneral::setFocusInfo(&m_focusInfo);//ターゲットをフォーカス
-		}
-		else {
-			m_pTree->removeCheck();
-		}
+	if (m_pTree->GetStyle() & TVS_CHECKBOXES) {
+		resetTreeDialog();
+		CGeneral::setFocusInfo(&m_focusInfo);
 	}
-	//IMEをONにする
-	if(m_ini.m_pop.m_nAutoImeOff) {
-		HIMC hIMC = ImmGetContext(m_pTreeDlg->m_hWnd);
-		if(m_isImeStatus)	ImmSetOpenStatus(hIMC,m_isImeStatus);
-	}
-	if(m_ini.m_etc.m_nMinimization) {
-		m_pMainFrame->ShowWindow(SW_HIDE);
-		m_pMainFrame->ShowWindow(SW_MINIMIZE);
-		m_pMainFrame->ShowWindow(SW_HIDE);
+	else {
+		m_pTree->ClearChecks();
 	}
 	ASSERT(m_nPhase == PHASE_POPUP);
 	m_nPhase = PHASE_IDOL;
+}
+
+void CCharu3App::SaveData()
+{
+	if (m_ini.m_bReadOnly) {
+		return;
+	}
+	if (m_pTree->saveDataToFile(m_ini.m_strDataPath, m_ini.m_strDataFormat, NULL)) {
+		return;
+	}
+
+	CString strRes;
+	strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
+	AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
 }
 
 //---------------------------------------------------
 //関数名	playData(STRING_DATA data,CString strClip)
 //機能		データの展開処理をする
 //---------------------------------------------------
-void CCharu3App::playData(STRING_DATA data,CString strClip,CString strSelect,bool isPaste,bool isChange)
+void CCharu3App::playData(STRING_DATA data, CString strClip, CString strSelect, bool isPaste, bool isChange)
 {
-	CString strMacro,strPaste;
-	int nIsMove;
+	HTREEITEM hSelectItem = m_pTree->GetSelectedItem();
+	CString strPaste;
 
 	//マクロ処理
-	HTREEITEM hSelectItem = m_pTree->GetSelectedItem();
-	HTREEITEM hMacroItem = NULL;
-	if(hSelectItem) hMacroItem = m_pTree->serchParentOption(hSelectItem,_T("macro"));//一番近い親か自分のマクロを調べる
-	if(hMacroItem) {
-		STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
-		strMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("macro"));
+	{
+		HTREEITEM hMacroItem = NULL;
+		if (hSelectItem) {
+			hMacroItem = m_pTree->searchParentOption(hSelectItem, _T("macro"));//一番近い親か自分のマクロを調べる
+		}
+		CString strMacro = m_ini.m_strDataFormat;
+		if (hMacroItem) {
+			STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+			strMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro, _T("macro"));
+		}
+		strPaste = convertMacro(&data, strSelect, strClip, strMacro);
 	}
-	else strMacro = m_ini.m_strMacroPluginName;
-	strPaste = convertMacro(&data,strSelect,strClip,strMacro);
 
 	//テキストを貼り付け処理
 	if(isPaste) {
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+		if(m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("playData active:%x focus:%x\n"),m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
 			CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
+
 		execData(strPaste,m_keySet,hSelectItem,m_focusInfo.m_hFocusWnd);
 
 		//クリップボード復帰
-		if(!m_ini.m_etc.m_nToClip) {
-			m_strlClipBackup = strClip;
-			m_clipbord.setClipboardText(strClip);
+		if(m_ini.m_etc.m_bPutBackClipboard && strClip != "") {
+			m_strClipBackup = strClip;
+			m_clipboard.setClipboardText(strClip.GetString(), m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);
 		}
 		if(isChange) {
 			//貼り付けデータをフォルダの先頭に移動
-			if(hSelectItem)	hMacroItem  = m_pTree->serchParentOption(hSelectItem,_T("move"));
-			else			hMacroItem = NULL;
-			if(hMacroItem) {
-				STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMacroItem);
-				nIsMove = m_pTree->getDataOption(macroDataPtr->m_strMacro,_T("move"));
-				if(nIsMove) { 
+			HTREEITEM hMoveItem = NULL;
+			if (hSelectItem) {
+				hMoveItem = m_pTree->searchParentOption(hSelectItem, _T("move"));
+			}
+			if (hMoveItem) {
+				STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMoveItem);
+				int nIsMove = m_pTree->getDataOption(macroDataPtr->m_strMacro,_T("move"));
+				if (nIsMove) {
 					hSelectItem = m_pTree->moveFolderTop(hSelectItem);
 					if(hSelectItem) m_pTree->SelectItem(hSelectItem);
 				}
@@ -885,7 +999,7 @@ void CCharu3App::playData(STRING_DATA data,CString strClip,CString strSelect,boo
 		}
 	}
 	else {
-		m_clipbord.setClipboardText(strPaste);
+		m_clipboard.setClipboardText(strPaste, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);
 	}
 }
 
@@ -935,12 +1049,13 @@ void CCharu3App::playHotItem(int nTarget)
 						int nTitleLength = m_pTree->getDataOption(data.m_strMacro,_T("titlelen"));//タイトルの文字数
 						if(nTitleLength < 1 || nTitleLength > 256) nTitleLength = 32;
 						dataChild.m_strTitle = m_pTree->makeTitle(strSelect,nTitleLength);
-						//デバッグログ処理
-						if(m_ini.m_nDebug) {
+
+						if(m_ini.m_bDebug) {
 							CString strText;
 							strText.Format(_T("Direct copy folder %s\n"),dataChild.m_strTitle.GetString());
 							CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 						}
+
 						m_pTree->addData(keyData.m_hItem,dataChild,true,true);
 					}
 					setAppendHotKey();//追加ホットキーを設定
@@ -952,8 +1067,8 @@ void CCharu3App::playHotItem(int nTarget)
 
 					m_pTree->SelectItem(keyData.m_hItem);
 					getPopupPos(&pos,m_ini.m_pop.m_nPopupPos);//ポップアップ位置を取得
-					if(m_ini.m_pop.m_nOutRevice)	reviseWindowPos(&pos);
-					popupTreeWindow(pos,true,keyData.m_hItem);//ポップアップ
+					adjustLocation(&pos);
+					popupTreeWindow(pos, true, keyData.m_hItem);
 				}
 			}
 			else {//定形文は一発貼り付け
@@ -961,8 +1076,8 @@ void CCharu3App::playHotItem(int nTarget)
 				stopAppendHotKey();//追加ホットキーを停止
 
 				CString strClip,strPaste;
+				m_clipboard.getClipboardText(strClip, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);//クリップボードを保存
 				strPaste = data.m_strData;
-				m_clipbord.getClipboardText(strClip);//クリップボードを保存
 
 				POINT pos;
 
@@ -971,7 +1086,6 @@ void CCharu3App::playHotItem(int nTarget)
 					::GetAsyncKeyState(VK_SHIFT) < 0 || ::GetAsyncKeyState(keyData.m_uVkCode) < 0) Sleep(50);
 				keyUpDown(keyData.m_uModKey,keyData.m_uVkCode,KEY_UP);//キーを離す処理（これが無いと選択テキスト取得で失敗）
 
-				HTREEITEM hMacroItem;
 				int nIsMove;
 
 				//ダイレクトコピー
@@ -981,8 +1095,8 @@ void CCharu3App::playHotItem(int nTarget)
 					strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択文字取得
 					data.m_strData = strSelect;
 					m_pTree->editData(keyData.m_hItem,data);
-					//デバッグログ処理
-					if(m_ini.m_nDebug) {
+
+					if(m_ini.m_bDebug) {
 						CString strText;
 						strText.Format(_T("Direct copy data %s\n"),data.m_strTitle.GetString());
 						CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -991,12 +1105,14 @@ void CCharu3App::playHotItem(int nTarget)
 				//ホットキー
 				else if(keyData.m_strMacroName == EXMACRO_HOT_KEY) {
 					//マクロ処理
-					hMacroItem = m_pTree->serchParentOption(keyData.m_hItem,_T("macro"));//一番近い親か自分のマクロを調べる
-					if(hMacroItem) {
-						STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
-						strMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("macro"));
+					{
+						HTREEITEM hMacroItem = m_pTree->searchParentOption(keyData.m_hItem, _T("macro"));//一番近い親か自分のマクロを調べる
+						strMacro = m_ini.m_strDataFormat;
+						if (hMacroItem) {
+							STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMacroItem);
+							strMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro, ("macro"));
+						}
 					}
-					else strMacro = m_ini.m_strMacroPluginName;
 
 					CGeneral::getCaretPos(&pos,&m_focusInfo);//キャレット位置を取得
 					setAppendKeyInit(m_focusInfo.m_hActiveWnd,&m_keySet);//キー設定を変更
@@ -1004,8 +1120,7 @@ void CCharu3App::playHotItem(int nTarget)
 					strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択文字取得
 					strPaste = convertMacro(&data,strSelect,strClip,strMacro);//マクロ変換
 					
-					//デバッグログ処理
-					if(m_ini.m_nDebug) {
+					if(m_ini.m_bDebug) {
 						CString strText;
 						strText.Format(_T("Direct paste data %s active:%x focus:%x\n"),strPaste.GetString(),m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
 						CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1015,17 +1130,19 @@ void CCharu3App::playHotItem(int nTarget)
 					execData(strPaste,m_keySet,keyData.m_hItem,m_focusInfo.m_hFocusWnd);
 
 					//貼り付けデータをフォルダの先頭に移動
-					hMacroItem  = m_pTree->serchParentOption(keyData.m_hItem,_T("move"));
-					if(hMacroItem) {
-						STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMacroItem);
-						nIsMove = m_pTree->getDataOption(macroDataPtr->m_strMacro,_T("move"));
-						if(nIsMove) {
-							keyData.m_hItem = m_pTree->moveFolderTop(keyData.m_hItem);
+					{
+						HTREEITEM hMoveItem = m_pTree->searchParentOption(keyData.m_hItem, _T("move"));
+						if (hMoveItem) {
+							STRING_DATA* macroDataPtr = m_pTree->getDataPtr(hMoveItem);
+							nIsMove = m_pTree->getDataOption(macroDataPtr->m_strMacro, _T("move"));
+							if (nIsMove) {
+								keyData.m_hItem = m_pTree->moveFolderTop(keyData.m_hItem);
+							}
 						}
 					}
 					//クリップボード復帰
-					if(!m_ini.m_etc.m_nToClip) {
-						m_clipbord.setClipboardText(strClip);
+					if(m_ini.m_etc.m_bPutBackClipboard && strClip != "") {
+						m_clipboard.setClipboardText(strClip.GetString(), m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);
 					}
 					//一時項目は消す
 					if(m_pTree->getDatakind(keyData.m_hItem) & KIND_ONETIME) {
@@ -1046,7 +1163,7 @@ void CCharu3App::playHotItem(int nTarget)
 //---------------------------------------------------
 CString CCharu3App::getSelectString(COPYPASTE_KEY key,HWND hWnd)
 {
-	m_clipbord.setClipboardText(_T(""));
+	m_clipboard.setClipboardText(CString(), m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);
 	if(!hWnd)	hWnd = m_focusInfo.m_hFocusWnd;
 	CString strSelect;
 
@@ -1085,19 +1202,20 @@ CString CCharu3App::getSelectString(COPYPASTE_KEY key,HWND hWnd)
 				::PostMessage(hWnd,key.m_copyMessage.Msg,key.m_copyMessage.wParam,key.m_copyMessage.lParam);//メッセージ方式
 //				::SendMessage(hWnd,WM_COPY,NULL,NULL);//メッセージ方式
 			}
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
+
+			if(m_ini.m_bDebug) {
 				CString strText;
 				strText.Format(_T("getSelectString %d %s\n"),keySet.m_nMessage,strSelect.GetString());
 				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 			}
 		}
 	}
-	for(i = 0; i <= m_ini.m_etc.m_nCopyWaitCnt; i++) {
-		if(m_clipbord.getClipboardText(strSelect)) break;
-		Sleep(key.m_nCopyWait);//ウェイト
+
+	if (m_clipboard.getClipboardText(strSelect, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval)) {
+		return strSelect;
 	}
-	return strSelect;
+
+	return CString();
 }
 
 //---------------------------------------------------
@@ -1158,7 +1276,7 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 	int nStart = 0,nFoundStart,nFoundEnd,nMacroLenS,nMacroLenE;
 
 	//ビフォアキー処理
-	if(hTargetItem)	hMacroItem  = m_pTree->serchParentOption(hTargetItem,_T("beforkey"));
+	if(hTargetItem)	hMacroItem  = m_pTree->searchParentOption(hTargetItem,_T("beforkey"));
 	else			hMacroItem = NULL;
 	if(hMacroItem) {
 		STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
@@ -1209,7 +1327,7 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 					pasteData(strCut,keySet,hWnd);//貼り付け
 				}
 			}
-			m_strlClipBackup = strCut;
+			m_strClipBackup = strCut;
 		}
 		//キーマクロを実行
 		if(strKeyMacro != _T("")) {
@@ -1218,7 +1336,7 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 	}while(nFoundStart >= 0);
 
 	//アフターキー処理
-	if(hTargetItem)	hMacroItem  = m_pTree->serchParentOption(hTargetItem,_T("afterkey"));
+	if(hTargetItem)	hMacroItem  = m_pTree->searchParentOption(hTargetItem,_T("afterkey"));
 	else			hMacroItem = NULL;
 	if(hMacroItem) {
 		STRING_DATA *macroDataPtr = m_pTree->getDataPtr(hMacroItem);
@@ -1233,8 +1351,8 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 //---------------------------------------------------
 void CCharu3App::pasteData(CString strPaste,COPYPASTE_KEY key,HWND hWnd)
 {
-	if(m_isStockMode) m_strlClipBackup = strPaste;
-	m_clipbord.setClipboardText(strPaste);
+	if(m_isStockMode) m_strClipBackup = strPaste;
+	m_clipboard.setClipboardText(strPaste, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval);
 
 	if(key.m_nMessage == 0) {//イベント方式
 		keyUpDown(key.m_uMod_Paste,key.m_uVK_Paste,KEY_DOWN);
@@ -1250,8 +1368,8 @@ void CCharu3App::pasteData(CString strPaste,COPYPASTE_KEY key,HWND hWnd)
 		::PostMessage(hWnd,key.m_pasteMessage.Msg,key.m_pasteMessage.wParam,key.m_pasteMessage.lParam);//メッセージ方式
 //		::PostMessage(hWnd,WM_PASTE,NULL,NULL);//メッセージ方式
 	}
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("pasteData %d %s %x %x active:%x focus:%x\n"),key.m_nMessage,strPaste.GetString(),key.m_uMod_Paste,key.m_uVK_Paste,m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1287,7 +1405,7 @@ void CCharu3App::keyUpDown(UINT uMod,UINT uVKCode,int nFlag)
 }
 
 //---------------------------------------------------
-//関数名	keyUpDown()
+//関数名	keyUpDownC2()
 //機能		仮想キーを押す
 //---------------------------------------------------
 void CCharu3App::keyUpDownC2(UINT uMod,UINT uVKCode,int nFlag)
@@ -1309,7 +1427,7 @@ void CCharu3App::keyUpDownC2(UINT uMod,UINT uVKCode,int nFlag)
 }
 
 //---------------------------------------------------
-//関数名	keyUpDownMessage
+//関数名	keyUpDownMessage()
 //機能		仮想キーを押す
 //---------------------------------------------------
 void CCharu3App::keyUpDownMessage(UINT uMod,UINT uVKCode,int nFlag,HWND hWnd)
@@ -1333,7 +1451,7 @@ void CCharu3App::keyUpDownMessage(UINT uMod,UINT uVKCode,int nFlag,HWND hWnd)
 //関数名	convertMacro(CString strSourceData)
 //機能		マクロ文字列を置換
 //---------------------------------------------------
-CString CCharu3App::convertMacro(STRING_DATA *SourceData,CString strSelect,CString strClip,CString strSoftName)
+CString CCharu3App::convertMacro(STRING_DATA* SourceData, CString strSelect, CString strClip, CString strSoftName)
 {
 	SetCurrentDirectory(m_ini.m_strAppPath);
 
@@ -1341,7 +1459,7 @@ CString CCharu3App::convertMacro(STRING_DATA *SourceData,CString strSelect,CStri
 
 	CString strSourceData;
 	if(strSoftName != DAT_FORMAT) {
-		if(m_pTree->convertMacroPlugin(SourceData,&strSourceData,strSelect,strClip,strSoftName))
+		if(m_pTree->convertMacroPlugin(SourceData, &strSourceData, strSelect, strClip, strSoftName))
 			return strSourceData;
 	}
 	
@@ -1635,12 +1753,12 @@ CString CCharu3App::convertMacro(STRING_DATA *SourceData,CString strSelect,CStri
 //---------------------------------------------------
 void CCharu3App::changeClipBord(CString strClipBord)
 {
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("changeClipBord \"%s\"\n"),strClipBord.GetString());
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
+
 	//連続で空のクリップボード更新イベントが起こるので対策
 	//2007/10/27-20:20:19-------------------
 	static int nEmptyCnt = 0;
@@ -1661,60 +1779,53 @@ void CCharu3App::changeClipBord(CString strClipBord)
 */		return;
 	}
 	nEmptyCnt = 0;
-	CString strText;
 
-	//サイズ確認
-	int nLimit;
-	CString strTitle;
-	nLimit = m_ini.m_key.m_nHistoryLimit;
-
-	//タイトル別に処理してみる
-	strTitle = CGeneral::getWindowTitle(::GetForegroundWindow());
-	if(strTitle != "") {
+	// Check size
+	int nLimit = m_ini.m_key.m_nHistoryLimit;
+	CString strTitle = CGeneral::getWindowTitle(::GetForegroundWindow());
+	if (strTitle != "") {
 		CHANGE_KEY key;
 		key = m_ini.getAppendKeyInit2(strTitle);
-		if(key.m_nMatch >= 0) nLimit = key.m_nHistoryLimit;
+		if (key.m_nMatch >= 0) nLimit = key.m_nHistoryLimit;
 	}
-	nLimit = nLimit * 1024;//KBなので1024倍
-	if(nLimit >= 0 && nLimit < strClipBord.GetLength()) return;//上限より大きかったら抜ける
+	nLimit *= 1024;
+	if (nLimit >= 0 && strClipBord.GetLength() > nLimit) {
+		return;
+	}
 
-
-	if(m_nPhase == PHASE_IDOL && /*strClipBord != m_strlClipBackup &&*/ strClipBord != "") {
-		m_nPhase = PHASE_LOCK;
+	if (m_nPhase == PHASE_IDOL && /*strClipBord != m_strlClipBackup &&*/ strClipBord != "") {
 		STRING_DATA data;
-		m_pTree->initStringData(&data);
-
-		data.m_cKind    = KIND_ONETIME;
-		data.m_strData  = strClipBord;
-		data.m_strTitle = "";
+		data.m_cKind = KIND_ONETIME;
+		data.m_strData = strClipBord;
 		data.m_cIcon = KIND_DEFAULT;
-		//タイマー停止
-		KillTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE);
-		KillTimer(m_pMainWnd->m_hWnd,TIMER_SELF_DIAGNOSIS);
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+
+		m_nPhase = PHASE_LOCK;
+		KillTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE);
+
+		if (m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("clipboard record \"%s\"\n"),strClipBord.GetString());
 			CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 		}
-		//ストックモード処理
-		if(m_isStockMode) {
-			if((m_ini.m_fifo.m_nDuplication && strClipBord != m_strlClipBackup) || !m_ini.m_fifo.m_nDuplication) {
-				if(m_ini.m_fifo.m_nCopySound) PlaySound(m_ini.m_fifo.m_strWaveFile, NULL, SND_ASYNC|SND_FILENAME);
-				m_pTree->addData(NULL,data);//リストに追加
+
+		if (m_isStockMode) {
+			if (!(m_ini.m_fifo.m_bDontSaveSameDataAsLast && strClipBord == m_strClipBackup)) {
+				if (m_ini.m_fifo.m_strCopySound != _T("")) {
+					PlaySound(m_ini.m_fifo.m_strCopySound, NULL, SND_ASYNC | SND_FILENAME);
+				}
+				m_pTree->addData(NULL, data);
 			}
 		}
-		//履歴フォルダ処理
-		m_pTree->addDataToRecordFolder(data,m_strlClipBackup);
-		if(m_isStockMode)
-			SetTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE,m_ini.m_etc.m_nActiveTime,NULL);
-		//自己診断タイマーセット
-		if(m_ini.m_etc.m_nSelfDiagnosisTime)
-			SetTimer(m_pMainWnd->m_hWnd,TIMER_SELF_DIAGNOSIS,m_ini.m_etc.m_nSelfDiagnosisTime,NULL);
-	
+
+		m_pTree->addDataToRecordFolder(data, m_strClipBackup);
+
+		if (m_isStockMode && m_ini.m_nWindowCheckInterval > 0) {
+			SetTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE, m_ini.m_nWindowCheckInterval, NULL);
+		}
 		m_nPhase = PHASE_IDOL;
 	}
-	m_strlClipBackup = strClipBord;
+
+	m_strClipBackup = strClipBord;
 }
 
 //---------------------------------------------------
@@ -1723,39 +1834,39 @@ void CCharu3App::changeClipBord(CString strClipBord)
 //---------------------------------------------------
 void CCharu3App::fifoClipbord()
 {
-	if(!m_isStockMode || m_nPhase != PHASE_IDOL) return;
-	UnregisterHotKey(NULL,HOTKEY_PASTE);//ホットキー解除
-	STRING_DATA data;
-	HTREEITEM hTarget;
+	if (!m_isStockMode || m_nPhase != PHASE_IDOL) {
+		return;
+	}
 
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
-		CGeneral::writeLog(m_ini.m_strDebugLog,_T("fifoClipbord\n"),_ME_NAME_,__LINE__);
+	if (m_ini.m_bDebug) {
+		CGeneral::writeLog(m_ini.m_strDebugLog, _T("fifoClipbord\n"), _ME_NAME_, __LINE__);
 	}
+
+	UnregisterHotKey(NULL, HOTKEY_PASTE);
 	m_nPhase = PHASE_LOCK;
-	//先入れ処理
-	if(m_ini.m_fifo.m_nFifo) {
-		hTarget = m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo);
-		if(hTarget)	{
-			data = m_pTree->getData(hTarget);
-			m_pTree->deleteData(hTarget);
+	if (m_ini.m_fifo.m_nFifo) {
+		CString text;
+		HTREEITEM hItem = m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo);
+		if (hItem) {
+			text = m_pTree->getDataPtr(hItem)->m_strData;
+			m_pTree->deleteData(hItem);
 		}
-		if(data.m_strData != "" || !m_ini.m_fifo.m_nNoClear) {
-			for(int i = 0; i <= m_ini.m_etc.m_nPasteWaitCnt; i++) {
-				//デバッグログ処理
-				if(m_ini.m_nDebug) {
-					CString strText;
-					strText.Format(_T("fifoClipbord text:%s\n"),data.m_strData.GetString());
-					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-				}
-				if(m_clipbord.setClipboardText(data.m_strData))	break;//クリップボードにセット
-				Sleep(50);//ウェイト
+		else {
+			text = _T("");
+		}
+		if (text != _T("")) {
+			if (m_ini.m_bDebug) {
+				CString strText;
+				strText.Format(_T("fifoClipbord text:%s\n"), text.GetString());
+				CGeneral::writeLog(m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
 			}
-			m_strlClipBackup = data.m_strData;		//比較用文字列にセット
+			if (m_clipboard.setClipboardText(text, m_ini.m_nClipboardRetryTimes, m_ini.m_nClipboardRetryInterval)) {
+				if (m_ini.m_fifo.m_strPasteSound != _T("")) {
+					PlaySound(m_ini.m_fifo.m_strPasteSound, NULL, SND_ASYNC | SND_FILENAME);
+				}
+				m_strClipBackup = text;
+			}
 		}
-	}
-	if(m_ini.m_fifo.m_nPasteSound) {//効果音を鳴らす
-		PlaySound(m_ini.m_fifo.m_strWaveFile, NULL, SND_ASYNC|SND_FILENAME);
 	}
 	//仮想的にCtrl+Vを押す
 	UINT uVkCode = NULL;
@@ -1778,9 +1889,10 @@ void CCharu3App::fifoClipbord()
 
 	RegisterHotKey(NULL,HOTKEY_PASTE,m_keySet.m_uMod_Paste,m_keySet.m_uVK_Paste);//ペーストキー
 
-	if (m_ini.m_fifo.m_nAllClearOff && !m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo)) {
-		toggleStockMode(); // Toggle (turn off) stock mode due to loss of one-time item
+	if (m_ini.m_fifo.m_bAutoOff && !m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo)) {
+		toggleStockMode(); // Turn off stock mode due to one-time item is gone
 	}
+
 	m_nPhase = PHASE_IDOL;
 }
 
@@ -1790,29 +1902,28 @@ void CCharu3App::fifoClipbord()
 //---------------------------------------------------
 void CCharu3App::toggleStockMode()
 {
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("toggleStockMode %d\n"),!m_isStockMode);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
-	if(m_isStockMode) {
-		m_isStockMode = false;
-		KillTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE);
-		UnregisterHotKey(NULL,HOTKEY_PASTE);
-		m_pMainFrame->changeTrayIcon(m_isStockMode);
-		if(m_ini.m_fifo.m_nOffClear)	m_pTree->clearOneTime(m_pTree->GetRootItem());//一時項目クリア
+	m_isStockMode = !m_isStockMode;
+	m_pMainFrame->changeTrayIcon(m_isStockMode);
+	if (m_isStockMode) {
+		m_strClipBackup = _T("");
+		setAppendKeyInit(::GetForegroundWindow(), &m_keySet);
+		RegisterHotKey(NULL, HOTKEY_PASTE, theApp.m_keySet.m_uMod_Paste, theApp.m_keySet.m_uVK_Paste);//ペーストキー
+		if (m_ini.m_nWindowCheckInterval > 0) {
+			SetTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE, m_ini.m_nWindowCheckInterval, NULL);
+		}
 	}
 	else {
-		m_isStockMode = true;
-		m_strlClipBackup = "";
-		setAppendKeyInit(::GetForegroundWindow(),&m_keySet);
-		RegisterHotKey(NULL,HOTKEY_PASTE,theApp.m_keySet.m_uMod_Paste,theApp.m_keySet.m_uVK_Paste);//ペーストキー
-		//監視タイマーセット
-		if(m_ini.m_etc.m_nActiveTime)
-			SetTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE,m_ini.m_etc.m_nActiveTime,NULL);
-		m_pMainFrame->changeTrayIcon(m_isStockMode);
+		KillTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE);
+		UnregisterHotKey(NULL, HOTKEY_PASTE);
+		if (m_ini.m_fifo.m_bCleanupAtTurnOff) {
+			m_pTree->cleanupOneTimeItems(m_pTree->GetRootItem());
+		}
 	}
 }
 
@@ -1864,82 +1975,35 @@ void CCharu3App::getPopupPos(POINT *pPos,int nPosType)
 }
 
 //---------------------------------------------------
-//関数名	cornerPopup()
-//機能		デスクトップ隅でのポップアップ処理
-//---------------------------------------------------
-bool CCharu3App::cornerPopup()
-{
-	//デスクトップのサイズを取得
-	RECT rectDeskTop;
-	HWND hDeskTop = GetDesktopWindow();
-	::GetWindowRect(hDeskTop,&rectDeskTop);
-	POINT pos;
-	GetCursorPos(&pos);
-	int nPosType = 0;
-	if(m_ini.m_pop.m_nCornerPopup & 0x02) //左上
-		if(pos.x  <= m_ini.m_pop.m_nCornerPopupPix && pos.y <= m_ini.m_pop.m_nCornerPopupPix) nPosType = POPUP_POS_LEFT_U;
-
-	if(m_ini.m_pop.m_nCornerPopup & 0x04) //右上
-		if(pos.x >= rectDeskTop.right - m_ini.m_pop.m_nCornerPopupPix && pos.y <= m_ini.m_pop.m_nCornerPopupPix) nPosType = POPUP_POS_RIGHT_U;
-		
-	if(m_ini.m_pop.m_nCornerPopup & 0x08) //左下
-		if(pos.x  <= m_ini.m_pop.m_nCornerPopupPix && pos.y >= rectDeskTop.bottom - m_ini.m_pop.m_nCornerPopupPix) nPosType = POPUP_POS_LEFT_D;
-		
-	if(m_ini.m_pop.m_nCornerPopup & 0x10) //右下
-		if(pos.x >= rectDeskTop.right - m_ini.m_pop.m_nCornerPopupPix && pos.y >= rectDeskTop.bottom - m_ini.m_pop.m_nCornerPopupPix) nPosType = POPUP_POS_RIGHT_D;
-		
-	if(nPosType) {
-		if(!m_isCornerPopup) {
-			m_isCornerPopup = true;
-			return false;
-		}
-		getPopupPos(&pos,nPosType);
-		popupTreeWindow(pos,m_ini.m_pop.m_nSelectSW);//ポップアップ
-		m_isCornerPopup = false;
-		return true;
-	}
-	else m_isCornerPopup = false;
-	return false;
-}
-
-//---------------------------------------------------
 //関数名	resetTreeDialog()
-//機能		ツリーダイアログを再構築
+//機能		ツリーダイアログを再生成
 //---------------------------------------------------
 void  CCharu3App::resetTreeDialog()
 {
-	list<STRING_DATA> stringList;//データリスト
+	std::list<STRING_DATA> stringList;//データリスト
 
 	//データの順番を正規化してコピー
 	HTREEITEM hStartItem = m_pTree->GetRootItem();
 	m_pTree->tree2List(hStartItem,&stringList,true);
 
-	if(m_pTree)		delete m_pTree;
-	if(m_pTreeDlg)	delete m_pTreeDlg;
-
-	m_pTreeDlg = NULL;
-	m_pTree = NULL;
-
+	if (m_pTree) {
+		delete m_pTree;
+	}
+	if (m_pTreeDlg) {
+		delete m_pTreeDlg;
+	}
 	m_pTreeDlg = new CMyTreeDialog;
 	m_pTree = new CCharu3Tree;
-	if(m_pTree) {
+	if (m_pTree) {
 		m_pTreeDlg->setTree(m_pTree);
-		m_pTreeDlg->Create(IDD_POPUP_DIALOG,this->m_pMainWnd);
-
+		m_pTreeDlg->Create(IDD_DATA_TREE_VIEW, this->m_pMainWnd);
 		m_pTree->setImageList(m_ini.m_IconSize,theApp.m_ini.m_visual.m_strResourceName,m_ini.m_strAppPath);
 		m_pTree->setInitInfo(&m_ini.m_nTreeID,&m_ini.m_nSelectID,&m_ini.m_nRecNumber);//ID初期値を設定
-
-		//データ互換プラグインを初期化
-		if(!m_pTree->setPlugin(m_ini.m_strRwPluginFolder)){
-			m_ini.m_strRwPluginFolder = m_ini.m_strAppPath + "rw_plugin";
-			m_pTree->setPlugin(m_ini.m_strRwPluginFolder);
-			m_ini.writeEnvInitData();
-		}
+		m_pTree->setPlugin(m_ini.m_strRwPluginFolder);
 		m_pTree->m_MyStringList = stringList;
 		m_pTree->CWnd::LockWindowUpdate();
 		m_pTree->copyData(ROOT,TVI_ROOT,&m_pTree->m_MyStringList);//ツリーにデータをセット
 		m_pTree->CWnd::UnlockWindowUpdate();
-
 		setAppendHotKey();
 	}
 }
@@ -1956,8 +2020,7 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 {
 	//キーフック処理
 	if(pMsg->message == WM_KEY_HOOK) {
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+		if(m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("WM_KEY_HOOK %d %d\n"),pMsg->wParam,pMsg->lParam);
 			CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1999,32 +2062,19 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 	}
 	
 	if(m_nPhase == PHASE_IDOL && pMsg->message == WM_TIMER) {
-		//監視タイマー処理
+		// 監視タイマー処理（ウィンドウが切り替わっていたらストックモードのペーストキーを切り替える）
 		if(pMsg->wParam == TIMER_ACTIVE && m_isStockMode) {
 			if(setAppendKeyInit(::GetForegroundWindow(),&m_keySet)) {
 				UnregisterHotKey(NULL,HOTKEY_PASTE);
 				RegisterHotKey(NULL,HOTKEY_PASTE,theApp.m_keySet.m_uMod_Paste,theApp.m_keySet.m_uVK_Paste);
 			}
 		}
-		//自己診断タイマー
-		else if(pMsg->wParam == TIMER_SELF_DIAGNOSIS) {
-			m_clipbord.resetClipView(this->m_pMainWnd->m_hWnd);
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
-				CGeneral::writeLog(m_ini.m_strDebugLog,_T("TIMER_SELF_DIAGNOSIS\n"),_ME_NAME_,__LINE__);
-			}
-		}
-		//マウス監視タイマー
-		else if(pMsg->wParam == TIMER_MOUSE) {
-			if(cornerPopup()) return FALSE;
-		}
 	}
 	//ホットキー処理
 	if(pMsg->message == WM_HOTKEY) {
 		switch(pMsg->wParam) {
 		case HOTKEY_POPUP://ポップアップ
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
+			if(m_ini.m_bDebug) {
 				CGeneral::writeLog(m_ini.m_strDebugLog,_T("HOTKEY_POPUP\n"),_ME_NAME_,__LINE__);
 			}
 			if(m_ini.m_pop.m_nDoubleKeyPOP) {//ダブルキークリック
@@ -2037,27 +2087,32 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 			if(m_nPhase == PHASE_IDOL) {
 				POINT pos;
 				getPopupPos(&pos,m_ini.m_pop.m_nPopupPos);//ポップアップ位置を取得
-				if(m_ini.m_nDebug) {
+
+				if(m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("getPopupPos %d %d\n"),pos.x,pos.y);
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
-				if(m_ini.m_pop.m_nOutRevice)	reviseWindowPos(&pos);
-				if(m_ini.m_nDebug) {
+
+				adjustLocation(&pos);
+
+				if(m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("reviseWindowPos %d %d\n"),pos.x,pos.y);
 					CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
-				popupTreeWindow(pos,m_ini.m_pop.m_nSelectSW);//ポップアップ
+
+				popupTreeWindow(pos, m_ini.m_pop.m_bKeepSelection);
 			}
 			else	m_isCloseKey = true;//閉じるスイッチを入れておく
 			return FALSE;
 			break;
+
 		case HOTKEY_FIFO://ストックモード切り替え
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
+			if(m_ini.m_bDebug) {
 				CGeneral::writeLog(m_ini.m_strDebugLog,_T("HOTKEY_FIFO\n"),_ME_NAME_,__LINE__);
 			}
+
 			if(m_ini.m_pop.m_nDoubleKeyFIFO) {//ダブルキークリック
 				DWORD dwTime = timeGetTime();
 				if(static_cast<int>(dwTime - m_dwDoubleKeyFifoTime) > m_ini.m_pop.m_nDCKeyFifoTime) {
@@ -2068,14 +2123,15 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 			toggleStockMode(); // Toggle stock mode by hotkey
 			return FALSE;
 			break;
+
 		case HOTKEY_PASTE://履歴FIFO処理
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
+			if(m_ini.m_bDebug) {
 				CGeneral::writeLog(m_ini.m_strDebugLog,_T("HOTKEY_PASTE\n"),_ME_NAME_,__LINE__);
 			}
 			fifoClipbord();
 			return FALSE;
 			break;
+
 		//ホットアイテム
 		default:
 			if(m_nPhase == PHASE_IDOL) {
@@ -2112,15 +2168,8 @@ void CCharu3App::OnAbout()
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	//{{AFX_MSG_MAP(CAboutDlg)
-	ON_BN_CLICKED(IDC_WEB, OnWeb)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
-void CAboutDlg::OnWeb()
-{
-	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE"), NULL, NULL, SW_SHOWNORMAL);
-	EndDialog(IDOK);
-}
 
 //---------------------------------------------------
 //関数名	OnHelp()
@@ -2128,31 +2177,7 @@ void CAboutDlg::OnWeb()
 //---------------------------------------------------
 void CCharu3App::OnHelp() 
 {
-	CString strFileName;
-	strFileName = m_ini.m_strAppPath + HELP_FILE;
-	ShellExecute(NULL,NULL,strFileName,NULL,NULL,SW_SHOWNORMAL);
-}
-
-//---------------------------------------------------
-//関数名	OnExit()
-//機能		終了処理
-//---------------------------------------------------
-void CCharu3App::OnExit() 
-{
-	stopAppendHotKey();//追加ホットキーを停止
-	stopHotkey();
-	//タイマー停止
-	KillTimer(m_pMainWnd->m_hWnd,TIMER_SELF_DIAGNOSIS);
-	KillTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE);
-	KillTimer(m_pMainWnd->m_hWnd,TIMER_MOUSE);
-
-	if(m_hLangDll)	FreeLibrary(m_hLangDll);
-	m_ini.unHookKey();
-	m_pTree->saveDataFile(m_ini.m_strDataFile,m_ini.m_strPluginName,NULL);
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
-		CGeneral::writeLog(m_ini.m_strDebugLog,_T("OnExit\n"),_ME_NAME_,__LINE__);
-	}
+	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE/wiki"), NULL, NULL, SW_SHOWNORMAL);
 }
 
 //---------------------------------------------------
@@ -2167,7 +2192,6 @@ void CCharu3App::OnOption()
 
 	//タイマー停止
 	KillTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE);
-	KillTimer(m_pMainWnd->m_hWnd,TIMER_SELF_DIAGNOSIS);
 	KillTimer(m_pMainWnd->m_hWnd,TIMER_MOUSE);
 
 	COptMainDialog dlgOption(NULL,m_ini.m_nOptionPage);
@@ -2179,26 +2203,27 @@ void CCharu3App::OnOption()
 	stopAppendHotKey();//追加ホットキーを停止
 	stopHotkey();
 
-	//デバッグログ処理
-	if(m_ini.m_nDebug) {
+	if(m_ini.m_bDebug) {
 		CGeneral::writeLog(m_ini.m_strDebugLog,_T("OnOption\n"),_ME_NAME_,__LINE__);
 	}
 	int ret = dlgOption.DoModal();
 	if(ret == IDOK) {
 		m_ini.writeAllInitData();
-		//デバッグログ処理
-		if(m_ini.m_nDebug) {
+
+		if(m_ini.m_bDebug) {
 			CGeneral::writeLog(m_ini.m_strDebugLog,_T("writeAllInitData\n"),_ME_NAME_,__LINE__);
 		}
 	}
 	else m_ini = iniBkup;
 
-	if(m_ini.m_visual.m_nResetTree && nPhase != PHASE_POPUP && iniBkup.m_visual.m_strResourceName != m_ini.m_visual.m_strResourceName)
-		resetTreeDialog();//ツリー再構築
+	CRect rect;
+	m_pTreeDlg->GetWindowRect(&rect);
+
+	if (iniBkup.m_visual.m_strResourceName != m_ini.m_visual.m_strResourceName) {
+		resetTreeDialog();
+	}
 
 	if (ret == IDOK && nPhase == PHASE_POPUP) {
-		CRect rect;
-		m_pTreeDlg->GetWindowRect(rect);
 		m_pTreeDlg->ShowWindow(false);
 		m_pTreeDlg->showWindowPos(rect.TopLeft(), m_ini.m_DialogSize, SW_SHOW, true);
 	}
@@ -2207,66 +2232,13 @@ void CCharu3App::OnOption()
 	setAppendHotKey();//追加ホットキーを設定
 	if(nPhase == PHASE_IDOL)	m_ini.setHookKey(m_hSelfWnd);
 
-	//自己診断タイマーセット
-	if(m_ini.m_etc.m_nSelfDiagnosisTime)
-		SetTimer(m_pMainWnd->m_hWnd,TIMER_SELF_DIAGNOSIS,m_ini.m_etc.m_nSelfDiagnosisTime,NULL);
 	//監視タイマーセット アイドル状態でストックモード中なら
-	if(m_nPhase == PHASE_IDOL && m_isStockMode && m_ini.m_etc.m_nActiveTime)
-		SetTimer(m_pMainWnd->m_hWnd,TIMER_ACTIVE,m_ini.m_etc.m_nActiveTime,NULL);
-
-	//マウス監視タイマー
-	if(m_ini.m_pop.m_nCornerPopup)
-		SetTimer(m_pMainWnd->m_hWnd,TIMER_MOUSE,m_ini.m_pop.m_nCornerPopupTime,NULL);
+	if (m_nPhase == PHASE_IDOL && m_isStockMode && m_ini.m_nWindowCheckInterval > 0) {
+		SetTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE, m_ini.m_nWindowCheckInterval, NULL);
+	}
 
 	m_hActiveKeyWnd = NULL;
 	m_nPhase = nPhase;
-}
-
-//---------------------------------------------------
-//関数名	OnDataSave()
-//機能		別名保存
-//---------------------------------------------------
-void CCharu3App::OnDataSave() 
-{
-	CFileDialog *pFileDialog;
-	CString strFilter;
-	strFilter.LoadString(APP_INF_FILE_FILTER);
-	pFileDialog = new CFileDialog(FALSE,_T("*.c3d"),NULL,NULL,strFilter + _T("||"));
-
-	if(pFileDialog) {
-		if(IDOK == pFileDialog->DoModal()) {
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
-				CString strText;
-				strText.Format(_T("OnDataSave \"%s\"\n"),pFileDialog->GetPathName().GetString());
-				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-			}
-			if(!m_pTree->saveDataFile(pFileDialog->GetPathName(),DAT_FORMAT,NULL)) {
-				CString strRes;
-				strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
-				AfxMessageBox(strRes,MB_ICONEXCLAMATION,0);
-			}
-		}
-		delete pFileDialog;
-	}
-}
-
-//---------------------------------------------------
-//関数名	OnOnetimeClear() 
-//機能		一時項目をクリア
-//---------------------------------------------------
-void CCharu3App::OnOnetimeClear() 
-{
-	m_pTree->clearOneTime(m_pTree->GetRootItem());	
-}
-
-//---------------------------------------------------
-//関数名	OnAllLock()
-//機能		一時項目を全てロック
-//---------------------------------------------------
-void CCharu3App::OnAllLock() 
-{
-	m_pTree->clearOneTime(m_pTree->GetRootItem(),KIND_LOCK);	
 }
 
 //---------------------------------------------------
@@ -2275,67 +2247,43 @@ void CCharu3App::OnAllLock()
 //---------------------------------------------------
 void CCharu3App::OnChangData() 
 {
-	CString strFilter,strBuff;
+	SelectFile();
+}
 
-	strFilter = "";
-	RW_PLUGIN plugin;
-	vector<RW_PLUGIN>::iterator it;
-	CString strRes;
-	for(it = m_pTree->m_rwPlugin.begin(); it != m_pTree->m_rwPlugin.end(); it++) {
-		strRes.LoadString(APP_INF_FILE_FILTER2);
-		strBuff.Format(strRes,it->m_strSoftName,it->m_strExtension,it->m_strExtension);
-		strFilter = strFilter + strBuff;
-	}
-
-	CMyFileDialog *pFileDialog;
-
-	CString strFilterC3;
-	strFilterC3.LoadString(APP_INF_FILE_FILTER);
-	pFileDialog = new CMyFileDialog(TRUE,_T("c3d"),NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,strFilterC3 + _T("|") + strFilter,NULL,true);
-
-	if(pFileDialog) {
-		pFileDialog->m_ofn.lpstrInitialDir = m_ini.m_strAppPath;
-		strRes.LoadString(APP_INF_CHECKBOX_MACRO);
-		if(IDOK == pFileDialog->DoModal(TRUE,strRes)) {
-			//デバッグログ処理
-			if(m_ini.m_nDebug) {
-				CString strText;
-				strText.Format(_T("OnChangData \"%s\"\n"),pFileDialog->GetPathName().GetString());
-				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-			}
-			
-			CString strNameBkup,strPlugBkup;
-			strNameBkup = m_ini.m_strDataFile;
-			m_ini.m_strDataFile = pFileDialog->GetPathName();
-
-			//適合プラグインを検索
-			bool isFound = false;
-			OPENFILENAME fileName;
-			fileName = pFileDialog->getFileName();
-
-			//ソフト名を設定
-			strPlugBkup = m_ini.m_strPluginName;
-			if(fileName.nFilterIndex == 1)
-				m_ini.m_strPluginName = DAT_FORMAT;
-			else
-				m_ini.m_strPluginName = m_pTree->m_rwPlugin[fileName.nFilterIndex - 2].m_strSoftName;
-
-			if(m_pTree->loadDataFileDef(m_ini.m_strDataFile,m_ini.m_strPluginName)) {	
-				//マクロプラグイン処理
-				if(pFileDialog->m_isAutoMacro) 	m_ini.m_strMacroPluginName = m_ini.m_strPluginName;
-			}
-			else {
-				strRes.LoadString(APP_MES_UNKNOWN_FORMAT);
-				AfxMessageBox(strRes,MB_ICONEXCLAMATION,0);
-				m_ini.m_strDataFile = strNameBkup;
-				m_ini.m_strPluginName = strPlugBkup;
-				m_pTree->loadDataFileDef(m_ini.m_strDataFile,m_ini.m_strPluginName);
-			}
-			//状態を保存
-			m_ini.writeEnvInitData();
+//---------------------------------------------------
+//関数名	OnExport()
+//機能		エクスポート
+//---------------------------------------------------
+void CCharu3App::OnExport()
+{
+	CString file = NewFile();
+	if (file != _T("")) {
+		if (!m_pTree->saveDataToFile(file, DAT_FORMAT, NULL)) {
+			CString strRes;
+			strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
+			AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
 		}
-		delete pFileDialog;
-	}	
+	}
+}
+
+//---------------------------------------------------
+//関数名	OnExit()
+//機能		終了処理
+//---------------------------------------------------
+void CCharu3App::OnExit()
+{
+	stopAppendHotKey();
+	stopHotkey();
+	KillTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE);
+	KillTimer(m_pMainWnd->m_hWnd, TIMER_MOUSE);
+	if (m_hLangDll) {
+		FreeLibrary(m_hLangDll);
+	}
+	m_ini.unHookKey();
+	SaveData();
+	if (m_ini.m_bDebug) {
+		CGeneral::writeLog(m_ini.m_strDebugLog, _T("OnExit\n"), _ME_NAME_, __LINE__);
+	}
 }
 
 //---------------------------------------------------
@@ -2344,60 +2292,12 @@ void CCharu3App::OnChangData()
 //---------------------------------------------------
 void CCharu3App::OnAddData() 
 {
-	CAddDialog addDialog(NULL,NULL);
-	addDialog.setMacroTempate(&m_ini.m_vctMacro,&m_ini.m_vctDataMacro);
-	//追加ダイアログを開く
-	int nRet = addDialog.DoModal();
-}
-
-//---------------------------------------------------
-//関数名	OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
-//機能		すでに割り当てられているメッセージがない場合
-//---------------------------------------------------
-BOOL CCharu3App::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
-{
-	if(pHandlerInfo == NULL) {	//　すでに割り当てられているメッセージがない場合……
-		if(nCode == CN_COMMAND) {
-			int nMax = m_pTree->m_rwPlugin.size();//データ数を取得
-			for(int i = 0; i <= nMax; i++) {
-				if(nID == (UINT)(IDM_MACRO_CHARU + i)) {//適合プラグインを設定
-					if(i == 0) m_ini.m_strMacroPluginName = DAT_FORMAT;
-					else {
-						m_ini.m_strMacroPluginName = m_pTree->m_rwPlugin[i-1].m_strSoftName;
-					}
-					m_ini.writeEnvInitData();
-					break;
-				}
-			}
-		}
+	STRING_DATA data;
+	CEditDialog editDialog(NULL, &data, true);
+	int nRet = editDialog.DoModal();
+	if (IDOK == nRet) {
+		theApp.m_pTree->addData(NULL, data);
 	}
-	
-	return CWinApp::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-}
-
-//---------------------------------------------------
-//関数名	OnIconDecide()  
-//機能		アイコンを自動判別
-//---------------------------------------------------
-void CCharu3App::OnIconDecide() 
-{
-	CString strRes;
-	strRes.LoadString(APP_MES_DECIDE_ICONS);
-	int nRet = AfxMessageBox(strRes,MB_YESNO|MB_ICONEXCLAMATION|MB_APPLMODAL);
-
-	if(nRet == IDYES) {
-		m_pTree->allIconCheck();
-	}		
-}
-
-//---------------------------------------------------
-//関数名	OnBbsOpen()
-//機能		サポート掲示板を開く
-//---------------------------------------------------
-void CCharu3App::OnBbsOpen() 
-{
-	ShellExecute(NULL,NULL,m_ini.m_strBBS,NULL,NULL,SW_SHOWNORMAL);
-	
 }
 
 //---------------------------------------------------
@@ -2410,53 +2310,6 @@ void CCharu3App::OnStockStop()
 }
 
 //---------------------------------------------------
-//関数名	OnVisualFile() 
-//機能		ビジュアル設定を読み込み
-//---------------------------------------------------
-void CCharu3App::OnVisualFile() 
-{
-	CString strFileName;
-	CFileDialog *pFileDialog;
-	CString strRes;
-	strRes.LoadString(APP_INF_FILE_FILTER_VISUAL_PREF);
-	pFileDialog = new CFileDialog(TRUE,_T("json"),NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,strRes,NULL);
-
-	CInit iniBkup;
-	iniBkup = m_ini;
-
-	if(pFileDialog) {
-		pFileDialog->m_ofn.lpstrInitialDir = m_ini.m_strAppPath;
-		if(IDOK == pFileDialog->DoModal()) {
-			if(m_ini.m_nDebug) {
-				CString strText;
-				strText.Format(_T("OnVisualFile \"%s\"\n"),pFileDialog->GetPathName().GetString());
-				CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-			}
-			strFileName = pFileDialog->GetPathName();
-			nlohmann::json j = nlohmann::json::parse(std::ifstream(strFileName));
-			double n;
-			std::string s;
-			CString cs;
-			cs = CGeneral::getPrefCString(j, "IconFile");
-			if (!cs.IsEmpty()) m_ini.m_visual.m_strResourceName = cs;
-			cs = CGeneral::getPrefCString(j, "FontName");
-			if (!cs.IsEmpty()) m_ini.m_visual.m_strFontName = cs;
-			if (CGeneral::getPrefNumber(j, "FontSize", n) && n >= 0) m_ini.m_visual.m_nFontSize = static_cast<int>(n);
-			s = CGeneral::getPrefString(j, "BackColor");
-			if (!s.empty()) m_ini.m_visual.m_nBackColor = Color::parse(s);
-			s = CGeneral::getPrefString(j, "BorderColor");
-			if (!s.empty()) m_ini.m_visual.m_nBorderColor = Color::parse(s);
-			s = CGeneral::getPrefString(j, "TextColor");
-			if (!s.empty()) m_ini.m_visual.m_nTextColor = Color::parse(s);
-		}
-		delete pFileDialog;
-
-		if(m_ini.m_visual.m_nResetTree && iniBkup.m_visual.m_strResourceName != m_ini.m_visual.m_strResourceName)
-			resetTreeDialog();
-	}
-}
-
-//---------------------------------------------------
 //関数名	resetTreeDialog()
 //機能		ツリー再構築
 //---------------------------------------------------
@@ -2464,5 +2317,3 @@ void CCharu3App::OnResetTree()
 {
 	resetTreeDialog();//ツリー再構築
 }
-
-

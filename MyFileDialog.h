@@ -32,7 +32,7 @@ public:
 		return CFileDialog::DoModal();
 	}
 	OPENFILENAME getFileName(){return m_ofn;}
-protected:
+private:
 	//{{AFX_MSG(CMyFileDialog)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnDestroy();
@@ -41,6 +41,9 @@ protected:
 
 	int m_nCheck;
 	CString m_strCheckString;
+#if (NTDDI_VERSION >= NTDDI_VISTA)
+	IFileDialogCustomize* m_custom;
+#endif
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -10,8 +10,10 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // OptVisual.h : ヘッダー ファイル
-//
+#include "resource.h"
 #include "PaletStatic.h"
+
+#include <afxwin.h>
 
 #define	MAX_FONT 256
 //---------------------------------------------------
@@ -27,16 +29,13 @@ public:
 // ダイアログ データ
 	//{{AFX_DATA(COptVisual)
 	enum { IDD = IDD_OPT_VISUAL };
-	CPaletStatic m_ctrlBorderPal;
-	CPaletStatic m_ctrlTextPal;
-	CPaletStatic m_ctrlBackPal;
-	CComboBox	m_ctrlFontCombo;
-	CString	m_strBackColor;
-	CString	m_strTextColor;
 	CString	m_strBorderColor;
-	int		m_n;
-	int		m_nScrollH;
-	int		m_nScrollV;
+	CPaletStatic m_ctrlBorderPal;
+	CString	m_strBackgroundColor;
+	CPaletStatic m_ctrlBackgroundPal;
+	CString	m_strTextColor;
+	CPaletStatic m_ctrlTextPal;
+	CComboBox	m_ctrlFontCombo;
 	//}}AFX_DATA
 
 
@@ -57,8 +56,8 @@ protected:
 
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(COptVisual)
-	afx_msg void OnOptBackColorPal();
 	afx_msg void OnOptBorderColorPal();
+	afx_msg void OnOptBackgroundColorPal();
 	afx_msg void OnOptTextColorPal();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnOptVsBrows();
@@ -69,10 +68,11 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedOptLoadVisual();
+	afx_msg void OnBnClickedOptLoadStyle();
 	void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 private:
+	void ReadStyleFile();
 	void SetOpacityText(int value);
 };
 

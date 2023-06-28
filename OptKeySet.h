@@ -10,8 +10,12 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // OptKeySet.h : ヘッダー ファイル
-//
+#include "resource.h"
+#include "Init.h"
 #include "MyHotkeyCtrl.h"
+
+#include <list>
+#include <afxwin.h>
 
 //---------------------------------------------------
 // COptKeySet ダイアログ
@@ -46,9 +50,9 @@ public:
 // インプリメンテーション
 protected:
 	void SetListData(CHANGE_KEY sKeyData, CHANGE_KEY *dataPtr, bool isSet, int nLine);
-	list<CHANGE_KEY>::iterator findData(CHANGE_KEY* dataPtr);
+	std::list<CHANGE_KEY>::iterator findData(CHANGE_KEY* dataPtr);
 
-	list<CHANGE_KEY> m_MyKeyList;//キー設定データリスト
+	std::list<CHANGE_KEY> m_MyKeyList;//キー設定データリスト
 	CHANGE_KEY *m_dataPtrSelect;
 	int m_nSelItem;
 
@@ -57,9 +61,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnOptKeyAdd();
 	afx_msg void OnOptKeyDalete();
-	afx_msg void OnOptKeyOk();
 	afx_msg void OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnOptKeyEdit();
 	afx_msg void OnDblclkOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG

@@ -10,10 +10,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "Charu3.h"
-#include "Charu3Tree.h"
-#include <list>
-using namespace std;
+#include <vector>
 
 //---------------------------------------------------
 // CAddDialog ダイアログ
@@ -22,49 +19,48 @@ class CAddDialog : public CDialog
 {
 // コンストラクション
 public:
-	CAddDialog(CWnd* pParent,HTREEITEM hTreeItem);   // 標準のコンストラクタ
-	void setMacroTempate(vector<MACRO_STRUCT> *pMacro,vector<MACRO_STRUCT> *pDataMacro){
-		m_vctMacro = pMacro;
-		m_vctDataMacro = pDataMacro;
-	}
+	CAddDialog(CWnd* pParent, STRING_DATA* pData, bool newData);
 
 // ダイアログ データ
 	//{{AFX_DATA(CAddDialog)
 	enum { IDD = IDD_ADD_DATA };
-	CComboBox	m_ctrlDataMacro;
+private:
 	CComboBox	m_ctrlMacro;
-	CComboBox	m_comboIcon;
+	CComboBox	m_ctrlDataMacro;
+	CComboBox	m_ctrlIcon;
 	//}}AFX_DATA
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(CAddDialog)
-	public:
+public:
 	virtual BOOL DestroyWindow();
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 	//}}AFX_VIRTUAL
 
 // インプリメンテーション
 protected:
-	HTREEITEM m_hTreeItem;
-	vector<MACRO_STRUCT>  *m_vctMacro;
-	vector<MACRO_STRUCT>  *m_vctDataMacro;
-	void pasteMacro(int nCtrlID,CString strString);
+	std::vector<MACRO_STRUCT>  *m_vctMacro;
+	std::vector<MACRO_STRUCT>  *m_vctDataMacro;
 	CFont *m_cFontEdit,*m_cOlgFontEdit;
 	CFont *m_cFontTitle,*m_cOlgFontTitle;
+
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CAddDialog)
-	afx_msg void OnAddOk();
-	afx_msg void OnAddClose();
-	afx_msg void OnAddPasteFile();
-	afx_msg void OnMacroPaste();
 	virtual BOOL OnInitDialog();
-	afx_msg void OnSelchangeAddMacroCombo();
-	afx_msg void OnSelchangeEditDataMacroCombo();
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	virtual void OnOK();
+	afx_msg void OnPasteFile();
+	afx_msg void OnSelchangeMacroCombo();
+	afx_msg void OnSelchangeDataMacroCombo();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	void PasteMacro(int nCtrlID, CString strString);
+
+	STRING_DATA* m_pData;
+	bool m_bNewData;
 };
 
 //{{AFX_INSERT_LOCATION}}

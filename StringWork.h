@@ -7,14 +7,7 @@
 #define AFX_STRINGWORK_H__E26F2A4C_01CC_4E2E_8A31_1E4C6D507C1E__INCLUDED_
 
 #include <stdarg.h>
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <memory.h>
-#include <vector>
-
-using namespace std;
+#include <tchar.h>
 
 #if _MSC_VER > 1000
 #pragma once
@@ -25,7 +18,6 @@ struct KANSUUJI
 	char strKANJI[3];
 	int  nNumber;
 };
-
 
 //---------------------------------------------------
 //Å@ÉNÉâÉXêÈåæ

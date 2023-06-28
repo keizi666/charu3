@@ -4,8 +4,8 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
 #include "ChildView.h"
+#include "Charu3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

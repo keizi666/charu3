@@ -6,7 +6,13 @@
 #include "stdafx.h"
 #include "Charu3.h"
 #include "Init.h"
+#include "General.h"
 #include "StringWork.h"
+#include "Color.h"
+
+#include <fstream>
+#include <vector>
+#include <list>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -14,28 +20,46 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+namespace {
+
+	void ReadPredefined(std::vector<MACRO_STRUCT>& macro, CString filePath)
+	{
+		nlohmann::json snippets;
+		try { snippets = nlohmann::json::parse(std::ifstream(filePath)); }
+		catch (...) {}
+		for (nlohmann::json::iterator it = snippets.begin(); it != snippets.end(); it++) {
+			nlohmann::json jnode = it.value();
+			MACRO_STRUCT snippet;
+			snippet.m_strName = CGeneral::getSettingCString(jnode, "caption", _T(""));
+			snippet.m_strMacro = CGeneral::getSettingCString(jnode, "data", _T(""));
+			snippet.m_cKind = static_cast<int>(CGeneral::getSettingNumber(jnode, "mode", 255));
+			macro.push_back(snippet);
+		}
+	}
+
+} // anonymous namespace
+
 //---------------------------------------------------
 //関数名	CInit
 //機能		コンストラクタ
 //---------------------------------------------------
 CInit::CInit()
+	: m_nSelectID(0)
+	, m_nOptionPage(0)
+	, m_nRecNumber(0)
+	, m_nSearchTarget(0)
+	, m_nSearchLogic(0)
+	, m_bReadOnly(false)
+	, m_strIniFile(_T(""))
+	, m_strStateFile(_T(""))
+	, m_strSettingsFile(_T(""))
+	, m_hHookDLL(nullptr)
 {
-	m_nSelectID = 0;		//選択してるID
-	m_nOptionPage = 0;
-	m_DialogSize.x = 100;	//ダイアログのサイズ
-	m_DialogSize.y = 100;	//ダイアログのサイズ
-
-	m_nSerchKind = 0;		//検索種別
-	m_nSerchLogic = 0;		//検索方法
-
-	m_strIniFile = "";
-	m_nOptionPage = 0;
-	m_nRecNumber = 0;
+	m_DialogSize.x = 100;
+	m_DialogSize.y = 100;
 
 	m_IconSize.x = ICON_SIZE;
 	m_IconSize.y = ICON_SIZE;
-
-	m_hHookDLL = NULL;
 }
 
 //---------------------------------------------------
@@ -53,253 +77,395 @@ CInit::~CInit()
 //---------------------------------------------------
 void CInit::initialize()
 {
-	CString StringBuff,StringBuff2;
-	TCHAR strBuff[MAX_PATH];
+	TCHAR buf[MAX_PATH];
 	TCHAR *cpName;
 
-	//ユーザー名を取得
-	DWORD dwSize = _countof(strBuff);
-	m_strUserName = _T("Charu3User");
-	if(::GetUserName(strBuff,&dwSize)) {
-		m_strUserName = strBuff;
+	// locale
+	m_locale.LoadString(APP_LOCALE);
+
+	// user name
+	DWORD dwSize = _countof(buf);
+	if(::GetUserName(buf, &dwSize)) {
+		m_strUserName = CString(buf);
+	}
+	else {
+		m_strUserName = _T("Charu3User");
 	}
 
-	//実行パスを取得、作成
-	GetModuleFileName(NULL,strBuff,_countof(strBuff));
-	cpName = _tcsrchr(strBuff,_T('\\'));
+	// app and plugin path
+	GetModuleFileName(NULL, buf, _countof(buf));
+	cpName = _tcsrchr(buf, _T('\\'));
 	cpName++;
-	*cpName = NULL;
-	m_strAppPath = strBuff;
+	*cpName = '\0';
+	m_strAppPath = CString(buf);
+	m_strRwPluginFolder = m_strAppPath + _T("rw_plugin");
+
+	// app data path
+	SHGetSpecialFolderPath(NULL, buf, CSIDL_APPDATA, 0);
+	m_strAppDataPath = CString(buf) + "\\" + NAME;
+	if (!FILEEXIST(m_strAppDataPath)) {
+		CreateDirectory(m_strAppDataPath, NULL);
+	}
+
+	// file paths for state, settings and log
+	m_strIniFile = m_strAppDataPath + "\\" + INI_FILE;
+	m_strStateFile = m_strAppDataPath + "\\" + STATE_FILE;
+	m_strSettingsFile = m_strAppDataPath + "\\" + SETTINGS_FILE;
+	m_strDebugLog = m_strAppDataPath + "\\" + DEBUGLOG_FILE;
+
+	// read state
+	try { m_state = nlohmann::json::parse(std::ifstream(m_strStateFile)); }
+	catch (...) {}
+
+	// read settings
+	try { m_settings = nlohmann::json::parse(std::ifstream(m_strSettingsFile)); }
+	catch (...) {}
+
+	//if(m_strIniFile == "") return;
+
+	//int i;
+	////int nKetsetCount;
+	//CString strKeyBuff,StringBuff;
+	//CString strRes;
+	//CHANGE_KEY key;
+	//TCHAR strBuff[1024],*szName,*szKind,*szMacro;
+
+	//一般設定
+	//m_etc.m_nActiveTime = setIniFileInt(REGKEY_ETC,_T("ActiveTime"),400);	//監視タイマー
+	//m_etc.m_nCopyRetryTimes = setIniFileInt(REGKEY_ETC,_T("CopyWaitCnt"),5);
+	//m_etc.m_nPasteRetryTimes = setIniFileInt(REGKEY_ETC,_T("PasteWaitCnt"),10);
+
+	//m_pop.m_nDCKeyPopTime = setIniFileInt(REGKEY_POPUP,_T("DCPopupKeyTime"),250);
+	//m_pop.m_nDCKeyFifoTime = setIniFileInt(REGKEY_POPUP,_T("DCFifoKeyTime"),250);
+
+	//m_nToolTipTime = setIniFileInt(REGKEY_ENV, _T("ToolTipTime"), 30000);
+	//m_nToolTipDelay = setIniFileInt(REGKEY_ENV, _T("ToolTipDelay"), 300);
+
+	//履歴FIFO設定
+	//m_fifo.m_nFifo = setIniFileInt(REGKEY_FIFO,_T("FifoSW"),1);			//履歴動作中はCtrl+Vで貼り付ける文字列を先入れ先出しにする 0NON 1FIFO 2RIFO
+	//m_fifo.m_strCopySound = setIniFileString(REGKEY_FIFO,_T("WaveName"),_T("pu.wav"));
+	//m_fifo.m_nOffClear = setIniFileInt(REGKEY_FIFO,_T("OffClear"),0);		//履歴OFF時に一時項目をクリア
+	//m_fifo.m_nAllClearOff = setIniFileInt(REGKEY_FIFO,_T("AllClearOff"),1);//一時履歴が空になったら履歴モードをOFFにする
+	//m_fifo.m_nDuplication = setIniFileInt(REGKEY_FIFO,_T("Duplication"),1);
+
+	////仮想キー設定
+	//WINDOWS_MESSAGE winMessage;
+	//// m_key.m_defKeySet.m_nMessage = setIniFileInt(REGKEY_KEY,_T("isMessage"),0); // obsolete
+	//m_key.m_defKeySet.m_nMessage = 0; //メッセージ方式
+	//m_key.m_defKeySet.m_uMod_Paste = setIniFileInt(REGKEY_KEY,_T("ModPaste"),MOD_CONTROL);	//貼り付け特殊キー
+	//m_key.m_defKeySet.m_uVK_Paste  = setIniFileInt(REGKEY_KEY,_T("VKPaste"),'V');			//貼り付けキー
+	//m_key.m_defKeySet.m_uMod_Copy  = setIniFileInt(REGKEY_KEY,_T("ModCopy"),MOD_CONTROL);	//コピー特殊キー
+	//m_key.m_defKeySet.m_uVK_Copy   = setIniFileInt(REGKEY_KEY,_T("VkCopy"),'C');			//コピーキー
+	//m_key.m_defKeySet.m_nCopyWait  = setIniFileInt(REGKEY_KEY,_T("CopyWait"),50);		//コピー待ち時間
+	//m_key.m_defKeySet.m_nPasteWait = setIniFileInt(REGKEY_KEY,_T("PasteWait"),50);		//ペースト待ち時間
+	////メッセージ
+	//strKeyBuff = setIniFileString(REGKEY_KEY,_T("CopyMessage"),_T("301,0,0"));
+	//_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+	//m_key.m_defKeySet.m_copyMessage = winMessage;
+
+	//strKeyBuff = setIniFileString(REGKEY_KEY,_T("PasteMessage"),_T("302,0,0"));
+	//_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+	//m_key.m_defKeySet.m_pasteMessage = winMessage;
+	////クリップボード容量制限
+	//m_key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,_T("HistoryLimit"),-1);	
+
+	////固有キー設定を読む
+	//nKetsetCount = setIniFileInt(REGKEY_KEY,_T("KeySetCount"),0);
+	//m_key.m_KeyList.clear();
+	//for(i = 0; i < nKetsetCount; i++){
+	//	StringBuff.Format(_T("KeySetTitle_%d"),i);
+	//	//ウィンドウキャプション
+	//	key.m_strTitle = setIniFileString(REGKEY_KEY,StringBuff,_T(""));
+	//	//マッチ方法
+	//	StringBuff.Format(_T("KeySetMatch_%d"),i);
+	//	key.m_nMatch = setIniFileInt(REGKEY_KEY,StringBuff,0);
+	//	//キーコード
+	//	StringBuff.Format(_T("KeySetCode_%d"),i);
+	//	strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,"");
+	//	_stscanf_s(LPCTSTR(strKeyBuff),_T("%d,%d,%d,%d")
+	//		,&key.m_sCopyPasteKey.m_uMod_Copy,&key.m_sCopyPasteKey.m_uVK_Copy
+	//		,&key.m_sCopyPasteKey.m_uMod_Paste,&key.m_sCopyPasteKey.m_uVK_Paste);
+	//	StringBuff.Format(_T("KeyCopyWait_%d"),i);
+	//	key.m_sCopyPasteKey.m_nCopyWait  = setIniFileInt(REGKEY_KEY,StringBuff,100);		//コピー待ち時間
+	//	StringBuff.Format(_T("KeyPasteWait_%d"),i);
+	//	key.m_sCopyPasteKey.m_nPasteWait = setIniFileInt(REGKEY_KEY,StringBuff,100);		//ペースト待ち時間
+
+	//	StringBuff.Format(_T("KeyMessage_%d"),i);
+	//	key.m_sCopyPasteKey.m_nMessage = setIniFileInt(REGKEY_KEY,StringBuff,0);		//方式
+
+	//	//メッセージ
+	//	StringBuff.Format(_T("CopyMessage_%d"),i);
+	//	strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("301,0,0"));
+	//	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+	//	key.m_sCopyPasteKey.m_copyMessage = winMessage;
+	//
+	//	StringBuff.Format(_T("PasteMessage_%d"),i);
+	//	strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("302,0,0"));
+	//	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
+	//	key.m_sCopyPasteKey.m_pasteMessage = winMessage;
+	//	//クリップボード容量制限
+	//	StringBuff.Format(_T("HistoryLimit_%d"),i);
+	//	key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,StringBuff,-1);	
+	//	
+	//	m_key.m_KeyList.insert(m_key.m_KeyList.end(),key);//設定に追加
+	//}	
+
+	//一般環境設定
+	//m_strDataPath = setIniFileString(REGKEY_ENV,_T("DataFile"),"");
+
+	//m_strRwPluginFolder = setIniFileString(REGKEY_ENV,_T("RwPluginFolder"),m_strAppPath + _T("RW_Plugin"));
+	//m_strPluginName = setIniFileString(REGKEY_ENV,_T("DataFormat"),DAT_FORMAT);
+	//m_strMacroPluginName = setIniFileString(REGKEY_ENV,_T("MacroPlugin"),DAT_FORMAT);
+	//m_nSelectID     = setIniFileInt(REGKEY_ENV,_T("SelectID"),-1);
+	//time_t lTime;
+	//m_nTreeID       = setIniFileInt(REGKEY_ENV,_T("TreeID"),time(&lTime));
+	//m_nRecNumber    = setIniFileInt(REGKEY_ENV,_T("RecNumber"),0);
+	//m_nDebug		= setIniFileInt(REGKEY_ENV,_T("Debug"),0) != 0;
+	//m_strDebugLog	= setIniFileString(REGKEY_ENV,_T("LogfileName"),_T("Charu3.log"));
+
+	//ウィンドウ設定
+	//m_DialogSize.x = setIniFileInt(REGKEY_WINDOW,_T("PopupSizeX"),250);
+	//m_DialogSize.y = setIniFileInt(REGKEY_WINDOW,_T("PopupSizeY"),350);
+
+	//検索設定
+	//m_nSearchTarget = setIniFileInt(REGKEY_SERCH,_T("SerchKind"),0);
+	//m_nSearchLogic = setIniFileInt(REGKEY_SERCH,_T("SerchLogic"),0);
+	//m_strSearchKey = setIniFileString(REGKEY_SERCH,_T("SerchKey"),_T(""));
+
+	//マクロテンプレート
+	//for(i = 0; i <= 99; i++) { // TODO: magic number
+	//	strRes.LoadString(APP_INF_MACRO_TEMPLATE01+i);
+	//	if(strRes == _T("end")) break;
+	//}
+	//int nStringCnt = i;
+	MACRO_STRUCT macroData;
+	CString strMacro;
+	//m_vctMacro.clear();
+	//m_vctMacro.reserve(99); // TODO: magic number
+	//for(i = 1; i <= 99; i++) { // TODO: magic number
+	//	StringBuff.Format(_T("Macro_%02d"),i);
+	//	::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
+	//	if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
+	//		strRes.LoadString(APP_INF_MACRO_TEMPLATE01 + i -1);
+	//		writeProfileString(REGKEY_MACRO,StringBuff,strRes);
+	//		strMacro = strRes;
+	//		_tcscpy_s(strBuff,LPCTSTR(strRes));
+	//	}
+	//	if(_tcsclen(strBuff) == 0) break;
+	//	if(UStringWork::splitString(strBuff,_T('@'),&szName,&szKind,&szMacro,NULL) == 3) {
+	//		macroData.m_strName = szName;
+	//		if(*szKind == _T('D'))		macroData.m_cKind = KIND_DATA_ALL;
+	//		else if(*szKind == _T('F'))	macroData.m_cKind = KIND_FOLDER_ALL;
+	//		else					macroData.m_cKind = 0xff;
+	//		macroData.m_strMacro = szMacro;
+	//		m_vctMacro.push_back(macroData);
+	//	}
+	//}
+	
+	//拡張マクロテンプレート R履歴フォルダ Fフォルダ A全て Dデータ
+	//for(i = 0; i <= 99; i++) { // TODO: magic number
+	//	strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01+i);
+	//	if(strRes == "end") break;
+	//}
+	//int nStringCnt = i;
+	//m_vctDataMacro.clear();
+	//m_vctDataMacro.reserve(99); // TODO: magic number
+	//for(i = 1; i <= 99; i++) { // TODO: magic number
+	//	StringBuff.Format(_T("DataMacro_%02d"),i);
+	//	::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
+	//	if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
+	//		strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01 + i -1);
+	//		writeProfileString(REGKEY_MACRO,StringBuff,strRes);
+	//		strMacro = strRes;
+	//		_tcscpy_s(strBuff,LPCTSTR(strRes));
+	//	}
+	//	if(_tcsclen(strBuff) == 0) break;
+	//	if(UStringWork::splitString(strBuff,'@',&szName,&szKind,&szMacro,NULL) == 3) {
+	//		macroData.m_strName = szName;
+			//if(*szKind == 'D')		macroData.m_cKind = KIND_DATA_ALL;
+			//else if(*szKind == 'R')	macroData.m_cKind = KIND_RIREKI;
+			//else if(*szKind == 'F')	macroData.m_cKind = KIND_FOLDER_ALL;
+			//else					macroData.m_cKind = 0xff;
+	//		macroData.m_strMacro = szMacro;
+	//		m_vctDataMacro.push_back(macroData);
+	//	}
+	//}
+
+	// read state
+
+	m_strDataPath = CGeneral::getSettingCString(m_state, "data.path", _T(""));
+	m_strDataFormat = CGeneral::getSettingCString(m_state, "data.format", DAT_FORMAT);
+	m_bReadOnly = CGeneral::getSettingBool(m_state, "data.readOnly", false);
+	m_DialogSize.x = static_cast<LONG>(CGeneral::getSettingNumber(m_state, "treeview.width", 250));
+	m_DialogSize.y = static_cast<LONG>(CGeneral::getSettingNumber(m_state, "treeview.height", 350));
+	m_nSearchTarget = static_cast<int>(CGeneral::getSettingNumber(m_state, "find.target", SEARCH_TARGET_NAME));
+	m_nSearchLogic = static_cast<int>(CGeneral::getSettingNumber(m_state, "find.logic", SEARCH_TARGET_DATA));
+	m_strSearchKeywords = CGeneral::getSettingCString(m_state, "find.keywords", _T(""));
+	m_nSelectID = static_cast<int>(CGeneral::getSettingNumber(m_state, "internal.selectId", -1));
+	{
+		time_t lTime;
+		m_nTreeID = static_cast<int>(CGeneral::getSettingNumber(m_state, "internal.treeId", time(&lTime)));
+	}
+	m_nRecNumber = static_cast<int>(CGeneral::getSettingNumber(m_state, "internal.recordNumber", 0));
+
+	// read settings
+
+	m_etc.m_bPutBackClipboard = CGeneral::getSettingBool(m_settings, "clipboard.putBackAfterPasting", false);
+	m_nClipboardOpenDelay = static_cast<int>(CGeneral::getSettingNumber(m_settings, "clipboard.openDelay", 0));
+	m_nClipboardRetryInterval = static_cast<int>(CGeneral::getSettingNumber(m_settings, "clipboard.retryInterval", 50));
+	m_nClipboardRetryTimes = static_cast<int>(CGeneral::getSettingNumber(m_settings, "clipboard.retryTimes", 10));
+
+	m_pop.m_nDoubleKeyPOP = static_cast<int>(CGeneral::getSettingNumber(m_settings, "hotkey.popup", 0));
+	m_pop.m_nDCKeyPopTime = static_cast<int>(CGeneral::getSettingNumber(m_settings, "hotkey.popup.hitTime", 250));
+	m_pop.m_uVK_Pouup = static_cast<UINT>(CGeneral::getSettingNumber(m_settings, "hotkey.popup.keyCode", 88)); // X
+	m_pop.m_uMod_Pouup = static_cast<UINT>(CGeneral::getSettingNumber(m_settings, "hotkey.popup.keyModifier", MOD_ALT));
+	m_pop.m_nDoubleKeyFIFO = static_cast<int>(CGeneral::getSettingNumber(m_settings, "hotkey.stockmode", 0));
+	m_pop.m_nDCKeyFifoTime = static_cast<int>(CGeneral::getSettingNumber(m_settings, "hotkey.stockmode.hitTime", 250));
+	m_pop.m_uVK_Fifo = static_cast<UINT>(CGeneral::getSettingNumber(m_settings, "hotkey.stockmode.keyCode", 83)); // S
+	m_pop.m_uMod_Fifo = static_cast<UINT>(CGeneral::getSettingNumber(m_settings, "hotkey.stockmode.keyModifier", MOD_CONTROL|MOD_SHIFT));
+
+	m_etc.m_nIconClick = static_cast<int>(CGeneral::getSettingNumber(m_settings, "notifyIcon.clickedBehavior", 0));
+	m_etc.m_bShowClipboardInTooltipOfNofifyIcon = CGeneral::getSettingBool(m_settings, "notifyIcon.showClipboard", true);
+
+	m_fifo.m_nFifo = static_cast<int>(CGeneral::getSettingNumber(m_settings, "stockmode.behavior", 1));
+	m_fifo.m_bAutoOff = CGeneral::getSettingBool(m_settings, "stockmode.autoTurnOff", false);
+	m_fifo.m_bCleanupAtTurnOff = CGeneral::getSettingBool(m_settings, "stockmode.cleanupAtTurnOff", false);
+	m_fifo.m_bDontSaveSameDataAsLast = CGeneral::getSettingBool(m_settings, "stockmode.dontSaveSameDataAsLast", false);
+	m_fifo.m_strCopySound = CGeneral::getSettingCString(m_settings, "stockmode.sound.copy", _T("pu.wav"));
+	m_fifo.m_strPasteSound = CGeneral::getSettingCString(m_settings, "stockmode.sound.paste", _T(""));
+
+	m_nToolTipTime = static_cast<int>(CGeneral::getSettingNumber(m_settings, "tooltip.autopop", 30000));
+	m_nToolTipDelay = static_cast<int>(CGeneral::getSettingNumber(m_settings, "tooltip.delay", 300));
+
+	m_pop.m_nPopupPos = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.popupPosition", 0));
+	m_pop.m_posCaretHosei.x = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.popupOffset.x", -20));
+	m_pop.m_posCaretHosei.y = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.popupOffset.y", 0));
+	m_pop.m_nSelectByTypingFinalizePeriod = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.selectByTyping.finalizePeriod", 350));
+	m_pop.m_bSelectByTypingCaseInsensitive = CGeneral::getSettingBool(m_settings, "treeview.selectByTyping.caseInsensitive", true);
+	m_pop.m_bSelectByTypingAutoPaste = CGeneral::getSettingBool(m_settings, "treeview.selectByTyping.autoPaste", false);
+	m_pop.m_bSelectByTypingAutoExpand = CGeneral::getSettingBool(m_settings, "treeview.selectByTyping.autoExpand", false);
+	m_visual.m_nToolTip = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.tooltip", 0));
+	m_visual.m_bScrollbarVertical = CGeneral::getSettingBool(m_settings, "treeview.scrollbar.vertical", true);
+	m_visual.m_bScrollbarHorizontal = CGeneral::getSettingBool(m_settings, "treeview.scrollbar.horizontal", true);
+	m_pop.m_bSingleExpand = CGeneral::getSettingBool(m_settings, "treeview.expandOnSingleClick", false);
+	m_pop.m_bKeepSelection = CGeneral::getSettingBool(m_settings, "treeview.keepSelection", true);
+	m_pop.m_bKeepFolders = CGeneral::getSettingBool(m_settings, "treeview.keepFolders", true);
+
+	m_visual.m_nBorderColor = Color::Parse(CGeneral::getSettingString(m_settings, "treeview.style.borderColor", "#ff9900"));
+	m_visual.m_nBackgroundColor = Color::Parse(CGeneral::getSettingString(m_settings, "treeview.style.backgroundColor", "#ffffee"));
+	m_visual.m_nTextColor = Color::Parse(CGeneral::getSettingString(m_settings, "treeview.style.textColor", "#663300"));
+	m_visual.m_strFontName = CGeneral::getSettingCString(m_settings, "treeview.style.fontName", m_visual.m_strFontName);
+	m_visual.m_nFontSize = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.style.fontSize", 100));
+	m_visual.m_strResourceName = CGeneral::getSettingCString(m_settings, "treeview.style.iconFile", m_visual.m_strResourceName);
+	m_visual.m_nOpacity = static_cast<int>(CGeneral::getSettingNumber(m_settings, "treeview.opacity", 100));
+
+	m_nWindowCheckInterval = static_cast<int>(CGeneral::getSettingNumber(m_settings, "windowCheckInterval", 400));
+
+	m_bDebug = CGeneral::getSettingBool(m_settings, "debug", false);
+
+	m_key.m_KeyList.clear();
+	nlohmann::json keyEventByWindow = m_settings["keyEvent.byWindow"];
+	for (nlohmann::json::iterator it = keyEventByWindow.begin(); it != keyEventByWindow.end(); it++) {
+		nlohmann::json jnode = it.value();
+		CHANGE_KEY node;
+		node.m_strTitle = CGeneral::getSettingCString(jnode, "caption", _T(""));
+		node.m_nMatch = static_cast<int>(CGeneral::getSettingNumber(jnode, "captionMatchCondition", 0));
+		node.m_nHistoryLimit = static_cast<int>(CGeneral::getSettingNumber(jnode, "copyLimit", -1));
+		node.m_sCopyPasteKey = COPYPASTE_KEY(jnode["keyEvent"]);
+		m_key.m_KeyList.push_back(node);
+	}
+	m_key.m_defKeySet = COPYPASTE_KEY(m_settings["keyEvent.default"]);
+	m_key.m_nHistoryLimit = m_settings["keyEvent.default.copyLimit"];
+
+	SaveSettings();
+
+	// read snippets
+
+	m_vctMacro.clear();
+	ReadPredefined(m_vctMacro, m_strAppPath + "_locale\\" + m_locale + "\\snippets.json");
+	ReadPredefined(m_vctMacro, m_strAppDataPath + "\\snippets.json");
+
+	// read options
+
+	m_vctDataMacro.clear();
+	ReadPredefined(m_vctDataMacro, m_strAppPath + "_locale\\" + m_locale + "\\options.json");
 }
 
 //---------------------------------------------------
-//関数名	readAllInitData()
-//機能		読み込み
+//関数名	SaveSettings()
+//機能		書き込み
 //---------------------------------------------------
-void CInit::readAllInitData()
+void CInit::SaveSettings()
 {
-	if(m_strIniFile == "") return;
+	m_settings["clipboard.putBackAfterPasting"] = m_etc.m_bPutBackClipboard;
+	m_settings["clipboard.openDelay"] = m_nClipboardOpenDelay;
+	m_settings["clipboard.retryInterval"] = m_nClipboardRetryInterval;
+	m_settings["clipboard.retryTimes"] = m_nClipboardRetryTimes;
 
-	int i;
-	int nKetsetCount;
-	CString strKeyBuff,StringBuff;
-	CString strRes;
-	CHANGE_KEY key;
-	TCHAR strBuff[1024],*szName,*szKind,*szMacro;
+	m_settings["hotkey.popup"] = m_pop.m_nDoubleKeyPOP;
+	m_settings["hotkey.popup.hitTime"] = m_pop.m_nDCKeyPopTime;
+	m_settings["hotkey.popup.keyCode"] = m_pop.m_uVK_Pouup;
+	m_settings["hotkey.popup.keyModifier"] = m_pop.m_uMod_Pouup;
+	m_settings["hotkey.stockmode"] = m_pop.m_nDoubleKeyFIFO;
+	m_settings["hotkey.stockmode.hitTime"] = m_pop.m_nDCKeyFifoTime;
+	m_settings["hotkey.stockmode.keyCode"] = m_pop.m_uVK_Fifo;
+	m_settings["hotkey.stockmode.keyModifier"] = m_pop.m_uMod_Fifo;
 
-	//一般設定	
-	m_etc.m_nMulchUser    = setIniFileInt(REGKEY_ETC,_T("MulchUser"),1);//マルチユーザーで使うかどうか // No longer used
+	m_settings["notifyIcon.clickedBehavior"] = m_etc.m_nIconClick;
+	m_settings["notifyIcon.showClipboard"] = m_etc.m_bShowClipboardInTooltipOfNofifyIcon;
 
-	m_etc.m_nToClip    = setIniFileInt(REGKEY_ETC,_T("ToClipBord"),1);//リストから選んだ文字列はクリップボードにも入れる
-	m_etc.m_nToolTip   = setIniFileInt(REGKEY_ETC,_T("FixToolTip"),0);//タスクトレイアイコンのツールチップを固定にする
-	m_etc.m_nIconClick = setIniFileInt(REGKEY_ETC,_T("IconClickAct"),0);//アイコンをクリックしたときの動作
-	m_etc.m_nClipboardOpenDelay = setIniFileInt(REGKEY_ETC,_T("ClipboardOpenDelay"),0);
-	m_etc.m_nSelfDiagnosisTime = setIniFileInt(REGKEY_ETC,_T("SelfDiagnosisTime"),10000);	//自己診断タイマー
-	m_etc.m_nActiveTime = setIniFileInt(REGKEY_ETC,_T("ActiveTime"),400);	//監視タイマー
-	m_etc.m_nMinimization = setIniFileInt(REGKEY_ETC,_T("Minimization"),1);	//最小化する
-	m_etc.m_nDontSave = setIniFileInt(REGKEY_ETC,_T("DontSave"),0);
-	m_etc.m_nCopyWaitCnt = setIniFileInt(REGKEY_ETC,_T("CopyWaitCnt"),5);
-	m_etc.m_nPasteWaitCnt = setIniFileInt(REGKEY_ETC,_T("PasteWaitCnt"),10);
+	m_settings["stockmode.behavior"] = m_fifo.m_nFifo;
+	m_settings["stockmode.autoTurnOff"] = m_fifo.m_bAutoOff;
+	m_settings["stockmode.cleanupAtTurnOff"] = m_fifo.m_bCleanupAtTurnOff;
+	m_settings["stockmode.dontSaveSameDataAsLast"] = m_fifo.m_bDontSaveSameDataAsLast;
+	m_settings["stockmode.sound.copy"] = CGeneral::ConvertUnicodeToUTF8(m_fifo.m_strCopySound);
+	m_settings["stockmode.sound.paste"] = CGeneral::ConvertUnicodeToUTF8(m_fifo.m_strPasteSound);
 
-	
+	m_settings["tooltip.autopop"] = m_nToolTipTime;
+	m_settings["tooltip.delay"] = m_nToolTipDelay;
 
-	//ポップアップ設定	
-	m_pop.m_nSelectSW  = setIniFileInt(REGKEY_POPUP,_T("HoldSelect"),1);//テキストリストの選択位置を保持する
-	m_pop.m_nFolderSW  = setIniFileInt(REGKEY_POPUP,_T("HoldFolder"),1);//テキストリストのフォルダ状態を保持する
-	m_pop.m_nCornerPopup = setIniFileInt(REGKEY_POPUP,_T("CornerPopup"),0);//マウスカーソルが画面の端に触れたらポップアップする
-	m_pop.m_nCornerPopupTime = setIniFileInt(REGKEY_POPUP,_T("CornerPopupTime"),400);
-	m_pop.m_nCornerPopupPix  = setIniFileInt(REGKEY_POPUP,_T("CornerPopupPix"),2);
+	m_settings["treeview.popupPosition"] = m_pop.m_nPopupPos;
+	m_settings["treeview.popupOffset.x"] = m_pop.m_posCaretHosei.x;
+	m_settings["treeview.popupOffset.y"] = m_pop.m_posCaretHosei.y;
+	m_settings["treeview.selectByTyping.finalizePeriod"] = m_pop.m_nSelectByTypingFinalizePeriod;
+	m_settings["treeview.selectByTyping.caseInsensitive"] = m_pop.m_bSelectByTypingCaseInsensitive;
+	m_settings["treeview.selectByTyping.autoPaste"] = m_pop.m_bSelectByTypingAutoPaste;
+	m_settings["treeview.selectByTyping.autoExpand"] = m_pop.m_bSelectByTypingAutoExpand;
+	m_settings["treeview.tooltip"] = m_visual.m_nToolTip;
+	m_settings["treeview.scrollbar.vertical"] = m_visual.m_bScrollbarVertical;
+	m_settings["treeview.scrollbar.horizontal"] = m_visual.m_bScrollbarHorizontal;
+	m_settings["treeview.expandOnSingleClick"] = m_pop.m_bSingleExpand;
+	m_settings["treeview.keepSelection"] = m_pop.m_bKeepSelection;
+	m_settings["treeview.keepFolders"] = m_pop.m_bKeepFolders;
 
-	m_pop.m_nDoubleKeyPOP = setIniFileInt(REGKEY_POPUP,_T("PopupKeyDC"),0);
-	m_pop.m_uVK_Pouup   = setIniFileInt(REGKEY_POPUP,_T("PopupKey"),88);		//ポップアップキー
-	m_pop.m_uMod_Pouup  = setIniFileInt(REGKEY_POPUP,_T("PopupKeyM"),MOD_ALT);	//ポップアップ特殊キー
-	m_pop.m_nDCKeyPopTime = setIniFileInt(REGKEY_POPUP,_T("DCPopupKeyTime"),250);
-	
-	m_pop.m_nDoubleKeyFIFO = setIniFileInt(REGKEY_POPUP,_T("FifoKeyDC"),0);
-	m_pop.m_uVK_Fifo  = setIniFileInt(REGKEY_POPUP,_T("FifoKey"),29);			//履歴FIFO切り替えキー
-	m_pop.m_uMod_Fifo = setIniFileInt(REGKEY_POPUP,_T("FifoKeyM"),MOD_CONTROL);	//履歴FIFO切り替え特殊キー
-	m_pop.m_nDCKeyFifoTime = setIniFileInt(REGKEY_POPUP,_T("DCFifoKeyTime"),250);
+	m_settings["treeview.style.backgroundColor"] = Color::String(m_visual.m_nBackgroundColor);
+	m_settings["treeview.style.borderColor"] = Color::String(m_visual.m_nBorderColor);
+	m_settings["treeview.style.textColor"] = Color::String(m_visual.m_nTextColor);
+	m_settings["treeview.style.fontName"] = CGeneral::ConvertUnicodeToUTF8(m_visual.m_strFontName);
+	m_settings["treeview.style.fontSize"] = m_visual.m_nFontSize;
+	m_settings["treeview.style.iconFile"] = CGeneral::ConvertUnicodeToUTF8(m_visual.m_strResourceName);
+	m_settings["treeview.opacity"] = m_visual.m_nOpacity;
 
-	m_pop.m_nPopupPos     = setIniFileInt(REGKEY_POPUP,_T("PopupPos"),0);	//ポップアップ出現位置
-	m_pop.m_posCaretHosei.x = setIniFileInt(REGKEY_POPUP,_T("CaretHoseiX"),-20);	//キャレット位置の補正値
-	m_pop.m_posCaretHosei.y = setIniFileInt(REGKEY_POPUP,_T("CaretHoseiY"),0);	//キャレット位置の補正値
-	m_pop.m_nOutRevice      = setIniFileInt(REGKEY_POPUP,_T("ReviseOutOfDesktop"),1);
+	m_settings["windowCheckInterval"] = m_nWindowCheckInterval;
 
-	m_pop.m_nQuickEnter = setIniFileInt(REGKEY_POPUP,_T("QuickEnter"),0);	//クイックアクセス終了時の貼り付け
-	m_pop.m_nQuickTime  = setIniFileInt(REGKEY_POPUP,_T("QuickTime"),400);		//クイックアクセス確定時間
-	m_pop.m_nQuickChar  = setIniFileInt(REGKEY_POPUP,_T("QuickChar"),0);
-	m_pop.m_nAutoImeOff  = setIniFileInt(REGKEY_POPUP,_T("AutoImeOff"),0);
-	m_pop.m_nSingleExpand = setIniFileInt(REGKEY_POPUP,_T("SingleExpand"),0);
+	m_settings["debug"] = m_bDebug;
 
-	//履歴FIFO設定	
-	m_fifo.m_nFifo = setIniFileInt(REGKEY_FIFO,_T("FifoSW"),1);			//履歴動作中はCtrl+Vで貼り付ける文字列を先入れ先出しにする 0NON 1FIFO 2RIFO
-	m_fifo.m_nCopySound = setIniFileInt(REGKEY_FIFO,_T("CopySound"),1);	//履歴記録中はコピー時に効果音を鳴らす
-	m_fifo.m_nPasteSound = setIniFileInt(REGKEY_FIFO,_T("PasteSound"),0);	//貼り付け時にも音を鳴らすスイッチ
-	m_fifo.m_strWaveFile = setIniFileString(REGKEY_FIFO,_T("WaveName"),_T("pu.wav"));//効果音のファイル名
-	m_fifo.m_nOffClear = setIniFileInt(REGKEY_FIFO,_T("OffClear"),0);		//履歴OFF時に一時項目をクリア
-	m_fifo.m_nNoClear = setIniFileInt(REGKEY_FIFO,_T("NoClear"),1);		//履歴モードで最後に空にしないスイッチ
-	m_fifo.m_nAllClearOff = setIniFileInt(REGKEY_FIFO,_T("AllClearOff"),1);//一時履歴が空になったら履歴モードをOFFにする
-	m_fifo.m_nDuplication = setIniFileInt(REGKEY_FIFO,_T("Duplication"),1);
-
-	//ビジュアル設定
-	m_visual.m_nSemitransparent = setIniFileInt(REGKEY_VISUAL,_T("Semitransparent"),100);	//透明度
-	strRes.LoadString(APP_INF_DEF_FONT);
-	m_visual.m_strFontName = setIniFileString(REGKEY_VISUAL,_T("FontName"),strRes);//フォント名
-	m_visual.m_nFontSize = setIniFileInt(REGKEY_VISUAL,_T("FontSize"),100);					//フォントサイズ
-	strRes.LoadString(APP_INF_DEF_ICON);
-	m_visual.m_strResourceName = setIniFileString(REGKEY_VISUAL,_T("ResourceName"),strRes);//リソース名
-	m_visual.m_nBorderColor = setIniFileInt(REGKEY_VISUAL,_T("BorderColor"),0xff9900);	//枠色
-	m_visual.m_nBackColor = setIniFileInt(REGKEY_VISUAL,_T("BackColor"),0xffffee);		//背景色
-	m_visual.m_nTextColor = setIniFileInt(REGKEY_VISUAL,_T("TextColor"),0x663300);		//テキスト色
-	m_visual.m_nResetTree = setIniFileInt(REGKEY_VISUAL,_T("ResetTree"),1);	//ツリーの自動再構築
-	m_visual.m_nScrollbar = setIniFileInt(REGKEY_VISUAL,_T("Scrollbar"),SB_BOTH);
-	m_visual.m_nToolTip = setIniFileInt(REGKEY_VISUAL,_T("ToolTip"),0);
-
-	//仮想キー設定
-	WINDOWS_MESSAGE winMessage;
-	m_key.m_defKeySet.m_nMessage = setIniFileInt(REGKEY_KEY,_T("isMessage"),0);		//メッセージ方式フラグ
-	m_key.m_defKeySet.m_uMod_Paste = setIniFileInt(REGKEY_KEY,_T("ModPaste"),MOD_CONTROL);	//貼り付け特殊キー
-	m_key.m_defKeySet.m_uVK_Paste  = setIniFileInt(REGKEY_KEY,_T("VKPaste"),'V');			//貼り付けキー
-	m_key.m_defKeySet.m_uMod_Copy  = setIniFileInt(REGKEY_KEY,_T("ModCopy"),MOD_CONTROL);	//コピー特殊キー
-	m_key.m_defKeySet.m_uVK_Copy   = setIniFileInt(REGKEY_KEY,_T("VkCopy"),'C');			//コピーキー
-	m_key.m_defKeySet.m_nCopyWait  = setIniFileInt(REGKEY_KEY,_T("CopyWait"),50);		//コピー待ち時間
-	m_key.m_defKeySet.m_nPasteWait = setIniFileInt(REGKEY_KEY,_T("PasteWait"),50);		//ペースト待ち時間
-	//メッセージ
-	strKeyBuff = setIniFileString(REGKEY_KEY,_T("CopyMessage"),_T("301,0,0"));
-	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-	m_key.m_defKeySet.m_copyMessage = winMessage;
-
-	strKeyBuff = setIniFileString(REGKEY_KEY,_T("PasteMessage"),_T("302,0,0"));
-	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-	m_key.m_defKeySet.m_pasteMessage = winMessage;
-	//クリップボード容量制限
-	m_key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,_T("HistoryLimit"),-1);	
-
-	//固有キー設定を読む
-	nKetsetCount = setIniFileInt(REGKEY_KEY,_T("KeySetCount"),0);
-	m_key.m_KeyList.clear();
-	for(i = 0; i < nKetsetCount; i++){
-		StringBuff.Format(_T("KeySetTitle_%d"),i);
-		//ウィンドウキャプション
-		key.m_strTitle = setIniFileString(REGKEY_KEY,StringBuff,_T(""));
-		//マッチ方法
-		StringBuff.Format(_T("KeySetMatch_%d"),i);
-		key.m_nMatch = setIniFileInt(REGKEY_KEY,StringBuff,0);
-		//キーコード
-		StringBuff.Format(_T("KeySetCode_%d"),i);
-		strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,"");
-		_stscanf_s(LPCTSTR(strKeyBuff),_T("%d,%d,%d,%d")
-			,&key.m_sCopyPasteKey.m_uMod_Copy,&key.m_sCopyPasteKey.m_uVK_Copy
-			,&key.m_sCopyPasteKey.m_uMod_Paste,&key.m_sCopyPasteKey.m_uVK_Paste);
-		StringBuff.Format(_T("KeyCopyWait_%d"),i);
-		key.m_sCopyPasteKey.m_nCopyWait  = setIniFileInt(REGKEY_KEY,StringBuff,100);		//コピー待ち時間
-		StringBuff.Format(_T("KeyPasteWait_%d"),i);
-		key.m_sCopyPasteKey.m_nPasteWait = setIniFileInt(REGKEY_KEY,StringBuff,100);		//ペースト待ち時間
-
-		StringBuff.Format(_T("KeyMessage_%d"),i);
-		key.m_sCopyPasteKey.m_nMessage = setIniFileInt(REGKEY_KEY,StringBuff,0);		//方式
-
-		//メッセージ
-		StringBuff.Format(_T("CopyMessage_%d"),i);
-		strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("301,0,0"));
-		_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-		key.m_sCopyPasteKey.m_copyMessage = winMessage;
-	
-		StringBuff.Format(_T("PasteMessage_%d"),i);
-		strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("302,0,0"));
-		_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-		key.m_sCopyPasteKey.m_pasteMessage = winMessage;
-		//クリップボード容量制限
-		StringBuff.Format(_T("HistoryLimit_%d"),i);
-		key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,StringBuff,-1);	
-		
-		m_key.m_KeyList.insert(m_key.m_KeyList.end(),key);//設定に追加
-	}	
-
-	//一般環境設定
-	m_strDataFile = setIniFileString(REGKEY_ENV,_T("DataFile"),"");
-
-	m_strRwPluginFolder = setIniFileString(REGKEY_ENV,_T("RwPluginFolder"),m_strAppPath + _T("RW_Plugin"));
-	m_strPluginName = setIniFileString(REGKEY_ENV,_T("DataFormat"),DAT_FORMAT);
-	m_strMacroPluginName = setIniFileString(REGKEY_ENV,_T("MacroPlugin"),DAT_FORMAT);
-	m_nSelectID     = setIniFileInt(REGKEY_ENV,_T("SelectID"),-1);
-	time_t lTime;
-	m_nTreeID       = setIniFileInt(REGKEY_ENV,_T("TreeID"),time(&lTime));
-	m_nRecNumber    = setIniFileInt(REGKEY_ENV,_T("RecNumber"),0);
-	m_strBBS        = setIniFileString(REGKEY_ENV,_T("SupportBBS"),_T("http://8537.teacup.com/keiziweb/bbs"));
-	m_nToolTipTime  = setIniFileInt(REGKEY_ENV,_T("ToolTipTime"),30000);
-	m_nToolTipDelay = setIniFileInt(REGKEY_ENV,_T("ToolTipDelay"),300);
-	m_nDebug		= setIniFileInt(REGKEY_ENV,_T("Debug"),0);
-	m_strDebugLog	= setIniFileString(REGKEY_ENV,_T("LogfileName"),_T("charu3.log"));
-
-
-	//ウィンドウ設定
-	m_DialogSize.x = setIniFileInt(REGKEY_WINDOW,_T("PopupSizeX"),250);
-	m_DialogSize.y = setIniFileInt(REGKEY_WINDOW,_T("PopupSizeY"),350);
-
-	//検索設定
-	m_nSerchKind  = setIniFileInt(REGKEY_SERCH,_T("SerchKind"),0);		//検索種別
-	m_nSerchLogic = setIniFileInt(REGKEY_SERCH,_T("SerchLogic"),0);		//検索方法
-	m_strSerchKey  = setIniFileString(REGKEY_SERCH,_T("SerchKey"),_T(""));	//検索キー
-
-	//マクロテンプレート
-	for(i = 0; i <= 99; i++) { // TODO: magic number
-		strRes.LoadString(APP_INF_MACRO_TEMPLATE01+i);
-		if(strRes == _T("end")) break;
+	nlohmann::json keyEventByWindow;
+	std::list<CHANGE_KEY>::iterator it;
+	for (it = m_key.m_KeyList.begin(); it != m_key.m_KeyList.end(); it++) {
+		nlohmann::json node;
+		node["caption"] = CGeneral::ConvertUnicodeToUTF8(it->m_strTitle);
+		node["captionMatchCondition"] = it->m_nMatch;
+		node["keyEvent"] = it->m_sCopyPasteKey.ToJson();
+		node["copyLimit"] = it->m_nHistoryLimit;
+		keyEventByWindow.push_back(node);
 	}
-	int nStringCnt = i;
-	MACRO_STRUCT macroData;
-	CString strMacro;
-	m_vctMacro.clear();
-	m_vctMacro.reserve(99); // TODO: magic number
-	for(i = 1; i <= 99; i++) { // TODO: magic number
-		StringBuff.Format(_T("Macro_%02d"),i);
-		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
-		if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
-			strRes.LoadString(APP_INF_MACRO_TEMPLATE01 + i -1);
-			writeProfileString(REGKEY_MACRO,StringBuff,strRes);
-			strMacro = strRes;
-			_tcscpy_s(strBuff,LPCTSTR(strRes));
-		}
-		if(_tcsclen(strBuff) == 0) break;
-		if(UStringWork::splitString(strBuff,_T('@'),&szName,&szKind,&szMacro,NULL) == 3) {
-			macroData.m_strName = szName;
-			if(*szKind == _T('D'))		macroData.m_cKind = KIND_DATA_ALL;
-			else if(*szKind == _T('F'))	macroData.m_cKind = KIND_FOLDER_ALL;
-			else					macroData.m_cKind = 0xff;
-			macroData.m_strMacro = szMacro;
-			m_vctMacro.push_back(macroData);
-		}
-	}
-	
-	//拡張マクロテンプレート R履歴フォルダ Fフォルダ A全て Dデータ
-	for(i = 0; i <= 99; i++) { // TODO: magic number
-		strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01+i);
-		if(strRes == "end") break;
-	}
-	nStringCnt = i;
-	m_vctDataMacro.clear();
-	m_vctDataMacro.reserve(99); // TODO: magic number
-	for(i = 1; i <= 99; i++) { // TODO: magic number
-		StringBuff.Format(_T("DataMacro_%02d"),i);
-		::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
-		if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
-			strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01 + i -1);
-			writeProfileString(REGKEY_MACRO,StringBuff,strRes);
-			strMacro = strRes;
-			_tcscpy_s(strBuff,LPCTSTR(strRes));
-		}
-		if(_tcsclen(strBuff) == 0) break;
-		if(UStringWork::splitString(strBuff,'@',&szName,&szKind,&szMacro,NULL) == 3) {
-			macroData.m_strName = szName;
-			if(*szKind == 'D')		macroData.m_cKind = KIND_DATA_ALL;
-			else if(*szKind == 'R')	macroData.m_cKind = KIND_RIREKI;
-			else if(*szKind == 'F')	macroData.m_cKind = KIND_FOLDER_ALL;
-			else					macroData.m_cKind = 0xff;
-			macroData.m_strMacro = szMacro;
-			m_vctDataMacro.push_back(macroData);
-		}
-	}
+	m_settings["keyEvent.byWindow"] = keyEventByWindow;
+	m_settings["keyEvent.default"] = m_key.m_defKeySet.ToJson();
+	m_settings["keyEvent.default.copyLimit"] = m_key.m_nHistoryLimit;
+
+	try { std::ofstream(m_strSettingsFile) << m_settings.dump(1, '\t') << "\n"; }
+	catch (...) {}
 }
 
 //---------------------------------------------------
@@ -308,134 +474,9 @@ void CInit::readAllInitData()
 //---------------------------------------------------
 void CInit::writeAllInitData()
 {
-	if(m_strIniFile == "") return;
-
-	//一般設定	
-	writeProfileInt(REGKEY_ETC,_T("ToClipBord"),m_etc.m_nToClip);		//リストから選んだ文字列はクリップボードにも入れる
-	writeProfileInt(REGKEY_ETC,_T("FixToolTip"),m_etc.m_nToolTip);		//タスクトレイアイコンのツールチップを固定にする
-	writeProfileInt(REGKEY_ETC,_T("IconClickAct"),m_etc.m_nIconClick);	//アイコンをクリックしたときの動作
-	writeProfileInt(REGKEY_ETC,_T("ClipboardOpenDelay"),m_etc.m_nClipboardOpenDelay);
-	writeProfileInt(REGKEY_ETC,_T("SelfDiagnosisTime"),m_etc.m_nSelfDiagnosisTime);	//自己診断タイマー
-	writeProfileInt(REGKEY_ETC,_T("ActiveTime"),m_etc.m_nActiveTime);	//監視タイマー
-	writeProfileInt(REGKEY_ETC,_T("Minimization"),m_etc.m_nMinimization);	//最小化する
-	writeProfileInt(REGKEY_ETC,_T("DontSave"),m_etc.m_nDontSave);
-	
-	//ポップアップ設定	
-	writeProfileInt(REGKEY_POPUP,_T("HoldSelect"),m_pop.m_nSelectSW);	//テキストリストの選択位置を保持する
-	writeProfileInt(REGKEY_POPUP,_T("HoldFolder"),m_pop.m_nFolderSW);	//テキストリストのフォルダ状態を保持する
-	writeProfileInt(REGKEY_POPUP,_T("CornerPopup"),m_pop.m_nCornerPopup);	//マウスカーソルが画面の端に触れたらポップアップする
-
-	writeProfileInt(REGKEY_POPUP,_T("PopupKeyDC"),m_pop.m_nDoubleKeyPOP);
-	writeProfileInt(REGKEY_POPUP,_T("PopupKey"),m_pop.m_uVK_Pouup);			//ポップアップキー
-	writeProfileInt(REGKEY_POPUP,_T("PopupKeyM"),m_pop.m_uMod_Pouup);		//ポップアップ特殊キー
-	writeProfileInt(REGKEY_POPUP,_T("FifoKeyDC"),m_pop.m_nDoubleKeyFIFO);
-	writeProfileInt(REGKEY_POPUP,_T("FifoKey"),m_pop.m_uVK_Fifo);			//履歴FIFO切り替えキー
-	writeProfileInt(REGKEY_POPUP,_T("FifoKeyM"),m_pop.m_uMod_Fifo);		//履歴FIFO切り替え特殊キー
-
-	writeProfileInt(REGKEY_POPUP,_T("PopupPos"),m_pop.m_nPopupPos);	//ポップアップ出現位置
-	writeProfileInt(REGKEY_POPUP,_T("CaretHoseiX"),m_pop.m_posCaretHosei.x);	//キャレット位置の補正値
-	writeProfileInt(REGKEY_POPUP,_T("CaretHoseiY"),m_pop.m_posCaretHosei.y);	//キャレット位置の補正値
-	writeProfileInt(REGKEY_POPUP,_T("ReviseOutOfDesktop"),m_pop.m_nOutRevice);
-
-	writeProfileInt(REGKEY_POPUP,_T("QuickEnter"),m_pop.m_nQuickEnter);//クイックアクセス終了時の貼り付け
-	writeProfileInt(REGKEY_POPUP,_T("QuickTime"),m_pop.m_nQuickTime);		//クイックアクセス確定時間
-	writeProfileInt(REGKEY_POPUP,_T("QuickChar"),m_pop.m_nQuickChar);
-	writeProfileInt(REGKEY_POPUP,_T("AutoImeOff"),m_pop.m_nAutoImeOff);
-	writeProfileInt(REGKEY_POPUP,_T("SingleExpand"),m_pop.m_nSingleExpand);
-
-	//履歴FIFO設定	
-	writeProfileInt(REGKEY_FIFO,_T("FifoSW"),m_fifo.m_nFifo);			//履歴動作中はCtrl+Vで貼り付ける文字列を先入れ先出しにする 0NON 1FIFO 2RIFO
-	writeProfileInt(REGKEY_FIFO,_T("CopySound"),m_fifo.m_nCopySound);	//履歴記録中はコピー時に効果音を鳴らす
-	writeProfileInt(REGKEY_FIFO,_T("PasteSound"),m_fifo.m_nPasteSound);//貼り付け時にも音を鳴らすスイッチ
-	writeProfileString(REGKEY_FIFO,_T("WaveName"),m_fifo.m_strWaveFile);	//効果音のファイル名
-	writeProfileInt(REGKEY_FIFO,_T("OffClear"),m_fifo.m_nOffClear);	//履歴OFF時に一時項目をクリア
-	writeProfileInt(REGKEY_FIFO,_T("NoClear"),m_fifo.m_nNoClear);		//履歴モードで最後に空にしないスイッチ
-	writeProfileInt(REGKEY_FIFO,_T("AllClearOff"),m_fifo.m_nAllClearOff);//一時履歴が空になったら履歴モードをOFFにする
-	writeProfileInt(REGKEY_FIFO,_T("Duplication"),m_fifo.m_nDuplication);
-
-	//ビジュアル設定
-	writeProfileInt(REGKEY_VISUAL,_T("Semitransparent"),m_visual.m_nSemitransparent);//透明度
-	writeProfileString(REGKEY_VISUAL,_T("FontName"),m_visual.m_strFontName);		//フォント名
-	writeProfileInt(REGKEY_VISUAL,_T("FontSize"),m_visual.m_nFontSize);				//フォントサイズ
-	writeProfileString(REGKEY_VISUAL,_T("ResourceName"),m_visual.m_strResourceName);//リソース名
-	writeProfileInt(REGKEY_VISUAL,_T("BorderColor"),m_visual.m_nBorderColor);		//枠色
-	writeProfileInt(REGKEY_VISUAL,_T("BackColor"),m_visual.m_nBackColor);			//背景色
-	writeProfileInt(REGKEY_VISUAL,_T("TextColor"),m_visual.m_nTextColor);			//テキスト色
-	writeProfileInt(REGKEY_VISUAL,_T("ResetTree"),m_visual.m_nResetTree);	//ツリーの自動再構築
-	writeProfileInt(REGKEY_VISUAL,_T("Scrollbar"),m_visual.m_nScrollbar);
-	writeProfileInt(REGKEY_VISUAL,_T("ToolTip"),m_visual.m_nToolTip);
-
-	//仮想キー設定
-	CString strBuff,strKeyBuff;
-	writeProfileInt(REGKEY_KEY,_T("isMessage"),m_key.m_defKeySet.m_nMessage);	//メッセージ方式フラグ
-	writeProfileInt(REGKEY_KEY,_T("ModPaste"),m_key.m_defKeySet.m_uMod_Paste);		//貼り付け特殊キー
-	writeProfileInt(REGKEY_KEY,_T("VKPaste"),m_key.m_defKeySet.m_uVK_Paste);		//貼り付けキー
-	writeProfileInt(REGKEY_KEY,_T("ModCopy"),m_key.m_defKeySet.m_uMod_Copy);		//コピー特殊キー
-	writeProfileInt(REGKEY_KEY,_T("VkCopy"),m_key.m_defKeySet.m_uVK_Copy);			//コピーキー
-	writeProfileInt(REGKEY_KEY,_T("CopyWait"),m_key.m_defKeySet.m_nCopyWait);		//コピー待ち時間
-	writeProfileInt(REGKEY_KEY,_T("PasteWait"),m_key.m_defKeySet.m_nPasteWait);			//ペースト待ち時間
-	//メッセージ
-	strKeyBuff.Format(_T("%x,%x,%x"),m_key.m_defKeySet.m_copyMessage.Msg,
-		m_key.m_defKeySet.m_copyMessage.wParam,
-		m_key.m_defKeySet.m_copyMessage.lParam);
-	writeProfileString(REGKEY_KEY,_T("CopyMessage"),strKeyBuff);
-
-	strKeyBuff.Format(_T("%x,%x,%x"),m_key.m_defKeySet.m_pasteMessage.Msg,
-		m_key.m_defKeySet.m_pasteMessage.wParam,
-		m_key.m_defKeySet.m_pasteMessage.lParam);
-	writeProfileString(REGKEY_KEY,_T("PasteMessage"),strKeyBuff);
-	//クリップボード容量制限
-	writeProfileInt(REGKEY_KEY,_T("HistoryLimit"),m_key.m_nHistoryLimit);	
-
-	//固有キー設定を書く
-	list<CHANGE_KEY>::iterator it;
-	int i,nKetsetCount = m_key.m_KeyList.size();
-	writeProfileInt(REGKEY_KEY,_T("KeySetCount"),nKetsetCount);
-	for(it = m_key.m_KeyList.begin(),i = 0; it != m_key.m_KeyList.end(); it++,i++) {
-		//ウィンドウキャプション
-		strBuff.Format(_T("KeySetTitle_%d"),i);
-		writeProfileString(REGKEY_KEY,strBuff,it->m_strTitle);
-
-		//マッチ方法
-		strBuff.Format(_T("KeySetMatch_%d"),i);
-		writeProfileInt(REGKEY_KEY,strBuff,it->m_nMatch);
-
-		//キーコード
-		strBuff.Format(_T("KeySetCode_%d"),i);
-		strKeyBuff.Format(_T("%d,%d,%d,%d")
-			,it->m_sCopyPasteKey.m_uMod_Copy,it->m_sCopyPasteKey.m_uVK_Copy
-			,it->m_sCopyPasteKey.m_uMod_Paste,it->m_sCopyPasteKey.m_uVK_Paste);
-		writeProfileString(REGKEY_KEY,strBuff,strKeyBuff);
-
-		strBuff.Format(_T("KeyCopyWait_%d"),i);
-		writeProfileInt(REGKEY_KEY,strBuff,it->m_sCopyPasteKey.m_nCopyWait);		//コピー待ち時間
-		strBuff.Format(_T("KeyPasteWait_%d"),i);
-		writeProfileInt(REGKEY_KEY,strBuff,it->m_sCopyPasteKey.m_nPasteWait);		//ペースト待ち時間
-
-		strBuff.Format(_T("KeyMessage_%d"),i);
-		writeProfileInt(REGKEY_KEY,strBuff,it->m_sCopyPasteKey.m_nMessage);		//方式
-
-		//メッセージ
-		strBuff.Format(_T("CopyMessage_%d"),i);
-		strKeyBuff.Format(_T("%x,%x,%x"),it->m_sCopyPasteKey.m_copyMessage.Msg,
-			it->m_sCopyPasteKey.m_copyMessage.wParam,
-			it->m_sCopyPasteKey.m_copyMessage.lParam);
-		writeProfileString(REGKEY_KEY,strBuff,strKeyBuff);
-	
-		strBuff.Format(_T("PasteMessage_%d"),i);
-		strKeyBuff.Format(_T("%x,%x,%x"),it->m_sCopyPasteKey.m_pasteMessage.Msg,
-			it->m_sCopyPasteKey.m_pasteMessage.wParam,
-			it->m_sCopyPasteKey.m_pasteMessage.lParam);
-		writeProfileString(REGKEY_KEY,strBuff,strKeyBuff);
-	
-		//クリップボード容量制限
-		strKeyBuff.Format(_T("HistoryLimit_%d"),i);
-		writeProfileInt(REGKEY_KEY,strKeyBuff,it->m_nHistoryLimit);	
-	}
-
+	SaveSettings();
 	writeEnvInitData();
 }
-
 
 //---------------------------------------------------
 //関数名	writeEnvInitData()
@@ -443,26 +484,18 @@ void CInit::writeAllInitData()
 //---------------------------------------------------
 void CInit::writeEnvInitData()
 {
-	if(m_strIniFile == "") return;
-
-	//一般環境設定
-	writeProfileString(REGKEY_ENV,_T("DataFile"),m_strDataFile);
-	writeProfileString(REGKEY_ENV,_T("RwPluginFolder"),m_strRwPluginFolder);
-	writeProfileString(REGKEY_ENV,_T("DataFormat"),m_strPluginName);
-	writeProfileString(REGKEY_ENV,_T("MacroPlugin"),m_strMacroPluginName);
-
-	writeProfileInt(REGKEY_ENV,_T("SelectID"),m_nSelectID);
-	writeProfileInt(REGKEY_ENV,_T("TreeID"),m_nTreeID);
-	writeProfileInt(REGKEY_ENV,_T("RecNumber"),m_nRecNumber);
-
-	//ウィンドウ設定
-	writeProfileInt(REGKEY_WINDOW,_T("PopupSizeX"),m_DialogSize.x);
-	writeProfileInt(REGKEY_WINDOW,_T("PopupSizeY"),m_DialogSize.y);
-
-	//検索設定
-	writeProfileInt(REGKEY_SERCH,_T("SerchKind"),m_nSerchKind);		//検索種別
-	writeProfileInt(REGKEY_SERCH,_T("SerchLogic"),m_nSerchLogic);	//検索方法
-	writeProfileString(REGKEY_SERCH,_T("SerchKey"),m_strSerchKey);	//検索キー
+	m_state["data.path"] = CGeneral::ConvertUnicodeToUTF8(m_strDataPath);
+	m_state["data.format"] = CGeneral::ConvertUnicodeToUTF8(m_strDataFormat);
+	m_state["data.readOnly"] = m_bReadOnly;
+	m_state["treeview.width"] = m_DialogSize.x;
+	m_state["treeview.height"] = m_DialogSize.y;
+	m_state["find.target"] = m_nSearchTarget;
+	m_state["find.logic"] = m_nSearchLogic;
+	m_state["find.keywords"] = CGeneral::ConvertUnicodeToUTF8(m_strSearchKeywords);
+	m_state["internal.selectId"] = m_nSelectID;
+	m_state["internal.treeId"] = m_nTreeID;
+	m_state["internal.recordNumber"] = m_nRecNumber;
+	try { std::ofstream(m_strStateFile) << m_state.dump(1, '\t') << "\n"; } catch (...) {}
 }
 
 
@@ -605,7 +638,6 @@ void CInit::unHookKey()
 	}
 }
 
-
 //---------------------------------------------------
 //関数名	getAppendKeyInit()
 //機能		追加キー設定を取得
@@ -615,7 +647,7 @@ COPYPASTE_KEY CInit::getAppendKeyInit(CString strWinName,int nNumber)
 	bool isMatch = false;
 
 	//キー設定リストから適合するものを探す
-	list<CHANGE_KEY>::iterator it;
+	std::list<CHANGE_KEY>::iterator it;
 	CHANGE_KEY key;
 	COPYPASTE_KEY ret;
 	int nFindPoint;
@@ -627,20 +659,20 @@ COPYPASTE_KEY CInit::getAppendKeyInit(CString strWinName,int nNumber)
 			nFindPoint = strWinName.Find(key.m_strTitle);
 		}
 		
-		//前方一致 頭からあったらOK
-		if(key.m_nMatch == MATCH_FORWORD) {
+		// 前方一致
+		if(key.m_nMatch == MATCH_FORWARD) {
 			if(nFindPoint == 0)	isMatch = true;
 		}
-		//後方一致　最後にあったらOK
-		else if(key.m_nMatch == MATCH_BACK && nFindPoint >= 0) {
+		// 後方一致
+		else if(key.m_nMatch == MATCH_BACKWARD && nFindPoint >= 0) {
 			if(nFindPoint == (strWinName.GetLength() - key.m_strTitle.GetLength()))	isMatch = true;
 		}
-		//インクルード　含まれてたらOK
-		else if(key.m_nMatch == MATCH_INCLUDE) {
+		// 部分一致
+		else if(key.m_nMatch == MATCH_PARTIAL) {
 			if(nFindPoint >= 0)	isMatch = true;
 		}
-		//フレーズ　完全一致
-		else if(key.m_nMatch == MATCH_PHRASE) {
+		// 完全一致
+		else if(key.m_nMatch == MATCH_EXACT) {
 			if(strWinName == key.m_strTitle)	isMatch = true;
 		}
 		
@@ -660,7 +692,6 @@ COPYPASTE_KEY CInit::getAppendKeyInit(CString strWinName,int nNumber)
 	return ret;
 }
 
-
 //---------------------------------------------------
 //関数名	getAppendKeyInit()
 //機能		追加キー設定を取得
@@ -670,30 +701,30 @@ CHANGE_KEY CInit::getAppendKeyInit2(CString strWinName)
 	bool isMatch = false;
 
 	//キー設定リストから適合するものを探す
-	list<CHANGE_KEY>::iterator it;
+	std::list<CHANGE_KEY>::iterator it;
 	CHANGE_KEY key;
 	int nFindPoint;
 
 	for(it = m_key.m_KeyList.begin(); it !=  m_key.m_KeyList.end(); it++) {
 		key = *it;
-		if(key.m_nMatch != MATCH_PHRASE) {
+		if(key.m_nMatch != MATCH_EXACT) {
 			nFindPoint = strWinName.Find(key.m_strTitle);
 		}
 		
-		//前方一致 頭からあったらOK
-		if(key.m_nMatch == MATCH_FORWORD) {
+		// 前方一致
+		if(key.m_nMatch == MATCH_FORWARD) {
 			if(nFindPoint == 0)	isMatch = true;
 		}
-		//後方一致　最後にあったらOK
-		else if(key.m_nMatch == MATCH_BACK && nFindPoint >= 0) {
+		// 後方一致
+		else if(key.m_nMatch == MATCH_BACKWARD && nFindPoint >= 0) {
 			if(nFindPoint == (strWinName.GetLength() - key.m_strTitle.GetLength()))	isMatch = true;
 		}
-		//インクルード　含まれてたらOK
-		else if(key.m_nMatch == MATCH_INCLUDE) {
+		// 部分一致
+		else if(key.m_nMatch == MATCH_PARTIAL) {
 			if(nFindPoint >= 0)	isMatch = true;
 		}
-		//フレーズ　完全一致
-		else if(key.m_nMatch == MATCH_PHRASE) {
+		// 完全一致
+		else if(key.m_nMatch == MATCH_EXACT) {
 			if(strWinName == key.m_strTitle)	isMatch = true;
 		}
 		

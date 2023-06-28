@@ -10,7 +10,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // OptFifo.h : ヘッダー ファイル
-//
+#include "resource.h"
+
+#include <afxwin.h>
 
 //---------------------------------------------------
 // COptFifo ダイアログ
@@ -21,13 +23,13 @@ class COptFifo : public CDialog
 // コンストラクション
 public:
 	COptFifo(CWnd* pParent = NULL);   // 標準のコンストラクタ
+	virtual BOOL DestroyWindow();
 
 // ダイアログ データ
 	//{{AFX_DATA(COptFifo)
 	enum { IDD = IDD_OPT_FIFO };
 		// メモ: ClassWizard はこの位置にデータ メンバを追加します。
 	//}}AFX_DATA
-
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
@@ -40,13 +42,27 @@ public:
 
 // インプリメンテーション
 protected:
-
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(COptFifo)
-	afx_msg void OnFile();
+	afx_msg void OnPlayCopy();
+	afx_msg void OnPlayPaste();
+	afx_msg void OnFileCopy();
+	afx_msg void OnFilePaste();
+	afx_msg void OnNoSoundCopy();
+	afx_msg void OnNoSoundPaste();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	void Play(int id);
+	void File(int id);
+
+	int m_nAutoOff;
+	int m_nCleanup;
+	int m_nDontSaveSameDataAsLast;
+	CString m_strCopySound;
+	CString m_strPasteSound;
 };
 
 //{{AFX_INSERT_LOCATION}}

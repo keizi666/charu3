@@ -6,16 +6,15 @@
 #if !defined(AFX_INIT_H__EA6EFDDA_9745_4690_B6A9_8B0533E4AB56__INCLUDED_)
 #define AFX_INIT_H__EA6EFDDA_9745_4690_B6A9_8B0533E4AB56__INCLUDED_
 
-#include "Charu3.h"
-#include "MyHotkeyCtrl.h"
-
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <vector>
-using namespace std;
+#include "nlomann/json.hpp"
+#include "General.h"
 
+#include <list>
+#include <vector>
 
 //設定セクション定義
 #define REGKEY_ENV		_T("Environment")
@@ -31,28 +30,18 @@ using namespace std;
 #define REGKEY_PLUGIN	_T("PluginSetting")
 #define REGKEY_MACRO	_T("MacroTemplate")
 
+#define SETTINGS_SECTION_GENERAL "GeneralSettings"
+#define SETTINGS_SECTION_STYLE "StyleSettings"
+#define SETTINGS_SECTION_TREEVIEW "TreeViewSettings"
+
 //---------------------------------------------------
 // 一般設定構造体
 //---------------------------------------------------
 struct OPTION_ETC
 {
-	int m_nMulchUser;//マルチユーザーで使うかどうか // No longer used
-
-	int m_nToClip;		//リストから選んだ文字列はクリップボードにも入れる
-	int m_nToolTip;	//タスクトレイアイコンのツールチップを固定にする
-	int m_nMinimization;	//最小化する
-
-	int m_nIconClick;		//アイコンをクリックしたときの動作
-
-	int m_nClipboardOpenDelay;
-
-	int m_nSelfDiagnosisTime;//自己診断タイマー
-	int m_nActiveTime;		//監視タイマー
-
-	int m_nDontSave;
-
-	int m_nCopyWaitCnt;
-	int m_nPasteWaitCnt;
+	bool m_bPutBackClipboard; // データツリーからのコピー＆ペースト後、クリップボードに以前の内容をセットし直す
+	bool m_bShowClipboardInTooltipOfNofifyIcon; // 通知領域アイコンのツールチップでクリップボードの内容を表示する
+	int m_nIconClick;		// 通知領域アイコンをクリックしたときの動作
 };
 
 //---------------------------------------------------
@@ -60,11 +49,8 @@ struct OPTION_ETC
 //---------------------------------------------------
 struct OPTION_POPUP
 {
-	int  m_nSelectSW;		//テキストリストの選択位置を保持する
-	int  m_nFolderSW;		//テキストリストのフォルダ状態を保持する
-	int  m_nCornerPopup;		//マウスカーソルが画面の端に触れたらポップアップする
-	int  m_nCornerPopupTime;	//マウスカーソルが画面の端に触れたらポップアップする
-	int  m_nCornerPopupPix;	//マウスカーソルが画面の端に触れたらポップアップする
+	bool m_bKeepSelection; // Keep selection on data tree view
+	bool m_bKeepFolders; // Keep expanded/collapsed status of folders
 
 	int  m_nDoubleKeyPOP;
 	UINT m_uVK_Pouup;	//ポップアップキー
@@ -78,14 +64,13 @@ struct OPTION_POPUP
 
 	int  m_nPopupPos;		//ポップアップ出現位置
 	POINT m_posCaretHosei;	//キャレット位置の補正値
-	int  m_nOutRevice;
 
-	int  m_nQuickEnter;		//クイックアクセス終了時の貼り付け
-	int  m_nQuickChar;		//クイックアクセスで大文字小文字を区別しない
-	int  m_nQuickTime;		//クイックアクセス確定時間
-	int  m_nAutoImeOff;
+	int m_nSelectByTypingFinalizePeriod;
+	bool m_bSelectByTypingCaseInsensitive;
+	bool m_bSelectByTypingAutoPaste;
+	bool m_bSelectByTypingAutoExpand;
 
-	int  m_nSingleExpand;
+	bool m_bSingleExpand;
 };
 
 //---------------------------------------------------
@@ -94,13 +79,11 @@ struct OPTION_POPUP
 struct OPTION_FIFO
 {
 	int  m_nFifo;			//履歴動作中はCtrl+Vで貼り付ける文字列を先入れ先出しにする
-	int  m_nCopySound;		//履歴記録中はコピー時に効果音を鳴らす
-	CString m_strWaveFile;	//効果音のファイル名
-	int  m_nOffClear;		//履歴OFF時に一時項目をクリア
-	int  m_nNoClear;		//履歴モードで最後に空にしないスイッチ
-	int  m_nPasteSound;		//貼り付け時にも音を鳴らすスイッチ
-	int  m_nAllClearOff;	//一時履歴が空になったら履歴モードをOFFにする
-	int  m_nDuplication;	//重複チェック
+	bool m_bAutoOff;	// Turn off stock mode when one-time item is gone
+	bool m_bCleanupAtTurnOff; // Remove all one-time items when turned off
+	bool m_bDontSaveSameDataAsLast;
+	CString m_strCopySound;	// コピー時に再生するサウンドのパス名
+	CString m_strPasteSound;	// 貼り付け時に再生するサウンドのパス名
 };
 
 //---------------------------------------------------
@@ -108,19 +91,16 @@ struct OPTION_FIFO
 //---------------------------------------------------
 struct OPTION_VISUAL
 {
-	int m_nSemitransparent;
-	int m_nScrollbar;
-
-	CString m_strFontName;//フォント名
-	int m_nFontSize;		//フォントサイズ
-
-	CString m_strResourceName;//リソース名
-	uint32_t m_nBorderColor;		//枠色
-	uint32_t m_nBackColor;		//背景色
-	uint32_t m_nTextColor;		//テキスト色
-	int m_nResetTree;
-
-	int m_nToolTip;			//ツールチップの表示項目
+	uint32_t m_nBorderColor;
+	uint32_t m_nBackgroundColor;
+	uint32_t m_nTextColor;
+	CString m_strFontName;
+	int m_nFontSize;
+	CString m_strResourceName;
+	bool m_bScrollbarVertical;
+	bool m_bScrollbarHorizontal;
+	int m_nOpacity;
+	int m_nToolTip;
 };
 
 struct WINDOWS_MESSAGE
@@ -135,7 +115,7 @@ struct WINDOWS_MESSAGE
 //---------------------------------------------------
 struct COPYPASTE_KEY
 {
-	int  m_nMessage;	//メッセージ方式フラグ
+	int  m_nMessage;	//メッセージ方式
 	UINT m_uMod_Paste;	//貼り付け特殊キー
 	UINT m_uVK_Paste;	//貼り付けキー
 	
@@ -147,7 +127,65 @@ struct COPYPASTE_KEY
 
 	int  m_nCopyWait;		//コピー待ち時間
 	int  m_nPasteWait;		//ペースト待ち時間
+
+	COPYPASTE_KEY()
+		: m_nMessage(0)
+		, m_uMod_Paste(0)
+		, m_uVK_Paste(0)
+		, m_uMod_Copy(0)
+		, m_uVK_Copy(0)
+		, m_copyMessage(WINDOWS_MESSAGE())
+		, m_pasteMessage(WINDOWS_MESSAGE())
+		, m_nCopyWait(0)
+		, m_nPasteWait(0)
+	{
+	}
+
+	COPYPASTE_KEY(nlohmann::json& obj)
+	{
+		m_nMessage = static_cast<int>(CGeneral::getSettingNumber(obj, "method", 0));
+		m_uMod_Copy = static_cast<UINT>(CGeneral::getSettingNumber(obj, "copy.keyCode", 0));
+		m_uVK_Copy = static_cast<UINT>(CGeneral::getSettingNumber(obj, "copy.keyModifier", 0));
+		m_nCopyWait = static_cast<int>(CGeneral::getSettingNumber(obj, "copy.delay", 0));
+		m_uMod_Paste = static_cast<UINT>(CGeneral::getSettingNumber(obj, "paste.keyCode", 0));
+		m_uVK_Paste = static_cast<UINT>(CGeneral::getSettingNumber(obj, "paste.keyModifier", 0));
+		m_nPasteWait = static_cast<int>(CGeneral::getSettingNumber(obj, "paste.delay", 0));
+
+		nlohmann::json msg;
+		msg = obj["copy.message"];
+		m_copyMessage.Msg = static_cast<UINT>(CGeneral::getSettingNumber(msg, "id", 0));
+		m_copyMessage.wParam = static_cast<WPARAM>(CGeneral::getSettingNumber(msg, "param1", 0));
+		m_copyMessage.lParam = static_cast<LPARAM>(CGeneral::getSettingNumber(msg, "param2", 0));
+		msg = obj["paste.message"];
+		m_pasteMessage.Msg = static_cast<UINT>(CGeneral::getSettingNumber(msg, "id", 0));
+		m_pasteMessage.wParam = static_cast<WPARAM>(CGeneral::getSettingNumber(msg, "param1", 0));
+		m_pasteMessage.lParam = static_cast<LPARAM>(CGeneral::getSettingNumber(msg, "param2", 0));
+	}
+
+	nlohmann::json ToJson() {
+		nlohmann::json obj;
+		obj["method"] = m_nMessage;
+		obj["copy.keyCode"] = m_uMod_Copy;
+		obj["copy.keyModifier"] = m_uVK_Copy;
+		obj["copy.delay"] = m_nCopyWait;
+		obj["paste.keyCode"] = m_uMod_Paste;
+		obj["paste.keyModifier"] = m_uVK_Paste;
+		obj["paste.delay"] = m_nPasteWait;
+
+		nlohmann::json msg;
+		msg["id"] = m_copyMessage.Msg;
+		msg["param1"] = m_copyMessage.wParam;
+		msg["param2"] = m_copyMessage.lParam;
+		obj["copy.message"] = msg;
+		msg["id"] = m_pasteMessage.Msg;
+		msg["param1"] = m_pasteMessage.wParam;
+		msg["param2"] = m_pasteMessage.lParam;
+		obj["paste.message"] = msg;
+
+		return obj;
+	}
 };
+
 //---------------------------------------------------
 // 自動キー変更構造体
 //---------------------------------------------------
@@ -155,6 +193,7 @@ struct CHANGE_KEY
 {
 	CString m_strTitle;	//タイトル文字列
 	int		m_nMatch;
+
 	COPYPASTE_KEY m_sCopyPasteKey;
 	int  m_nHistoryLimit;	//クリップボード容量制限
 };
@@ -163,9 +202,10 @@ struct CHANGE_KEY
 //---------------------------------------------------
 struct OPTION_KEYSET
 {
-	int  m_nHistoryLimit;	//クリップボード容量制限
 	COPYPASTE_KEY	m_defKeySet;
-	list<CHANGE_KEY> m_KeyList;//キー設定データリスト
+	int  m_nHistoryLimit;	//クリップボード容量制限
+
+	std::list<CHANGE_KEY> m_KeyList;//キー設定データリスト
 };
 
 //---------------------------------------------------
@@ -187,16 +227,13 @@ public:
 	CInit();
 	virtual ~CInit();
 	void initialize();
-	void setIniFileName(CString strFileName) {
-		m_strIniFile = strFileName;
-	}
-
-	void readAllInitData();
-	CString setIniFileString(const TCHAR* szSection,const TCHAR* szKey,CString strDefault);
-	int setIniFileInt(const TCHAR* szSection,const TCHAR* szKey,int nDefault);
 
 	void writeAllInitData();
 	void writeEnvInitData();
+
+	CString setIniFileString(const TCHAR* szSection, const TCHAR* szKey, CString strDefault);
+	int setIniFileInt(const TCHAR* szSection, const TCHAR* szKey, int nDefault);
+
 	void writeProfileInt(const TCHAR* szSection,const TCHAR* szKey,int nValue);
 	void writeProfileString(const TCHAR* szection,const TCHAR* szKey,CString strValue);
 
@@ -224,42 +261,60 @@ public:
 		return false;
 	}
 
-	//基本情報
-	CString m_strAppPath;	//実行パス
-	CString m_strUserName;	//ユーザー名
-	CString m_strIniFile;	//iniファイル名
-	CString m_strDataFile;	//データファイル名
-	CString m_strRwPluginFolder;//プラグインフォルダ
-	CString m_strPluginName;//フォーマット名
-	CString m_strMacroPluginName;//マクロ形式名
-	CString m_strBBS;//サポートBBSURL
-	HKL     m_keyLayout;
-
-	int  m_nSelectID;		//選択してるID
-	int  m_nTreeID;
-	int  m_nOptionPage;
-	int  m_nRecNumber;
-	int  m_nToolTipTime,m_nToolTipDelay;
-	POINT m_DialogSize,m_IconSize;	//ダイアログのサイズ
-
-	int  m_nSerchKind;		//検索種別
-	int  m_nSerchLogic;		//検索方法
-	CString m_strSerchKey;//検索キー
-
-	int m_nDebug;
+	// environment
+	CString m_strUserName;
+	CString m_strAppPath;
+	CString m_strRwPluginFolder;
+	CString m_strAppDataPath;
+	POINT m_IconSize;
+	CString m_strIniFile;
+	CString m_strStateFile;
+	CString m_strSettingsFile;
 	CString m_strDebugLog;
 
-	vector<MACRO_STRUCT>  m_vctMacro;
-	vector<MACRO_STRUCT>  m_vctDataMacro;
+	// state (reset on every startup)
+	int m_nOptionPage;
 
-	//設定情報
+	// state (to be saved)
+	nlohmann::json m_state;
+	CString m_strDataPath; // data file path
+	CString m_strDataFormat; // data format
+	bool m_bReadOnly; // whether access to data files should be read-only
+	POINT m_DialogSize;
+	int m_nSearchTarget;
+	int m_nSearchLogic;
+	CString m_strSearchKeywords;
+	int m_nSelectID;
+	int m_nTreeID;
+	int m_nRecNumber;
+
+	// settings
+	nlohmann::json m_settings;
+	bool m_bDebug; // no setting UI
+	int m_nToolTipTime; // no setting UI
+	int m_nToolTipDelay; // no setting UI
+	int m_nClipboardOpenDelay;
+	int m_nClipboardRetryInterval;
+	int m_nClipboardRetryTimes;
+	int m_nWindowCheckInterval;
 	OPTION_ETC		m_etc;
 	OPTION_POPUP	m_pop;
 	OPTION_FIFO		m_fifo;
 	OPTION_VISUAL	m_visual;
 	OPTION_KEYSET	m_key;
 
+	HKL     m_keyLayout;
+
+	std::vector<MACRO_STRUCT>  m_vctMacro;
+	std::vector<MACRO_STRUCT>  m_vctDataMacro;
+
 	HMODULE m_hHookDLL;
+
+private:
+	CString m_locale;
+
+	void SaveSettings();
+	//void ReadPredefined(std::vector<MACRO_STRUCT>& macro, CString filePath);
 };
 
 #endif // !defined(AFX_INIT_H__EA6EFDDA_9745_4690_B6A9_8B0533E4AB56__INCLUDED_)

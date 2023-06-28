@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "charu3.h"
 #include "MyEditCtrl.h"
+#include "charu3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,7 +21,6 @@ CMyEditCtrl::CMyEditCtrl()
 CMyEditCtrl::~CMyEditCtrl()
 {
 }
-
 
 BEGIN_MESSAGE_MAP(CMyEditCtrl, CEdit)
 	//{{AFX_MSG_MAP(CMyEditCtrl)

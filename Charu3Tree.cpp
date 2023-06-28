@@ -4,10 +4,12 @@
 ----------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "Charu3.h"
 #include "Charu3Tree.h"
-#include "General.h"
 #include "StringWork.h"
+#include "Charu3.h"
+
+#include <list>
+#include <vector>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,78 +56,65 @@ BEGIN_MESSAGE_MAP(CCharu3Tree, CTreeCtrl)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-
 //---------------------------------------------------
 //関数名	setPlugin(CString strPath)
 //機能		プラグイン情報を設定する
 //---------------------------------------------------
-bool CCharu3Tree::setPlugin(CString strPath)
+void CCharu3Tree::setPlugin(CString strPath)
 {
-	bool isRet = false;
-
-	readDataFile pReadData;
-	HMODULE hDLL;
-	initDLL pInitDLL;
-	endDLL	pEndDLL;
-	writeDataFile pWriteData;
-	getFormatName pGetFormatName;
-	getExtension  pGetExtension;
-	isUnicode pIsUnicode;
-	RW_PLUGIN plugin;
-	CString strFileName;
-
-	CFileFind filefind;
-	strFileName = strPath + "\\*.dll";
-	BOOL isSuccess = filefind.FindFile(strFileName);
-	if (!isSuccess) return isRet;
-
 	m_rwPlugin.reserve(20);//とりあえず20個分確保
 	m_rwPlugin.clear();
-	while(isSuccess == TRUE) {
-		isSuccess = filefind.FindNextFile();
-		if(filefind.IsDots() == TRUE);				//カレントか親
-		else if(filefind.IsDirectory() == TRUE);	//フォルダ
-		else {
-			hDLL = LoadLibrary(filefind.GetFilePath());//DLLをロード
-			if(hDLL){
+
+	CFileFind filefind;
+	BOOL more = filefind.FindFile(strPath + _T("\\*.dll"));
+	while (more) {
+		more = filefind.FindNextFile();
+		if (!filefind.IsDirectory()) {
+			HMODULE hDLL = LoadLibrary(filefind.GetFilePath());//DLLをロード
+			if (hDLL){
 				//関数ポインタを取得
-				pIsUnicode = (isUnicode)GetProcAddress(hDLL,"isUnicode");
+				isUnicode pIsUnicode = (isUnicode)GetProcAddress(hDLL,"isUnicode");
 #ifdef _UNICODE
-				if(pIsUnicode && pIsUnicode()) {
+				if(pIsUnicode && pIsUnicode())
 #else
-				if(pIsUnicode && !pIsUnicode()) {
+				if(pIsUnicode && !pIsUnicode())
 #endif
-					pReadData = (readDataFile)GetProcAddress(hDLL,"readDataFile");
-					pInitDLL = (initDLL)GetProcAddress(hDLL,"initDLL");
-					pEndDLL = (endDLL)GetProcAddress(hDLL,"endDLL");
-					pWriteData = (writeDataFile)GetProcAddress(hDLL,"writeDataFile");
-					pGetFormatName = (getFormatName)GetProcAddress(hDLL,"getFormatName");
-					pGetExtension = (getExtension)GetProcAddress(hDLL,"getExtension");
+				{
+					readDataFile pReadData = (readDataFile)GetProcAddress(hDLL,"readDataFile");
+					initDLL pInitDLL = (initDLL)GetProcAddress(hDLL,"initDLL");
+					endDLL pEndDLL = (endDLL)GetProcAddress(hDLL,"endDLL");
+					writeDataFile pWriteData = (writeDataFile)GetProcAddress(hDLL,"writeDataFile");
+					getFormatName pGetFormatName = (getFormatName)GetProcAddress(hDLL,"getFormatName");
+					getExtension pGetExtension = (getExtension)GetProcAddress(hDLL,"getExtension");
 
-					if(pInitDLL && pEndDLL && pReadData && pWriteData && pGetFormatName && pGetExtension) {
-						TCHAR strBuff[256];
-						plugin.m_strPluginName = filefind.GetFilePath();
-						pGetExtension(strBuff,sizeof(strBuff));
-						plugin.m_strExtension = strBuff;
-						pGetFormatName(strBuff,sizeof(strBuff));
-						plugin.m_strSoftName = strBuff;
+					if (pInitDLL && pEndDLL && pReadData && pWriteData && pGetFormatName && pGetExtension) {
+						TCHAR tcFormat[256], tcExt[256];
+						// NOTE: We need to pass the size of the buffer minus
+						// one character as the second argument.
+						// This is because the existing plugins are badly
+						// implemented (or the plugin specification is badly
+						// designed) and will copy the string to be copied if
+						// the size of the string to be copied is less than
+						// or EQUAL TO the size of the buffer. They do not
+						// take into account the extra storage for the string
+						// terminator character.
+						pGetExtension(tcExt, sizeof tcExt - sizeof(TCHAR));
+						pGetFormatName(tcFormat, sizeof tcFormat - sizeof(TCHAR));
+						RW_PLUGIN plugin(filefind.GetFilePath(), tcFormat, tcExt);
+						m_rwPlugin.push_back(plugin);
 
-						//デバッグログ処理
-						if(theApp.m_ini.m_nDebug) {
+						if (theApp.m_ini.m_bDebug) {
 							CString strText;
-							strText.Format(_T("plugin setting \"%s\"\n"),strBuff);
+							strText.Format(_T("plugin setting \"%s\"\n"), plugin.m_strPluginFilePath.GetString());
 							CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 						}
 						
-						m_rwPlugin.push_back(plugin);
 					}
 				}
 				FreeLibrary(hDLL);
 			}
 		}
 	}
-	isRet = true;
-	return isRet;
 }
 
 //---------------------------------------------------
@@ -162,7 +151,7 @@ void CCharu3Tree::setImageList(POINT posSize,CString strFileName,CString strPath
 bool CCharu3Tree::checkRedundancyID(int nID)
 {
 	bool isRet = false;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 
 	for (it = m_MyStringList.begin(); it != m_MyStringList.end(); it++) {
 		if(it->m_nMyID == nID) {
@@ -195,10 +184,10 @@ bool CCharu3Tree::checkMyChild(HTREEITEM hMeItem,HTREEITEM hChildItem)
 }
 
 //---------------------------------------------------
-//関数名	serchMyRoots(HTREEITEM hStartItem)
+//関数名	searchMyRoots(HTREEITEM hStartItem)
 //機能		一番上の親を探す
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::serchMyRoots(HTREEITEM hStartItem)
+HTREEITEM CCharu3Tree::searchMyRoots(HTREEITEM hStartItem)
 {
 	HTREEITEM hRet = nullptr,hTmp;
 
@@ -212,10 +201,10 @@ HTREEITEM CCharu3Tree::serchMyRoots(HTREEITEM hStartItem)
 }
 
 //---------------------------------------------------
-//関数名	serchParentOption(HTREEITEM hStartItem,CString strOption)
+//関数名	searchParentOption(HTREEITEM hStartItem,CString strOption)
 //機能		親のオプションを捜していく
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::serchParentOption(HTREEITEM hStartItem,CString strOption)
+HTREEITEM CCharu3Tree::searchParentOption(HTREEITEM hStartItem,CString strOption)
 {
 	HTREEITEM hRet = nullptr;
 	STRING_DATA data;
@@ -242,16 +231,12 @@ HTREEITEM CCharu3Tree::serchParentOption(HTREEITEM hStartItem,CString strOption)
 }
 
 //---------------------------------------------------
-//関数名	saveDataFile(CString strFileName,CString strPlugin)
+//関数名	saveDataToFile(CString strFileName,CString strPlugin)
 //機能		データを保存する
 //---------------------------------------------------
-bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM hStartItem)
+bool CCharu3Tree::saveDataToFile(CString strFileName,CString strPlugin,HTREEITEM hStartItem)
 {
-	bool isRet = false;
-
-	if(theApp.m_ini.m_etc.m_nDontSave) return true;
-
-	list<STRING_DATA> tmplist;
+	std::list<STRING_DATA> tmplist;
 	STRING_DATA Data;
 
 	//全データを出力
@@ -268,25 +253,23 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 		if(ItemHasChildren(hStartItem)) tree2List(GetChildItem(hStartItem),&tmplist);
 	}
 
-
-	if(strPlugin != DAT_FORMAT && strPlugin != DAT_FORMAT2) {
-		isRet = saveDataFilePlugin(strFileName,strPlugin,&tmplist);
-		return isRet;
+	if (strPlugin != DAT_FORMAT && strPlugin != DAT_FORMAT2) {
+		return SaveDataWithPlugin(strFileName,strPlugin,&tmplist);
 	}
 
-	int nDataSize;
 	FILE *fFile;
-	CString strTmp;
 
 	//データを保存する
-	if(_tfopen_s(&fFile, strFileName,_T("wb")) != 0)	return isRet;//ファイルを開く
+	if (_tfopen_s(&fFile, strFileName, _T("wb")) != 0) {
+		return false; //ファイルを開く
+	}
 
-	#ifdef _UNICODE
-		fwrite(DAT_FORMAT2,strlen(DAT_FORMAT2),1,fFile);//データ識別子
-	#else
-		fwrite(DAT_FORMAT,strlen(DAT_FORMAT),1,fFile);//データ識別子
-	#endif
-	for (list<STRING_DATA>::iterator it = tmplist.begin(); it != tmplist.end(); it++) {
+#ifdef _UNICODE
+	fwrite(DAT_FORMAT2,strlen(DAT_FORMAT2),1,fFile);//データ識別子
+#else
+	fwrite(DAT_FORMAT,strlen(DAT_FORMAT),1,fFile);//データ識別子
+#endif
+	for (std::list<STRING_DATA>::iterator it = tmplist.begin(); it != tmplist.end(); it++) {
 		
 		if(it->m_cKind & KIND_ONETIME) {//ノーマル項目以外を保存
 			continue;
@@ -299,12 +282,12 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 		fwrite(&it->m_timeEdit,sizeof(it->m_timeEdit),1,fFile);//変更日時
 
 		//タイトル
-		nDataSize = it->m_strTitle.GetLength();
+		int nDataSize = it->m_strTitle.GetLength();
 #ifdef _UNICODE
 		nDataSize = nDataSize * sizeof(WCHAR);
 #endif
 		fwrite(&nDataSize,sizeof(nDataSize),1,fFile);
-		strTmp = it->m_strTitle;
+		CString strTmp = it->m_strTitle;
 		fwrite(LPCTSTR(strTmp),nDataSize,1,fFile);
 
 		//文章
@@ -323,23 +306,22 @@ bool CCharu3Tree::saveDataFile(CString strFileName,CString strPlugin,HTREEITEM h
 		fwrite(&nDataSize,sizeof(nDataSize),1,fFile);
 		fwrite(LPCTSTR(it->m_strMacro),nDataSize,1,fFile);
 	}
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
+
+	if(theApp.m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("wrriten charu3 data \"%s\"\n"),strFileName.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 	fclose(fFile);
 
-	isRet = true;
-	return isRet;
+	return true;
 }
 
 //---------------------------------------------------
-//関数名	saveDataFilePlugin(CString strFileName,CString strPlugin)
+//関数名	saveDataWithPlugin(CString strFileName,CString strPlugin)
 //機能		プラグインを使ってデータを保存する
 //---------------------------------------------------
-bool CCharu3Tree::saveDataFilePlugin(CString strFileName,CString strPlugin,list<STRING_DATA> *tmplist)
+bool CCharu3Tree::SaveDataWithPlugin(CString strFileName, CString strPlugin, std::list<STRING_DATA> *tmplist)
 {
 	bool isRet = false;
 	RW_PLUGIN plugin;
@@ -354,7 +336,7 @@ bool CCharu3Tree::saveDataFilePlugin(CString strFileName,CString strPlugin,list<
 	HMODULE hDLL;
 	writeDataFile pWriteData;
 
-	hDLL = LoadLibrary(plugin.m_strPluginName);//DLLをロード
+	hDLL = LoadLibrary(plugin.m_strPluginFilePath);//DLLをロード
 	if(hDLL){
 		//関数ポインタを取得
 		pWriteData = (writeDataFile)GetProcAddress(hDLL,"writeDataFile");
@@ -364,8 +346,8 @@ bool CCharu3Tree::saveDataFilePlugin(CString strFileName,CString strPlugin,list<
 		}
 		FreeLibrary(hDLL);
 	}
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
+
+	if(theApp.m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("wrriten plugin data \"%s\" %s %d\n"),strFileName.GetString(),strPlugin.GetString(),isRet);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -391,17 +373,16 @@ bool CCharu3Tree::loadDataFileDef(CString strFileName,CString strPlugin) {
 //関数名	loadDataFile(CString strFileName,CString strPlugin)
 //機能		データを読み込む
 //---------------------------------------------------
-bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING_DATA> *tmplist)
+bool CCharu3Tree::loadDataFile(CString strFileName, CString strPlugin, std::list<STRING_DATA> *tmplist)
 {
 	bool isRet = false;
 
 	if(strPlugin != DAT_FORMAT) {
 		//プラグインを使ってファイルから読み込む
-		return loadDataFilePlugin(strFileName,strPlugin,tmplist);
+		return LoadDataWithPlugin(strFileName,strPlugin,tmplist);
 	}
 
 	STRING_DATA data;
-	initStringData(&data);
 	int nDataSize;
 	FILE *fFile;
 /*
@@ -426,7 +407,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 	CString strExtention;
 	strExtention = strFileName.Right(3);
 	strExtention.MakeLower();
-	list<STRING_DATA> readList;//データリスト
+	std::list<STRING_DATA> readList;//データリスト
 
 	if(strExtention != DAT_EXT) return isRet;
 
@@ -535,14 +516,14 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 
 	//本リストに登録	
 	tmplist->clear();
-	list<STRING_DATA>::iterator stit;
+	std::list<STRING_DATA>::iterator stit;
 
 	for(stit = readList.begin(); stit != readList.end(); stit++) {
 		data = *stit;
 		if(checkRedundancyID(data.m_nMyID)) {
 			int nOldID = data.m_nMyID;
 			data.m_nMyID = makeNewID();
-			list<STRING_DATA>::iterator newit;
+			std::list<STRING_DATA>::iterator newit;
 			for(newit = readList.begin(); newit != readList.end(); newit++) {
 				if(newit->m_nParentID == nOldID) newit->m_nParentID = data.m_nMyID;
 			}
@@ -550,8 +531,8 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 		tmplist->insert(tmplist->end(),data);//リストに追加
 	}
 	fclose(fFile);
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
+
+	if(theApp.m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("read charu3 data \"%s\"\n"),strFileName.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -565,26 +546,22 @@ bool CCharu3Tree::loadDataFile(CString strFileName,CString strPlugin,list<STRING
 //関数名	getPlugin(CString strName,RW_PLUGIN* pPlugin)
 //機能		プラグインを検索
 //---------------------------------------------------
-bool CCharu3Tree::getPlugin(CString strName,RW_PLUGIN* pPlugin)
+bool CCharu3Tree::getPlugin(CString strName, RW_PLUGIN* pPlugin)
 {
-	bool isRet = false;
-	vector<RW_PLUGIN>::iterator it;
-
-	for(it = m_rwPlugin.begin(); it != m_rwPlugin.end(); it++) {
-		if(it->m_strSoftName == strName) {
-			isRet = true;
+	for (std::vector<RW_PLUGIN>::iterator it = m_rwPlugin.begin(); it != m_rwPlugin.end(); it++) {
+		if (it->m_strFormatName == strName) {
 			*pPlugin = *it;
-			break;
+			return true;
 		}
 	}
-	return isRet;
+	return false;
 }
 
 //---------------------------------------------------
 //関数名	loadDataFilePlugin(CString strFileName,CString strPlugin)
 //機能		プラグインでデータを読み込み
 //---------------------------------------------------
-bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<STRING_DATA> *tmplist)
+bool CCharu3Tree::LoadDataWithPlugin(CString strFileName, CString strPlugin, std::list<STRING_DATA> *tmplist)
 {
 	bool isRet = false;
 	RW_PLUGIN plugin;
@@ -603,8 +580,8 @@ bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<
 	time_t	timeCreate;	//作成日時
 	time(&timeCreate);
 
-	list<STRING_DATA> *pData;//読み込みリスト
-	hDLL = LoadLibrary(plugin.m_strPluginName);//DLLをロード
+	std::list<STRING_DATA> *pData;//読み込みリスト
+	hDLL = LoadLibrary(plugin.m_strPluginFilePath);//DLLをロード
 	if(hDLL){
 		//関数ポインタを取得
 		pReadData = (readDataFile)GetProcAddress(hDLL,"readDataFile");
@@ -624,8 +601,8 @@ bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<
 			TCHAR *szBuff;
 			STRING_DATA data,data2;
 
-			list<STRING_DATA> readList;//データリスト
-			list<STRING_DATA>::iterator stit;
+			std::list<STRING_DATA> readList;//データリスト
+			std::list<STRING_DATA>::iterator stit;
 			//仮リストに登録
 			for(stit = pData->begin(); stit != pData->end(); stit++) {
 				if(stit->m_strTitle != "") {
@@ -681,12 +658,13 @@ bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<
 
 		FreeLibrary(hDLL);
 	}
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
+
+	if(theApp.m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("read plugin data \"%s\" %s\n"),strFileName.GetString(),strPlugin.GetString());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
+
 	isRet = true;
 	return isRet;
 }
@@ -695,9 +673,9 @@ bool CCharu3Tree::loadDataFilePlugin(CString strFileName,CString strPlugin,list<
 //関数名	normalizationID(list<STRING_DATA>* pList,int nParentID)
 //機能		IDを正規化(ほとんどCharu2Proのデータ専用)
 //---------------------------------------------------
-void CCharu3Tree::normalizationID(list<STRING_DATA>* pList,int nParentID)
+void CCharu3Tree::normalizationID(std::list<STRING_DATA>* pList, int nParentID)
 {
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 
 	for(it = pList->begin(); it != pList->end(); it++) {
 		//親のIDを比較
@@ -705,7 +683,7 @@ void CCharu3Tree::normalizationID(list<STRING_DATA>* pList,int nParentID)
 			if(checkRedundancyID(it->m_nMyID)) {//IDの重複をチェック
 				int nOldID = it->m_nMyID;
 				it->m_nMyID = makeNewID();//新しいIDを振る
-				list<STRING_DATA>::iterator newit;
+				std::list<STRING_DATA>::iterator newit;
 				for(newit = pList->begin(); newit != pList->end(); newit++) {//自分の子の親IDを変える
 					if(newit->m_nParentID == nOldID) newit->m_nParentID = it->m_nMyID;
 				}
@@ -720,13 +698,13 @@ void CCharu3Tree::normalizationID(list<STRING_DATA>* pList,int nParentID)
 //関数名	convertMacroPlugin(CString strSourceData)
 //機能		マクロ文字列を置換
 //---------------------------------------------------
-bool CCharu3Tree::convertMacroPlugin(STRING_DATA *SourceData,CString *strRet,CString strSelect,CString strClip,CString strSoftName)
+bool CCharu3Tree::convertMacroPlugin(STRING_DATA* SourceData, CString* strRet, CString strSelect, CString strClip, CString strSoftName)
 {
 	RW_PLUGIN plugin;
 	TCHAR *szRet;
 	bool isRet = false;
 
-	bool isFound = getPlugin(strSoftName,&plugin);
+	bool isFound = getPlugin(strSoftName, &plugin);
 
 	if(!isFound) {
 		CString strRes;
@@ -738,18 +716,27 @@ bool CCharu3Tree::convertMacroPlugin(STRING_DATA *SourceData,CString *strRet,CSt
 	HMODULE hDLL;
 	convertMacro pConvertMacro;
 
-	hDLL = LoadLibrary(plugin.m_strPluginName);//DLLをロード
+	hDLL = LoadLibrary(plugin.m_strPluginFilePath);//DLLをロード
 	if(hDLL){
 		//関数ポインタを取得
 		pConvertMacro = (convertMacro)GetProcAddress(hDLL,"convertMacro");
 
 		if(pConvertMacro) {
 			int nSize = SourceData->m_strData.GetLength()*10+10240;
-			szRet = new TCHAR[nSize];
+			// NOTE: The buffer needs to be one character larger
+			// than the buffer size to give the plugin.
+			// This is because the existing plugins are badly
+			// implemented (or the plugin specification is badly
+			// designed) and will copy the string to be copied if
+			// the size of the string to be copied is less than
+			// or EQUAL TO the size of the buffer.They do not
+			// take into account the extra storage for the string
+			// terminator character.
+			szRet = new TCHAR[nSize + 1];
 			if(szRet) {
 				isRet = pConvertMacro((TCHAR*)LPCTSTR(SourceData->m_strData),szRet,nSize,
 					(TCHAR*)LPCTSTR(strSelect),(TCHAR*)LPCTSTR(strClip));
-				*strRet = szRet;
+				*strRet = CString(szRet);
 				delete [] szRet;
 			}
 		}
@@ -764,11 +751,11 @@ bool CCharu3Tree::convertMacroPlugin(STRING_DATA *SourceData,CString *strRet,CSt
 //          HTREEITEM hParentTreeItem 親のポインタ
 //機能		文字列データリストをフォルダ表示する
 //---------------------------------------------------
-void CCharu3Tree::copyData(int nParentID,HTREEITEM hParentTreeItem,list<STRING_DATA> *pList)
+void CCharu3Tree::copyData(int nParentID, HTREEITEM hParentTreeItem, std::list<STRING_DATA> *pList)
 {
 	int nRet = 0;
 	HTREEITEM hTreeItem;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 
 	//ツリーデータ
 	TV_INSERTSTRUCT TreeCtrlItem;
@@ -801,7 +788,7 @@ void CCharu3Tree::copyData(int nParentID,HTREEITEM hParentTreeItem,list<STRING_D
 void CCharu3Tree::moveChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 {
 	if(! hFromItem || !hToItem) return;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	hFromItem = GetChildItem(hFromItem);
 	do {
 		//データを取得
@@ -846,7 +833,7 @@ void CCharu3Tree::moveChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 void CCharu3Tree::copyChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 {
 	if(! hFromItem || !hToItem) return;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	hFromItem = GetChildItem(hFromItem);
 	HTREEITEM hAddtItem = nullptr;
 	while (hFromItem) {
@@ -865,36 +852,12 @@ void CCharu3Tree::copyChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 	}
 }
 
-
-//---------------------------------------------------
-//関数名	addNewFolder(HTREEITEM hTreeItem)
-//機能		新しいフォルダを追加する
-//---------------------------------------------------
-HTREEITEM CCharu3Tree::addNewFolder(HTREEITEM hTreeItem,CString strName)
-{
-	STRING_DATA Data;
-	initStringData(&Data);
-
-	Data.m_cKind = KIND_FOLDER;
-	Data.m_strData = "";
-	Data.m_strTitle = strName;
-	HTREEITEM hAddItem = addData(hTreeItem,Data);
-	SelectItem(hAddItem);
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
-		CString strText;
-		strText.Format(_T("add new folder \"%s\"\n"),strName.GetString());
-		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-	}
-
-	return hAddItem;
-}
-
 //---------------------------------------------------
 //関数名	margeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pList)
 //機能		リストをマージしてツリーに反映させる
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::mergeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pList,bool isRoot)
+// TODO: Behavior when isRoot == true has not been verified. It seems strange.
+HTREEITEM CCharu3Tree::mergeTreeData(HTREEITEM hTreeItem, std::list<STRING_DATA> *pList, bool isRoot)
 {
 	if(pList->size() > 0) {
 		STRING_DATA folder;
@@ -912,9 +875,9 @@ HTREEITEM CCharu3Tree::mergeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pLis
 		}
 		mergeList(&m_MyStringList,pList,nParentID);
 		//親のいない子は消す
-		list<STRING_DATA>::iterator it,itNext;
+		std::list<STRING_DATA>::iterator it,itNext;
 		int i;
-		for (i = 0,it = m_MyStringList.begin(); it != m_MyStringList.end(); i++,it++) {
+		for (i = 0, it = m_MyStringList.begin(); it != m_MyStringList.end(); i++, it++) {
 			STRING_DATA data;
 			data = *it;
 			if(it->m_nParentID != ROOT && !checkRedundancyID(it->m_nParentID)) {
@@ -945,10 +908,10 @@ HTREEITEM CCharu3Tree::mergeTreeData(HTREEITEM hTreeItem,list<STRING_DATA> *pLis
 //関数名	mergeList(list<STRING_DATA> *pMainList,list<STRING_DATA> *pList,int nParent)
 //機能		リストをマージする
 //---------------------------------------------------
-int CCharu3Tree::mergeList(list<STRING_DATA> *pMainList,list<STRING_DATA> *pList,int nParent)
+int CCharu3Tree::mergeList(std::list<STRING_DATA> *pMainList, std::list<STRING_DATA> *pList, int nParent)
 {
 	int nRet = 0,nBeginID = 0;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	it = pList->begin();
 	nBeginID = ROOT;
 
@@ -959,6 +922,27 @@ int CCharu3Tree::mergeList(list<STRING_DATA> *pMainList,list<STRING_DATA> *pList
 	}
 
 	return nRet;
+}
+
+//---------------------------------------------------
+//関数名	addNewFolder(HTREEITEM hTreeItem)
+//機能		新しいフォルダを追加する
+//---------------------------------------------------
+HTREEITEM CCharu3Tree::addNewFolder(HTREEITEM hTreeItem, CString strName)
+{
+	STRING_DATA Data;
+	Data.m_cKind = KIND_FOLDER;
+	Data.m_strTitle = strName;
+	HTREEITEM hAddItem = addData(hTreeItem, Data);
+	SelectItem(hAddItem);
+
+	if (theApp.m_ini.m_bDebug) {
+		CString strText;
+		strText.Format(_T("add new folder \"%s\"\n"), strName.GetString());
+		CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+	}
+
+	return hAddItem;
 }
 
 //---------------------------------------------------
@@ -984,7 +968,7 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 
 	time(&data.m_timeCreate);
 	time(&data.m_timeEdit);
-	list<STRING_DATA>::iterator it = m_MyStringList.insert(m_MyStringList.end(),data);//リストに追加
+	std::list<STRING_DATA>::iterator it = m_MyStringList.insert(m_MyStringList.end(),data);//リストに追加
 
 	//ツリーデータ作成
 	TV_INSERTSTRUCT TreeCtrlItem;
@@ -1007,8 +991,8 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 
 	//ツリーに追加
 	hTreeItem = InsertItem(&TreeCtrlItem);
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
+
+	if(theApp.m_ini.m_bDebug) {
 		CString strText;
 		strText.Format(_T("add data %s %s %d\n"),data.m_strTitle.GetString(),data.m_strData.GetString(),data.m_cKind);
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1017,10 +1001,79 @@ HTREEITEM CCharu3Tree::addData(HTREEITEM hTreeItem,STRING_DATA data,bool isNewID
 }
 
 //---------------------------------------------------
+//関数名	editData(HTREEITEM hTreeItem,STRING_DATA Data)
+//機能		データを変更する
+//---------------------------------------------------
+void CCharu3Tree::editData(HTREEITEM hTreeItem, STRING_DATA Data)
+{
+	time(&Data.m_timeEdit);
+	STRING_DATA* dataPtr = getDataPtr(hTreeItem);
+	*dataPtr = Data;
+	int nIcon = getIconNumber(Data.m_cKind, Data.m_cIcon);
+	SetItemImage(hTreeItem, nIcon, nIcon + 1);
+	SetItemText(hTreeItem, Data.m_strTitle);
+
+	if (theApp.m_ini.m_bDebug) {
+		CString strText;
+		strText.Format(_T("edit data \"%s\" %d\n"), dataPtr->m_strTitle.GetString(), dataPtr->m_cKind);
+		CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+	}
+}
+
+//---------------------------------------------------
+//関数名	editData(HTREEITEM hTreeItem,STRING_DATA Data)
+//機能		データを変更する
+//---------------------------------------------------
+void CCharu3Tree::editData2(HTREEITEM hTreeItem)
+{
+	STRING_DATA* pData = getDataPtr(hTreeItem);
+	time(&pData->m_timeEdit);
+	int nIcon = getIconNumber(pData->m_cKind, pData->m_cIcon);
+	SetItemImage(hTreeItem, nIcon, nIcon + 1);
+	SetItemText(hTreeItem, pData->m_strTitle);
+
+	if (theApp.m_ini.m_bDebug) {
+		CString strText;
+		strText.Format(_T("edit data \"%s\" %d\n"), pData->m_strTitle.GetString(), pData->m_cKind);
+		CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+	}
+}
+
+//---------------------------------------------------
+//関数名	deleteData(HTREEITEM hTreeItem)
+//機能		データを削除する
+//---------------------------------------------------
+void CCharu3Tree::deleteData(HTREEITEM hTreeItem)
+{
+	//データのアドレスを設定
+	STRING_DATA* dataPtr = getDataPtr(hTreeItem);
+
+	if (theApp.m_ini.m_bDebug) {
+		CString strText;
+		strText.Format(_T("delete data \"%s\" %d\n"), dataPtr->m_strTitle.GetString(), dataPtr->m_cKind);
+		CGeneral::writeLog(theApp.m_ini.m_strDebugLog, strText, _ME_NAME_, __LINE__);
+	}
+
+	std::list<STRING_DATA>::iterator it = findData(dataPtr);
+	if (it->m_cKind & KIND_FOLDER_ALL) {
+		//フォルダを再帰で削除
+		clearFolder(GetChildItem(hTreeItem));//フォルダの子を削除
+		m_MyStringList.erase(it);
+		checkOut(hTreeItem);
+		DeleteItem(hTreeItem);
+	}
+	else {
+		m_MyStringList.erase(it);
+		checkOut(hTreeItem);
+		this->DeleteItem(hTreeItem);
+	}
+}
+
+//---------------------------------------------------
 //関数名	tree2List(HTREEITEM hStartItem,list<STRING_DATA> *list)
 //機能		ツリー構造体からリストを作成
 //---------------------------------------------------
-void CCharu3Tree::tree2List(HTREEITEM hStartItem,list<STRING_DATA> *tmplist,bool isAll/*=false*/)
+void CCharu3Tree::tree2List(HTREEITEM hStartItem, std::list<STRING_DATA> *tmplist, bool isAll /* = false */)
 {
 	if(!hStartItem) return;
 	STRING_DATA data;
@@ -1038,7 +1091,7 @@ void CCharu3Tree::tree2List(HTREEITEM hStartItem,list<STRING_DATA> *tmplist,bool
 //関数名	data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem,list<STRING_DATA>::iterator *pit)
 //機能		ツリー構造体にデータを格納
 //---------------------------------------------------
-void CCharu3Tree::data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem,list<STRING_DATA>::iterator it)
+void CCharu3Tree::data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem, std::list<STRING_DATA>::iterator it)
 {
 	//ツリーデータ作成
 	pTreeCtrlItem->hInsertAfter = TVI_LAST;
@@ -1061,9 +1114,9 @@ void CCharu3Tree::data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem,list<STRING_DAT
 //関数名	findData(STRING_DATA *ptr)
 //機能		データリストからptrが指している要素を探す
 //---------------------------------------------------
-list<STRING_DATA>::iterator CCharu3Tree::findData(STRING_DATA* dataPtr)
+std::list<STRING_DATA>::iterator CCharu3Tree::findData(STRING_DATA* dataPtr)
 {
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	for (it = m_MyStringList.begin(); it != m_MyStringList.end(); it++) {
 		if (&*it == dataPtr) {
 			break;
@@ -1100,38 +1153,6 @@ int CCharu3Tree::getIconNumber(char cKind,char cIcon)
 	return nRet;
 }
 
-
-//---------------------------------------------------
-//関数名	deleteData(HTREEITEM hTreeItem)
-//機能		データを削除する
-//---------------------------------------------------
-void CCharu3Tree::deleteData(HTREEITEM hTreeItem)
-{
-	//データのアドレスを設定
-	STRING_DATA *dataPtr = getDataPtr(hTreeItem);
-
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
-		CString strText;
-		strText.Format(_T("delete data \"%s\" %d\n"),dataPtr->m_strTitle.GetString(),dataPtr->m_cKind);
-		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-	}
-
-	list<STRING_DATA>::iterator it = findData(dataPtr);
-	if (it->m_cKind & KIND_FOLDER_ALL) {
-		//フォルダを再帰で削除
-		clearFolder(GetChildItem(hTreeItem));//フォルダの子を削除
-		m_MyStringList.erase(it);
-		checkOut(hTreeItem);
-		DeleteItem(hTreeItem);
-	}
-	else {
-		m_MyStringList.erase(it);
-		checkOut(hTreeItem);
-		this->DeleteItem(hTreeItem);
-	}
-}
-
 //---------------------------------------------------
 //関数名	void clearFolder(HTREEITEM hItem)
 //機能		指定データ以下を削除する
@@ -1143,7 +1164,7 @@ void CCharu3Tree::clearFolder(HTREEITEM hItem)
 			clearFolder(GetChildItem(hItem));//再帰で削除
 		}
 		STRING_DATA *dataPtr = getDataPtr(hItem);
-		list<STRING_DATA>::iterator it = findData(dataPtr);
+		std::list<STRING_DATA>::iterator it = findData(dataPtr);
 		m_MyStringList.erase(it);
 		HTREEITEM hNextItem = GetNextItem(hItem, TVGN_NEXT);
 		checkOut(hItem);
@@ -1175,10 +1196,10 @@ void CCharu3Tree::closeFolder(HTREEITEM hStartItem)
 //関数名	checkFolder(HTREEITEM hStartItem,bool isCheck)
 //機能		指定データ以下にチェックを入れる
 //---------------------------------------------------
-void CCharu3Tree::checkFolder(HTREEITEM hStartItem,bool isCheck,list<HTREEITEM> *listItem)
+void CCharu3Tree::checkFolder(HTREEITEM hStartItem, bool isCheck, std::list<HTREEITEM> *listItem)
 {
 	if(!hStartItem) return;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	SetCheck(hStartItem,isCheck);
 	HTREEITEM hItem = GetChildItem(hStartItem);
 	do {
@@ -1190,7 +1211,7 @@ void CCharu3Tree::checkFolder(HTREEITEM hStartItem,bool isCheck,list<HTREEITEM> 
 			listItem->insert(listItem->end(),hItem);
 		}
 		else {//リストから削除
-			list<HTREEITEM>::iterator it;
+			std::list<HTREEITEM>::iterator it;
 			for(it = listItem->begin(); it != listItem->end(); it++) {
 				if(*it == hItem) {
 					listItem->erase(it);
@@ -1203,19 +1224,19 @@ void CCharu3Tree::checkFolder(HTREEITEM hStartItem,bool isCheck,list<HTREEITEM> 
 }
 
 //---------------------------------------------------
-//関数名	void clearOneTime(HTREEITEM hStartItem)
-//機能		一時項目を削除する
+//関数名	void cleanupOneTimeItems(HTREEITEM hStartItem)
+//機能		一時項目を消す
 //---------------------------------------------------
-void CCharu3Tree::clearOneTime(HTREEITEM hStartItem,int nKind/*KIND_LOCKだと削除でなくロック処理*/)
+void CCharu3Tree::cleanupOneTimeItems(HTREEITEM hStartItem, int nKind /*KIND_LOCKだと削除でなくロック処理*/)
 {
 	if(!hStartItem) return;
-	HTREEITEM hItem = hStartItem,hPrevItem;
+	HTREEITEM hItem = hStartItem, hPrevItem;
 	do {
 		if(ItemHasChildren(hItem)) {
-			clearOneTime(GetChildItem(hItem),nKind);//再帰で処理
+			cleanupOneTimeItems(GetChildItem(hItem), nKind);
 		}
 		STRING_DATA *dataPtr = getDataPtr(hItem);
-		list<STRING_DATA>::iterator it = findData(dataPtr);
+		std::list<STRING_DATA>::iterator it = findData(dataPtr);
 		hPrevItem = hItem;
 		hItem = GetNextItem(hItem,TVGN_NEXT);
 		if(it->m_cKind & KIND_ONETIME) {
@@ -1233,29 +1254,6 @@ void CCharu3Tree::clearOneTime(HTREEITEM hStartItem,int nKind/*KIND_LOCKだと削除
 	}while(hItem);
 }
 
-
-//---------------------------------------------------
-//関数名	editData(HTREEITEM hTreeItem,STRING_DATA Data)
-//機能		データを変更する
-//---------------------------------------------------
-void CCharu3Tree::editData(HTREEITEM hTreeItem,STRING_DATA Data)
-{
-	//データのアドレスを設定
-	STRING_DATA *dataPtr = getDataPtr(hTreeItem);
-	time(&Data.m_timeEdit);
-
-	*dataPtr = Data;
-	int nIcon = getIconNumber(Data.m_cKind,Data.m_cIcon);
-
-	SetItemImage(hTreeItem,nIcon,nIcon + 1);
-	SetItemText(hTreeItem,Data.m_strTitle);
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
-		CString strText;
-		strText.Format(_T("edit data \"%s\" %d\n"),dataPtr->m_strTitle.GetString(),dataPtr->m_cKind);
-		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-	}
-}
 void CCharu3Tree::changeIcon(HTREEITEM hTreeItem,int nID) 
 {
 	STRING_DATA data = getData(hTreeItem);
@@ -1278,16 +1276,16 @@ STRING_DATA *CCharu3Tree::getDataPtr(HTREEITEM hTreeItem)
 }
 
 //---------------------------------------------------
-//関数名	serchItem()
+//関数名	searchItem()
 //機能		指定のアイテムを検索し、選択する
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem)
+HTREEITEM CCharu3Tree::searchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem)
 {
-	vector<CString> m_keyVector;//検索キー
-	vector<CString>::iterator keyIT;
+	std::vector<CString> m_keyVector;//検索キー
+	std::vector<CString>::iterator keyIT;
 	int nEnd;
-	bool isTitleFound = false,isDataFound = false,isFound = false;
-	STRING_DATA data,parentData;
+	bool foundInName = false, isDataFound = false;
+	STRING_DATA parentData;
 	HTREEITEM hTreeItem;
 
 	//余分を切り取り
@@ -1298,9 +1296,11 @@ HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM h
 	CString strRes;
 	strRes.LoadString(APP_INF_2BYTESPACE);
 	strKey.Replace(strRes,_T(" "));
-	while(1) {
+	while (true) {
 		nEnd = strKey.Find(_T(" "));//空白で区切る
-		if(nEnd == -1) break;
+		if (nEnd == -1) {
+			break;
+		}
 		m_keyVector.insert(m_keyVector.end(),strKey.Left(nEnd));//配列に追加
 		strKey = strKey.Right(strKey.GetLength() - nEnd);//追加した文を切り取り
 		strKey.TrimLeft();
@@ -1311,55 +1311,55 @@ HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM h
 	if(!hStartItem) {
 		hStartItem = GetRootItem();
 	}
-	hTreeItem = getTrueNextItem(hStartItem);
-	while(hTreeItem != hStartItem) {
-		data = getData(hTreeItem);
+	bool found = false;
+	for (hTreeItem = getTrueNextItem(hStartItem); hTreeItem && hTreeItem != hStartItem; hTreeItem = getTrueNextItem(hTreeItem)) {
+		STRING_DATA data = getData(hTreeItem);
 		data.m_strData = data.m_strData + data.m_strMacro;//マクロも検索対象にする
-		if(!hTreeItem)	break;
-		//タイトル検索
-		if(nKind == SERCH_KIND_TITLE || nKind == SERCH_KIND_ALL) {
-			if(nLogic == SERCH_LOGIC_AND)	isTitleFound = true;
-			else							isTitleFound = false;
-			for(keyIT = m_keyVector.begin(); keyIT != m_keyVector.end(); keyIT++) {
+		//名前
+		if (nKind & SEARCH_TARGET_NAME) {
+			found = (nLogic == SEARCH_LOGIC_AND);
+			for (keyIT = m_keyVector.begin(); keyIT != m_keyVector.end(); keyIT++) {
+				bool matched = (data.m_strTitle.Find(*keyIT) != -1);
 				//AND検索
-				if(data.m_strTitle.Find(*keyIT) == -1 && nLogic == SERCH_LOGIC_AND) {
-					isTitleFound = false;
+				if (!matched && nLogic == SEARCH_LOGIC_AND) {
+					found = false;
 					break;
 				}
 				//OR検索
-				else if(data.m_strTitle.Find(*keyIT) != -1 && nLogic == SERCH_LOGIC_OR) {
-					isTitleFound = true;
+				if (matched && nLogic == SEARCH_LOGIC_OR) {
+					found = true;
 					break;
 				}
 			}
-			isFound = isTitleFound;
-			if(isFound) break;
+			if (found) {
+				break;
+			}
 		}
-		//データ検索
-		if((nKind == SERCH_KIND_TEXT || nKind == SERCH_KIND_ALL) && !isFound) {
-			if(nLogic == SERCH_LOGIC_AND)	isDataFound = true;
-			else							isDataFound = false;
-			for(keyIT = m_keyVector.begin(); keyIT != m_keyVector.end(); keyIT++) {
-				//AND検索
-				if(data.m_strData.Find(*keyIT) == -1 && nLogic == SERCH_LOGIC_AND) {
-					isDataFound = false;
+		//データ
+		if(nKind & SEARCH_TARGET_DATA) {
+			found = (nLogic == SEARCH_LOGIC_AND);
+			for (keyIT = m_keyVector.begin(); keyIT != m_keyVector.end(); keyIT++) {
+				bool matched = (data.m_strData.Find(*keyIT) != -1);
+				if (!matched && nLogic == SEARCH_LOGIC_AND) {
+					found = false;
 					break;
 				}
-				//OR検索
-				else if(data.m_strData.Find(*keyIT) != -1 && nLogic == SERCH_LOGIC_OR) {
-					isDataFound = true;
+				if(matched && nLogic == SEARCH_LOGIC_OR) {
+					found = true;
 					break;
 				}
 			}
-			isFound = isDataFound;
-			if(isFound) break;
+			if (found) {
+				break;
+			}
 		}
-		hTreeItem = getTrueNextItem(hTreeItem);
 	}
-	if(isFound && hTreeItem) {
+	if (found && hTreeItem) {
 		SelectItem(hTreeItem);//見つかったら選択
 	}
-	else hTreeItem = nullptr;
+	else {
+		hTreeItem = nullptr;
+	}
 	return hTreeItem;
 }
 
@@ -1367,18 +1367,18 @@ HTREEITEM CCharu3Tree::serchItem(int nKind,int nLogic,CString strKey,HTREEITEM h
 //関数名	HTREEITEM serchTitle(HTREEITEM hStartItem,CString strKey)
 //機能		タイトル検索(前方一致)
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::serchTitle(HTREEITEM hStartItem,CString strKey,int isLower)
+HTREEITEM CCharu3Tree::searchTitle(HTREEITEM hStartItem,CString strKey, bool caseInsensitive)
 {
 	HTREEITEM hRetItem = nullptr;
 
 	if(!hStartItem) return nullptr;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	STRING_DATA data;
 	HTREEITEM hItem = hStartItem;
 	hItem = getTrueNextItem(hItem);
 	while(hItem && hStartItem != hItem) {
 		data = getData(hItem);
-		if(isLower) data.m_strTitle.MakeLower();
+		if (caseInsensitive) data.m_strTitle.MakeLower();
 		if(data.m_strTitle.Find(strKey) == 0) {//発見
 			hRetItem = hItem;
 			break;
@@ -1389,35 +1389,36 @@ HTREEITEM CCharu3Tree::serchTitle(HTREEITEM hStartItem,CString strKey,int isLowe
 
 	return hRetItem;
 }
+
 //---------------------------------------------------
 //関数名	getTrueNextItem(HTREEITEM hTreeItem)
 //機能		次のアイテムを取得(色々処理してます)
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::getTrueNextItem(HTREEITEM hTreeItem)
 {
-	HTREEITEM hRetTreeItem,hParentItem;
+	HTREEITEM hRetTreeItem, hParentItem;
 
-	if(!hTreeItem) {		//ルートを設定
+	if (!hTreeItem) {		//ルートを設定
 		hRetTreeItem = GetRootItem();
 	}
-	else if(!GetChildItem(hTreeItem)) {//子供がいるか調べる
+	else if (!GetChildItem(hTreeItem)) {//子供がいるか調べる
 		hRetTreeItem = GetNextSiblingItem(hTreeItem);//兄弟ハンドルを取得
-		if(!hRetTreeItem) {//兄弟がもういない時は親の兄弟
+		if (!hRetTreeItem) {//兄弟がもういない時は親の兄弟
 			hParentItem = hTreeItem;
 			do {
-				hParentItem = GetParentItem(hParentItem );
-				if(!hParentItem) {
+				hParentItem = GetParentItem(hParentItem);
+				if (!hParentItem) {
 					hRetTreeItem = nullptr;
 					break;
 				}
 				hRetTreeItem = GetNextSiblingItem(hParentItem);//兄弟ハンドルを取得
-			}while(hParentItem != GetRootItem() && !hRetTreeItem);
+			} while (hParentItem != GetRootItem() && !hRetTreeItem);
 		}
 	}
 	else {
 		hRetTreeItem = GetChildItem(hTreeItem);//子供のハンドルを取得
 	}
-	if(!hRetTreeItem){
+	if (!hRetTreeItem) {
 		hRetTreeItem = GetRootItem();//再ループで必要なので戻る
 	}
 	return hRetTreeItem;
@@ -1549,8 +1550,7 @@ HTREEITEM CCharu3Tree::getOneTimeText(int nType)
 		if(hTreeItem) {
 			data = getData(hTreeItem);
 			if(data.m_cKind & KIND_ONETIME) {
-				//デバッグログ処理
-				if(theApp.m_ini.m_nDebug) {
+				if(theApp.m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("getOneTimeText \"%s\" %s %d\n"),data.m_strTitle.GetString(),data.m_strData.GetString(),data.m_cKind);
 					CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1590,8 +1590,8 @@ int CCharu3Tree::getDataOption(CString strData,CString strKind)
 			else nRet = _ttoi(strBuff.GetBuffer(strBuff.GetLength()));
 		}
 		else nRet = -1;
-		//デバッグログ処理
-		if(theApp.m_ini.m_nDebug) {
+
+		if(theApp.m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("getDataOption \"%s\" %d\n"),strKind.GetString(),nRet);
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1624,8 +1624,8 @@ DWORD CCharu3Tree::getDataOptionHex(CString strData,CString strKind)
 			strBuff.TrimLeft();
 			_stscanf_s(strBuff,_T("%x"),&dwRet);
 		}
-		//デバッグログ処理
-		if(theApp.m_ini.m_nDebug) {
+
+		if(theApp.m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("getDataOptionHex \"%s\" 0x%x\n"),strKind.GetString(),dwRet);
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1658,8 +1658,8 @@ CString CCharu3Tree::getDataOptionStr(CString strData,CString strKind)
 			strBuff.TrimLeft();
 			strRet = strBuff;
 		}
-		//デバッグログ処理
-		if(theApp.m_ini.m_nDebug) {
+
+		if(theApp.m_ini.m_bDebug) {
 			CString strText;
 			strText.Format(_T("getDataOptionHex \"%s\" %s\n"),strKind.GetString(),strRet);
 			CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1679,8 +1679,8 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 
 	STRING_DATA parentData;
 	HTREEITEM hTreeItem,hStart = nullptr;
-	//デバッグログ処理
-	if(theApp.m_ini.m_nDebug) {
+
+	if(theApp.m_ini.m_bDebug) {
 		CString strText;
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,_T("addDataToRecordFolder\n"),_ME_NAME_,__LINE__);
 		strText.Format(_T("hRootItem:%d TreeSize:%d\n"),GetRootItem(),nSize);
@@ -1695,12 +1695,13 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 			nDoDuplication = getDataOption(parentData.m_strMacro,_T("duplicationcheck"));
 			if((nDoDuplication && strClipBkup != data.m_strData) || !nDoDuplication) {
 				if(*m_nRecNumber == nNumber)	nNumber++;
-				//デバッグログ処理
-				if(theApp.m_ini.m_nDebug) {
+
+				if(theApp.m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("number:%d handle:%d title:%s ID:%d\n"),i,hTreeItem,parentData.m_strTitle.GetString(),parentData.m_nMyID);
 					CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 				}
+
 				nIsLock = getDataOption(parentData.m_strMacro,_T("lock"));//履歴種別を取得
 				if(!nIsLock)	data.m_cKind = KIND_ONETIME;
 				else			data.m_cKind = KIND_LOCK;
@@ -1729,8 +1730,8 @@ void CCharu3Tree::addDataToRecordFolder(STRING_DATA data,CString strClipBkup)
 				if(nRirekiCount > 0) {
 					classHistoryFolder(hTreeItem,nRirekiCount);
 				}
-				//デバッグログ処理
-				if(theApp.m_ini.m_nDebug) {
+
+				if(theApp.m_ini.m_bDebug) {
 					CString strText;
 					strText.Format(_T("addDataToRecordFolder \"%s\" %s %d\n"),data.m_strTitle.GetString(),data.m_strData.GetString(),nNumber);
 					CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
@@ -1762,10 +1763,7 @@ void CCharu3Tree::classHistoryFolder(HTREEITEM hTreeItem,int nRirekiCount)
 				hFirstFolder = getLastChild(hTreeItem);
 			}
 			STRING_DATA data;
-			initStringData(&data);
-
 			data.m_cKind = KIND_FOLDER;
-			data.m_strData = "";
 			data.m_strTitle.LoadString(APP_INF_CLASS_HISTORY);
 			addData(hFirstFolder,data);//階層履歴フォルダを作成
 			hFirstFolder = getFirstFolder(hTreeItem);//改めてフォルダ位置を取得
@@ -1830,7 +1828,7 @@ HTREEITEM CCharu3Tree::getFirstFolder(HTREEITEM hStartItem)
 HTREEITEM CCharu3Tree::getLastChild(HTREEITEM hStartItem)
 {
 	if(!hStartItem) return nullptr;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	HTREEITEM hItem = hStartItem, hPrevItem = nullptr;
 	hItem = GetChildItem(hItem);
 	do {
@@ -1873,7 +1871,7 @@ int CCharu3Tree::getChildCount(HTREEITEM hTreeItem,bool isBrotherOnly)
 	int nChildren = 0;
 	if(hTreeItem) hTreeItem = GetChildItem(hTreeItem);
 	if(!hTreeItem) return nChildren;
-	list<STRING_DATA>::iterator it;
+	std::list<STRING_DATA>::iterator it;
 	do {
 		STRING_DATA* dataPtr = getDataPtr(hTreeItem);
 		if(!isBrotherOnly && ItemHasChildren(hTreeItem)) {
@@ -1930,10 +1928,10 @@ HTREEITEM CCharu3Tree::moveFolderTop(HTREEITEM hTreeItem)
 }
 
 //---------------------------------------------------
-//関数名	removeCheck()
+//関数名	ClearChecks()
 //機能		チェックを外す
 //---------------------------------------------------
-void CCharu3Tree::removeCheck()
+void CCharu3Tree::ClearChecks()
 {
 	int nSize = m_MyStringList.size(),i;
 	HTREEITEM hTreeItem;
@@ -1964,7 +1962,7 @@ void CCharu3Tree::checkItem(HTREEITEM hItem)
 			m_ltCheckItems.insert(m_ltCheckItems.end(),hItem);
 		}
 		else {//リストから削除
-			list<HTREEITEM>::iterator it;
+			std::list<HTREEITEM>::iterator it;
 			for(it = m_ltCheckItems.begin(); it != m_ltCheckItems.end(); it++) {
 				if(*it == hItem) {
 					m_ltCheckItems.erase(it);
@@ -1986,7 +1984,7 @@ void CCharu3Tree::checkOut(HTREEITEM hItem)
 	}
 	else if(hItem) {
 		SetCheck(hItem,false);
-		list<HTREEITEM>::iterator it;
+		std::list<HTREEITEM>::iterator it;
 		for(it = m_ltCheckItems.begin(); it != m_ltCheckItems.end(); it++) {
 			if(*it == hItem) {
 				m_ltCheckItems.erase(it);
@@ -2259,55 +2257,25 @@ void CCharu3Tree::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos)
 //---------------------------------------------------
 void CCharu3Tree::setScrollBar()
 {
-	//スクロールバーの状態を変える時だけ動くようにしとくように
+	SCROLLINFO si;
 
-	
-	int nPageH,nPageV;
-	SCROLLINFO infoHorz,infoVert;
-	static SCROLLINFO stInfoHorz,stInfoVert;
-	infoHorz.cbSize = sizeof(SCROLLINFO);
-	infoVert.cbSize = sizeof(SCROLLINFO);
-	if(theApp.m_ini.m_visual.m_nScrollbar == SB_BOTH) {//両方付ける
-		this->GetScrollInfo(SB_HORZ,&infoHorz,SIF_ALL);
-		nPageH = infoHorz.nPage;
-		this->GetScrollInfo(SB_VERT,&infoVert,SIF_ALL);
-		nPageV = infoVert.nPage;
-
-//		if(memcmp(&infoHorz,&stInfoHorz,sizeof(SCROLLINFO)) != 0 || memcmp(&infoVert,&stInfoVert,sizeof(SCROLLINFO)) != 0) {
-			if(nPageH > 1 && nPageV > 1) this->ShowScrollBar(SB_BOTH,TRUE);
-			if(nPageH > 1)	this->ShowScrollBar(SB_HORZ,TRUE);
-			if(nPageV > 1)	this->ShowScrollBar(SB_VERT,TRUE);
-
-			stInfoHorz = infoHorz;
-			stInfoVert = infoVert;
-//		}
+	bool showV = theApp.m_ini.m_visual.m_bScrollbarVertical;
+	if (showV) {
+		ZeroMemory(&si, sizeof(si));
+		si.cbSize = sizeof si;
+		si.fMask = SIF_PAGE;
+		showV = this->GetScrollInfo(SB_VERT, &si) && si.nPage > 1;
 	}
-	//水平だけ
-	else if(theApp.m_ini.m_visual.m_nScrollbar == SB_HORZ) {
-		this->GetScrollInfo(SB_HORZ,&infoHorz,SIF_ALL);
-		nPageH = infoHorz.nPage;
-//		if(memcmp(&infoHorz,&stInfoHorz,sizeof(SCROLLINFO)) != 0) {
-			if(nPageH > 1)	this->ShowScrollBar(SB_HORZ,TRUE);
-			this->ShowScrollBar(SB_VERT,FALSE);
+	ShowScrollBar(SB_VERT, showV);
 
-			stInfoHorz = infoHorz;
-//		}
+	bool showH = theApp.m_ini.m_visual.m_bScrollbarHorizontal;
+	if (showH) {
+		ZeroMemory(&si, sizeof(si));
+		si.cbSize = sizeof si;
+		si.fMask = SIF_PAGE;
+		showH = this->GetScrollInfo(SB_HORZ, &si) && si.nPage > 1;
 	}
-	//垂直だけ
-	else if(theApp.m_ini.m_visual.m_nScrollbar == SB_VERT) {
-		this->GetScrollInfo(SB_VERT,&infoVert,SIF_ALL);
-		nPageV = infoVert.nPage;
-//		if(memcmp(&infoVert,&stInfoVert,sizeof(SCROLLINFO)) != 0) {
-			if(nPageV > 1)	this->ShowScrollBar(SB_VERT,TRUE);
-			this->ShowScrollBar(SB_HORZ,FALSE);
-
-			stInfoVert = infoVert;
-//		}
-	}
-	else{
-		this->ShowScrollBar(SB_BOTH,FALSE);
-	}
-
+	ShowScrollBar(SB_HORZ, showH);
 }
 
 //---------------------------------------------------
@@ -2316,12 +2284,10 @@ void CCharu3Tree::setScrollBar()
 //---------------------------------------------------
 BOOL CCharu3Tree::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 {
-	if(theApp.m_ini.m_visual.m_nScrollbar != SB_BOTH && theApp.m_ini.m_visual.m_nScrollbar != SB_VERT) {
-		if(zDelta < 0)
-			SendMessage(WM_KEYDOWN,VK_DOWN,0);
-		else
-			SendMessage(WM_KEYDOWN,VK_UP,0);
-	}
+	if(zDelta < 0)
+		SendMessage(WM_KEYDOWN,VK_DOWN,0);
+	else
+		SendMessage(WM_KEYDOWN,VK_UP,0);
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
 }
 

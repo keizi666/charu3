@@ -10,6 +10,10 @@
 #pragma once
 #endif // _MSC_VER > 1000
 // OptEtc.h : ヘッダー ファイル
+#include "resource.h"
+#include "MyHotkeyCtrl.h"
+
+#include <afxwin.h>
 
 //---------------------------------------------------
 // COptEtc ダイアログ
@@ -22,16 +26,20 @@ public:
 
 // ダイアログ データ
 	//{{AFX_DATA(COptEtc)
-	enum { IDD = IDD_OPT_ETC };
+	enum { IDD = IDD_PREF_01_GENERAL };
+	CMyHotkeyCtrl	m_ctrlFifoKey;
+	CMyHotkeyCtrl	m_ctrlPopupKey;
 	//}}AFX_DATA
 
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(COptEtc)
-	public:
+public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
+	virtual BOOL DestroyWindow();
+
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 	//}}AFX_VIRTUAL
 
@@ -40,9 +48,18 @@ protected:
 
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(COptEtc)
+	virtual BOOL OnInitDialog();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void hotkeyEnablePOP();
+	afx_msg void hotkeyDisablePOP();
+	afx_msg void hotkeyEnableFIFO();
+	afx_msg void hotkeyDisableFIFO();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	int m_nPutBackClipboard;
+	int m_nShowClipboardInNotifyIconTooltip;
 };
 
 //{{AFX_INSERT_LOCATION}}
