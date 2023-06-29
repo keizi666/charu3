@@ -89,17 +89,8 @@ void CCharu3Tree::setPlugin(CString strPath)
 
 					if (pInitDLL && pEndDLL && pReadData && pWriteData && pGetFormatName && pGetExtension) {
 						TCHAR tcFormat[256], tcExt[256];
-						// NOTE: We need to pass the size of the buffer minus
-						// one character as the second argument.
-						// This is because the existing plugins are badly
-						// implemented (or the plugin specification is badly
-						// designed) and will copy the string to be copied if
-						// the size of the string to be copied is less than
-						// or EQUAL TO the size of the buffer. They do not
-						// take into account the extra storage for the string
-						// terminator character.
-						pGetExtension(tcExt, sizeof tcExt - sizeof(TCHAR));
-						pGetFormatName(tcFormat, sizeof tcFormat - sizeof(TCHAR));
+						pGetExtension(tcExt, sizeof tcExt);
+						pGetFormatName(tcFormat, sizeof tcFormat);
 						RW_PLUGIN plugin(filefind.GetFilePath(), tcFormat, tcExt);
 						m_rwPlugin.push_back(plugin);
 
@@ -723,16 +714,7 @@ bool CCharu3Tree::convertMacroPlugin(STRING_DATA* SourceData, CString* strRet, C
 
 		if(pConvertMacro) {
 			int nSize = SourceData->m_strData.GetLength()*10+10240;
-			// NOTE: The buffer needs to be one character larger
-			// than the buffer size to give the plugin.
-			// This is because the existing plugins are badly
-			// implemented (or the plugin specification is badly
-			// designed) and will copy the string to be copied if
-			// the size of the string to be copied is less than
-			// or EQUAL TO the size of the buffer.They do not
-			// take into account the extra storage for the string
-			// terminator character.
-			szRet = new TCHAR[nSize + 1];
+			szRet = new TCHAR[nSize];
 			if(szRet) {
 				isRet = pConvertMacro((TCHAR*)LPCTSTR(SourceData->m_strData),szRet,nSize,
 					(TCHAR*)LPCTSTR(strSelect),(TCHAR*)LPCTSTR(strClip));

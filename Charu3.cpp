@@ -267,8 +267,6 @@ bool CCharu3App::init()
 		CString strText;
 		strText.Format(_T("start \"%s\"\n"),ABOUT_NAME);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
-		strText.Format(_T("ini file name \"%s\"\n"), m_ini.m_strIniFile.GetString());
-		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
 	m_pTree->setPlugin(m_ini.m_strRwPluginFolder);

@@ -50,7 +50,6 @@ CInit::CInit()
 	, m_nSearchTarget(0)
 	, m_nSearchLogic(0)
 	, m_bReadOnly(false)
-	, m_strIniFile(_T(""))
 	, m_strStateFile(_T(""))
 	, m_strSettingsFile(_T(""))
 	, m_hHookDLL(nullptr)
@@ -68,7 +67,9 @@ CInit::CInit()
 //---------------------------------------------------
 CInit::~CInit()
 {
-	if(m_hHookDLL) unHook();
+	if (m_hHookDLL) {
+		unHook();
+	}
 }
 
 //---------------------------------------------------
@@ -85,7 +86,7 @@ void CInit::initialize()
 
 	// user name
 	DWORD dwSize = _countof(buf);
-	if(::GetUserName(buf, &dwSize)) {
+	if (::GetUserName(buf, &dwSize)) {
 		m_strUserName = CString(buf);
 	}
 	else {
@@ -108,7 +109,6 @@ void CInit::initialize()
 	}
 
 	// file paths for state, settings and log
-	m_strIniFile = m_strAppDataPath + "\\" + INI_FILE;
 	m_strStateFile = m_strAppDataPath + "\\" + STATE_FILE;
 	m_strSettingsFile = m_strAppDataPath + "\\" + SETTINGS_FILE;
 	m_strDebugLog = m_strAppDataPath + "\\" + DEBUGLOG_FILE;
@@ -116,182 +116,6 @@ void CInit::initialize()
 	// read state
 	try { m_state = nlohmann::json::parse(std::ifstream(m_strStateFile)); }
 	catch (...) {}
-
-	// read settings
-	try { m_settings = nlohmann::json::parse(std::ifstream(m_strSettingsFile)); }
-	catch (...) {}
-
-	//if(m_strIniFile == "") return;
-
-	//int i;
-	////int nKetsetCount;
-	//CString strKeyBuff,StringBuff;
-	//CString strRes;
-	//CHANGE_KEY key;
-	//TCHAR strBuff[1024],*szName,*szKind,*szMacro;
-
-	//一般設定
-	//m_etc.m_nActiveTime = setIniFileInt(REGKEY_ETC,_T("ActiveTime"),400);	//監視タイマー
-	//m_etc.m_nCopyRetryTimes = setIniFileInt(REGKEY_ETC,_T("CopyWaitCnt"),5);
-	//m_etc.m_nPasteRetryTimes = setIniFileInt(REGKEY_ETC,_T("PasteWaitCnt"),10);
-
-	//m_pop.m_nDCKeyPopTime = setIniFileInt(REGKEY_POPUP,_T("DCPopupKeyTime"),250);
-	//m_pop.m_nDCKeyFifoTime = setIniFileInt(REGKEY_POPUP,_T("DCFifoKeyTime"),250);
-
-	//m_nToolTipTime = setIniFileInt(REGKEY_ENV, _T("ToolTipTime"), 30000);
-	//m_nToolTipDelay = setIniFileInt(REGKEY_ENV, _T("ToolTipDelay"), 300);
-
-	//履歴FIFO設定
-	//m_fifo.m_nFifo = setIniFileInt(REGKEY_FIFO,_T("FifoSW"),1);			//履歴動作中はCtrl+Vで貼り付ける文字列を先入れ先出しにする 0NON 1FIFO 2RIFO
-	//m_fifo.m_strCopySound = setIniFileString(REGKEY_FIFO,_T("WaveName"),_T("pu.wav"));
-	//m_fifo.m_nOffClear = setIniFileInt(REGKEY_FIFO,_T("OffClear"),0);		//履歴OFF時に一時項目をクリア
-	//m_fifo.m_nAllClearOff = setIniFileInt(REGKEY_FIFO,_T("AllClearOff"),1);//一時履歴が空になったら履歴モードをOFFにする
-	//m_fifo.m_nDuplication = setIniFileInt(REGKEY_FIFO,_T("Duplication"),1);
-
-	////仮想キー設定
-	//WINDOWS_MESSAGE winMessage;
-	//// m_key.m_defKeySet.m_nMessage = setIniFileInt(REGKEY_KEY,_T("isMessage"),0); // obsolete
-	//m_key.m_defKeySet.m_nMessage = 0; //メッセージ方式
-	//m_key.m_defKeySet.m_uMod_Paste = setIniFileInt(REGKEY_KEY,_T("ModPaste"),MOD_CONTROL);	//貼り付け特殊キー
-	//m_key.m_defKeySet.m_uVK_Paste  = setIniFileInt(REGKEY_KEY,_T("VKPaste"),'V');			//貼り付けキー
-	//m_key.m_defKeySet.m_uMod_Copy  = setIniFileInt(REGKEY_KEY,_T("ModCopy"),MOD_CONTROL);	//コピー特殊キー
-	//m_key.m_defKeySet.m_uVK_Copy   = setIniFileInt(REGKEY_KEY,_T("VkCopy"),'C');			//コピーキー
-	//m_key.m_defKeySet.m_nCopyWait  = setIniFileInt(REGKEY_KEY,_T("CopyWait"),50);		//コピー待ち時間
-	//m_key.m_defKeySet.m_nPasteWait = setIniFileInt(REGKEY_KEY,_T("PasteWait"),50);		//ペースト待ち時間
-	////メッセージ
-	//strKeyBuff = setIniFileString(REGKEY_KEY,_T("CopyMessage"),_T("301,0,0"));
-	//_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-	//m_key.m_defKeySet.m_copyMessage = winMessage;
-
-	//strKeyBuff = setIniFileString(REGKEY_KEY,_T("PasteMessage"),_T("302,0,0"));
-	//_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-	//m_key.m_defKeySet.m_pasteMessage = winMessage;
-	////クリップボード容量制限
-	//m_key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,_T("HistoryLimit"),-1);	
-
-	////固有キー設定を読む
-	//nKetsetCount = setIniFileInt(REGKEY_KEY,_T("KeySetCount"),0);
-	//m_key.m_KeyList.clear();
-	//for(i = 0; i < nKetsetCount; i++){
-	//	StringBuff.Format(_T("KeySetTitle_%d"),i);
-	//	//ウィンドウキャプション
-	//	key.m_strTitle = setIniFileString(REGKEY_KEY,StringBuff,_T(""));
-	//	//マッチ方法
-	//	StringBuff.Format(_T("KeySetMatch_%d"),i);
-	//	key.m_nMatch = setIniFileInt(REGKEY_KEY,StringBuff,0);
-	//	//キーコード
-	//	StringBuff.Format(_T("KeySetCode_%d"),i);
-	//	strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,"");
-	//	_stscanf_s(LPCTSTR(strKeyBuff),_T("%d,%d,%d,%d")
-	//		,&key.m_sCopyPasteKey.m_uMod_Copy,&key.m_sCopyPasteKey.m_uVK_Copy
-	//		,&key.m_sCopyPasteKey.m_uMod_Paste,&key.m_sCopyPasteKey.m_uVK_Paste);
-	//	StringBuff.Format(_T("KeyCopyWait_%d"),i);
-	//	key.m_sCopyPasteKey.m_nCopyWait  = setIniFileInt(REGKEY_KEY,StringBuff,100);		//コピー待ち時間
-	//	StringBuff.Format(_T("KeyPasteWait_%d"),i);
-	//	key.m_sCopyPasteKey.m_nPasteWait = setIniFileInt(REGKEY_KEY,StringBuff,100);		//ペースト待ち時間
-
-	//	StringBuff.Format(_T("KeyMessage_%d"),i);
-	//	key.m_sCopyPasteKey.m_nMessage = setIniFileInt(REGKEY_KEY,StringBuff,0);		//方式
-
-	//	//メッセージ
-	//	StringBuff.Format(_T("CopyMessage_%d"),i);
-	//	strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("301,0,0"));
-	//	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-	//	key.m_sCopyPasteKey.m_copyMessage = winMessage;
-	//
-	//	StringBuff.Format(_T("PasteMessage_%d"),i);
-	//	strKeyBuff = setIniFileString(REGKEY_KEY,StringBuff,_T("302,0,0"));
-	//	_stscanf_s(LPCTSTR(strKeyBuff),_T("%x,%x,%x"),&winMessage.Msg,&winMessage.wParam,&winMessage.lParam);
-	//	key.m_sCopyPasteKey.m_pasteMessage = winMessage;
-	//	//クリップボード容量制限
-	//	StringBuff.Format(_T("HistoryLimit_%d"),i);
-	//	key.m_nHistoryLimit = setIniFileInt(REGKEY_KEY,StringBuff,-1);	
-	//	
-	//	m_key.m_KeyList.insert(m_key.m_KeyList.end(),key);//設定に追加
-	//}	
-
-	//一般環境設定
-	//m_strDataPath = setIniFileString(REGKEY_ENV,_T("DataFile"),"");
-
-	//m_strRwPluginFolder = setIniFileString(REGKEY_ENV,_T("RwPluginFolder"),m_strAppPath + _T("RW_Plugin"));
-	//m_strPluginName = setIniFileString(REGKEY_ENV,_T("DataFormat"),DAT_FORMAT);
-	//m_strMacroPluginName = setIniFileString(REGKEY_ENV,_T("MacroPlugin"),DAT_FORMAT);
-	//m_nSelectID     = setIniFileInt(REGKEY_ENV,_T("SelectID"),-1);
-	//time_t lTime;
-	//m_nTreeID       = setIniFileInt(REGKEY_ENV,_T("TreeID"),time(&lTime));
-	//m_nRecNumber    = setIniFileInt(REGKEY_ENV,_T("RecNumber"),0);
-	//m_nDebug		= setIniFileInt(REGKEY_ENV,_T("Debug"),0) != 0;
-	//m_strDebugLog	= setIniFileString(REGKEY_ENV,_T("LogfileName"),_T("Charu3.log"));
-
-	//ウィンドウ設定
-	//m_DialogSize.x = setIniFileInt(REGKEY_WINDOW,_T("PopupSizeX"),250);
-	//m_DialogSize.y = setIniFileInt(REGKEY_WINDOW,_T("PopupSizeY"),350);
-
-	//検索設定
-	//m_nSearchTarget = setIniFileInt(REGKEY_SERCH,_T("SerchKind"),0);
-	//m_nSearchLogic = setIniFileInt(REGKEY_SERCH,_T("SerchLogic"),0);
-	//m_strSearchKey = setIniFileString(REGKEY_SERCH,_T("SerchKey"),_T(""));
-
-	//マクロテンプレート
-	//for(i = 0; i <= 99; i++) { // TODO: magic number
-	//	strRes.LoadString(APP_INF_MACRO_TEMPLATE01+i);
-	//	if(strRes == _T("end")) break;
-	//}
-	//int nStringCnt = i;
-	MACRO_STRUCT macroData;
-	CString strMacro;
-	//m_vctMacro.clear();
-	//m_vctMacro.reserve(99); // TODO: magic number
-	//for(i = 1; i <= 99; i++) { // TODO: magic number
-	//	StringBuff.Format(_T("Macro_%02d"),i);
-	//	::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
-	//	if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
-	//		strRes.LoadString(APP_INF_MACRO_TEMPLATE01 + i -1);
-	//		writeProfileString(REGKEY_MACRO,StringBuff,strRes);
-	//		strMacro = strRes;
-	//		_tcscpy_s(strBuff,LPCTSTR(strRes));
-	//	}
-	//	if(_tcsclen(strBuff) == 0) break;
-	//	if(UStringWork::splitString(strBuff,_T('@'),&szName,&szKind,&szMacro,NULL) == 3) {
-	//		macroData.m_strName = szName;
-	//		if(*szKind == _T('D'))		macroData.m_cKind = KIND_DATA_ALL;
-	//		else if(*szKind == _T('F'))	macroData.m_cKind = KIND_FOLDER_ALL;
-	//		else					macroData.m_cKind = 0xff;
-	//		macroData.m_strMacro = szMacro;
-	//		m_vctMacro.push_back(macroData);
-	//	}
-	//}
-	
-	//拡張マクロテンプレート R履歴フォルダ Fフォルダ A全て Dデータ
-	//for(i = 0; i <= 99; i++) { // TODO: magic number
-	//	strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01+i);
-	//	if(strRes == "end") break;
-	//}
-	//int nStringCnt = i;
-	//m_vctDataMacro.clear();
-	//m_vctDataMacro.reserve(99); // TODO: magic number
-	//for(i = 1; i <= 99; i++) { // TODO: magic number
-	//	StringBuff.Format(_T("DataMacro_%02d"),i);
-	//	::GetPrivateProfileString(REGKEY_MACRO,StringBuff,_T(""),strBuff,_countof(strBuff),m_strIniFile);
-	//	if (_tcsclen(strBuff) == 0 && i <= nStringCnt) {
-	//		strRes.LoadString(APP_INF_EXMACRO_TEMPLATE01 + i -1);
-	//		writeProfileString(REGKEY_MACRO,StringBuff,strRes);
-	//		strMacro = strRes;
-	//		_tcscpy_s(strBuff,LPCTSTR(strRes));
-	//	}
-	//	if(_tcsclen(strBuff) == 0) break;
-	//	if(UStringWork::splitString(strBuff,'@',&szName,&szKind,&szMacro,NULL) == 3) {
-	//		macroData.m_strName = szName;
-			//if(*szKind == 'D')		macroData.m_cKind = KIND_DATA_ALL;
-			//else if(*szKind == 'R')	macroData.m_cKind = KIND_RIREKI;
-			//else if(*szKind == 'F')	macroData.m_cKind = KIND_FOLDER_ALL;
-			//else					macroData.m_cKind = 0xff;
-	//		macroData.m_strMacro = szMacro;
-	//		m_vctDataMacro.push_back(macroData);
-	//	}
-	//}
-
-	// read state
 
 	m_strDataPath = CGeneral::getSettingCString(m_state, "data.path", _T(""));
 	m_strDataFormat = CGeneral::getSettingCString(m_state, "data.format", DAT_FORMAT);
@@ -309,6 +133,8 @@ void CInit::initialize()
 	m_nRecNumber = static_cast<int>(CGeneral::getSettingNumber(m_state, "internal.recordNumber", 0));
 
 	// read settings
+	try { m_settings = nlohmann::json::parse(std::ifstream(m_strSettingsFile)); }
+	catch (...) {}
 
 	m_etc.m_bPutBackClipboard = CGeneral::getSettingBool(m_settings, "clipboard.putBackAfterPasting", false);
 	m_nClipboardOpenDelay = static_cast<int>(CGeneral::getSettingNumber(m_settings, "clipboard.openDelay", 0));
@@ -375,18 +201,16 @@ void CInit::initialize()
 		m_key.m_KeyList.push_back(node);
 	}
 	m_key.m_defKeySet = COPYPASTE_KEY(m_settings["keyEvent.default"]);
-	m_key.m_nHistoryLimit = m_settings["keyEvent.default.copyLimit"];
+	m_key.m_nHistoryLimit = static_cast<int>(CGeneral::getSettingNumber(m_settings, "keyEvent.default.copyLimit", -1));
 
 	SaveSettings();
 
 	// read snippets
-
 	m_vctMacro.clear();
 	ReadPredefined(m_vctMacro, m_strAppPath + "_locale\\" + m_locale + "\\snippets.json");
 	ReadPredefined(m_vctMacro, m_strAppDataPath + "\\snippets.json");
 
 	// read options
-
 	m_vctDataMacro.clear();
 	ReadPredefined(m_vctDataMacro, m_strAppPath + "_locale\\" + m_locale + "\\options.json");
 }
@@ -496,60 +320,6 @@ void CInit::writeEnvInitData()
 	m_state["internal.treeId"] = m_nTreeID;
 	m_state["internal.recordNumber"] = m_nRecNumber;
 	try { std::ofstream(m_strStateFile) << m_state.dump(1, '\t') << "\n"; } catch (...) {}
-}
-
-
-//---------------------------------------------------
-//関数名	setIniFileInt()
-//機能		設定ファイルを読む
-//---------------------------------------------------
-int CInit::setIniFileInt(const TCHAR* szSection,const TCHAR* szKey,int nDefault)
-{
-	int n = (int)::GetPrivateProfileInt(szSection,szKey,-1,m_strIniFile);
-	if(n == -1) {
-		n = nDefault;
-		writeProfileInt(szSection,szKey,n);
-	}
-	return n;
-} 
-
-//---------------------------------------------------
-//関数名	setIniFileString()
-//機能		設定ファイルを読む
-//---------------------------------------------------
-CString CInit::setIniFileString(const TCHAR* szSection,const TCHAR* szKey,CString strDefault)
-{
-	TCHAR strBuff[1024];
-	CString strRet;
-	::GetPrivateProfileString(szSection,szKey,_T(""),strBuff,_countof(strBuff),m_strIniFile);
-	strRet = strBuff;
-	if (strRet == "")	{
-		// Use default if empty
-		writeProfileString(szSection,szKey,strDefault);
-		strRet = strDefault;
-	}
-	return strRet;
-} 
-
-//---------------------------------------------------
-//関数名	writeProfileInt()
-//機能		設定ファイルを書き込み
-//---------------------------------------------------
-void CInit::writeProfileInt(const TCHAR* szSection,const TCHAR* szKey,int nValue)
-{
-	TCHAR strBuff[1024];
-	_stprintf_s(strBuff,_T("%d"),nValue);	
-	WritePrivateProfileString(szSection,szKey,strBuff,m_strIniFile);
-}
-
-//---------------------------------------------------
-//関数名	writeProfileString()
-//機能		設定ファイルを書き込み
-//---------------------------------------------------
-void CInit::writeProfileString(const TCHAR* szSection,const TCHAR* szKey,CString strValue)
-{
-	WritePrivateProfileString(szSection,szKey,_T("\"") + strValue + _T("\""),m_strIniFile);
-	auto err = GetLastError();
 }
 
 //---------------------------------------------------

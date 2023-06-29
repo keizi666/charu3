@@ -143,23 +143,30 @@ struct COPYPASTE_KEY
 
 	COPYPASTE_KEY(nlohmann::json& obj)
 	{
-		m_nMessage = static_cast<int>(CGeneral::getSettingNumber(obj, "method", 0));
-		m_uMod_Copy = static_cast<UINT>(CGeneral::getSettingNumber(obj, "copy.keyCode", 0));
-		m_uVK_Copy = static_cast<UINT>(CGeneral::getSettingNumber(obj, "copy.keyModifier", 0));
-		m_nCopyWait = static_cast<int>(CGeneral::getSettingNumber(obj, "copy.delay", 0));
-		m_uMod_Paste = static_cast<UINT>(CGeneral::getSettingNumber(obj, "paste.keyCode", 0));
-		m_uVK_Paste = static_cast<UINT>(CGeneral::getSettingNumber(obj, "paste.keyModifier", 0));
-		m_nPasteWait = static_cast<int>(CGeneral::getSettingNumber(obj, "paste.delay", 0));
+		COPYPASTE_KEY();
+		if (obj.is_object()) {
+			m_nMessage = static_cast<int>(CGeneral::getSettingNumber(obj, "method", 0));
+			m_uMod_Copy = static_cast<UINT>(CGeneral::getSettingNumber(obj, "copy.keyCode", 0));
+			m_uVK_Copy = static_cast<UINT>(CGeneral::getSettingNumber(obj, "copy.keyModifier", 0));
+			m_nCopyWait = static_cast<int>(CGeneral::getSettingNumber(obj, "copy.delay", 0));
+			m_uMod_Paste = static_cast<UINT>(CGeneral::getSettingNumber(obj, "paste.keyCode", 0));
+			m_uVK_Paste = static_cast<UINT>(CGeneral::getSettingNumber(obj, "paste.keyModifier", 0));
+			m_nPasteWait = static_cast<int>(CGeneral::getSettingNumber(obj, "paste.delay", 0));
 
-		nlohmann::json msg;
-		msg = obj["copy.message"];
-		m_copyMessage.Msg = static_cast<UINT>(CGeneral::getSettingNumber(msg, "id", 0));
-		m_copyMessage.wParam = static_cast<WPARAM>(CGeneral::getSettingNumber(msg, "param1", 0));
-		m_copyMessage.lParam = static_cast<LPARAM>(CGeneral::getSettingNumber(msg, "param2", 0));
-		msg = obj["paste.message"];
-		m_pasteMessage.Msg = static_cast<UINT>(CGeneral::getSettingNumber(msg, "id", 0));
-		m_pasteMessage.wParam = static_cast<WPARAM>(CGeneral::getSettingNumber(msg, "param1", 0));
-		m_pasteMessage.lParam = static_cast<LPARAM>(CGeneral::getSettingNumber(msg, "param2", 0));
+			nlohmann::json msg;
+			msg = obj["copy.message"];
+			if (msg.is_object()) {
+				m_copyMessage.Msg = static_cast<UINT>(CGeneral::getSettingNumber(msg, "id", 0));
+				m_copyMessage.wParam = static_cast<WPARAM>(CGeneral::getSettingNumber(msg, "param1", 0));
+				m_copyMessage.lParam = static_cast<LPARAM>(CGeneral::getSettingNumber(msg, "param2", 0));
+			}
+			msg = obj["paste.message"];
+			if (msg.is_object()) {
+				m_pasteMessage.Msg = static_cast<UINT>(CGeneral::getSettingNumber(msg, "id", 0));
+				m_pasteMessage.wParam = static_cast<WPARAM>(CGeneral::getSettingNumber(msg, "param1", 0));
+				m_pasteMessage.lParam = static_cast<LPARAM>(CGeneral::getSettingNumber(msg, "param2", 0));
+			}
+		}
 	}
 
 	nlohmann::json ToJson() {
@@ -196,6 +203,13 @@ struct CHANGE_KEY
 
 	COPYPASTE_KEY m_sCopyPasteKey;
 	int  m_nHistoryLimit;	//クリップボード容量制限
+
+	CHANGE_KEY()
+		: m_strTitle(_T(""))
+		, m_nHistoryLimit(-1)
+		, m_sCopyPasteKey(COPYPASTE_KEY())
+	{
+	}
 };
 //---------------------------------------------------
 // キー設定構造体
@@ -206,6 +220,13 @@ struct OPTION_KEYSET
 	int  m_nHistoryLimit;	//クリップボード容量制限
 
 	std::list<CHANGE_KEY> m_KeyList;//キー設定データリスト
+
+	OPTION_KEYSET()
+		: m_defKeySet(COPYPASTE_KEY())
+		, m_nHistoryLimit(-1)
+		, m_KeyList(std::list<CHANGE_KEY>())
+	{
+	}
 };
 
 //---------------------------------------------------
@@ -230,12 +251,6 @@ public:
 
 	void writeAllInitData();
 	void writeEnvInitData();
-
-	CString setIniFileString(const TCHAR* szSection, const TCHAR* szKey, CString strDefault);
-	int setIniFileInt(const TCHAR* szSection, const TCHAR* szKey, int nDefault);
-
-	void writeProfileInt(const TCHAR* szSection,const TCHAR* szKey,int nValue);
-	void writeProfileString(const TCHAR* szection,const TCHAR* szKey,CString strValue);
 
 	COPYPASTE_KEY getAppendKeyInit(CString strWinName,int nNumber = 0);
 	CHANGE_KEY getAppendKeyInit2(CString strWinName);
@@ -267,7 +282,6 @@ public:
 	CString m_strRwPluginFolder;
 	CString m_strAppDataPath;
 	POINT m_IconSize;
-	CString m_strIniFile;
 	CString m_strStateFile;
 	CString m_strSettingsFile;
 	CString m_strDebugLog;
