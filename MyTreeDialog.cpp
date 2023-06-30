@@ -899,9 +899,6 @@ void CMyTreeDialog::OnNewData()
 void CMyTreeDialog::OnNewFolder()
 {
 	HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
-	if (!hTreeItem) {
-		return;
-	}
 	CString strRes;
 	strRes.LoadString(APP_INF_NEW_FOLDER);
 	m_pTreeCtrl->EditLabel(m_pTreeCtrl->addNewFolder(hTreeItem, strRes));
