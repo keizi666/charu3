@@ -1,0 +1,52 @@
+[
+	{
+		"caption": "Date",
+		"data": "<charuMACRO>$Y/$M/$D</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Day of Week",
+		"data": "<charuMACRO>$ddd</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Time (23:59:59)",
+		"data": "<charuMACRO>$H:$m:$s</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Time (11:59:59 PM)",
+		"data": "<charuMACRO>$h:$m:$s $AMPM</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Run App.",
+		"data": "<charuMACRO>$SHELL<Commandline>$SHELL</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Open File with Default App.",
+		"data": "<charuMACRO>$RELATE<Filename>$RELATE</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Selected Text",
+		"data": "<charuMACRO>$SEL</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Clipboard Text",
+		"data": "<charuMACRO>$CLIP</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Plugin",
+		"data": "<charuMACRO>$PLUG-IN<DLL,Text>$PLUG-IN</charuMACRO>",
+		"mode": 3
+	},
+	{
+		"caption": "Key Press",
+		"data": "<charuMACRO_KEY>Key;Times;Delay</charuMACRO_KEY>",
+		"mode": 3
+	}
+]

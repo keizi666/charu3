@@ -35,13 +35,13 @@
 		"mode": 3
 	},
 	{
-		"caption": "シェルで実行",
-		"data": "<charuMACRO>$SHELL<実行ファイル名>$SHELL</charuMACRO>",
+		"caption": "アプリ実行",
+		"data": "<charuMACRO>$SHELL<コマンドライン>$SHELL</charuMACRO>",
 		"mode": 3
 	},
 	{
-		"caption": "既定のプログラムで開く",
-		"data": "<charuMACRO>$RELATE<ファイル名>$RELATE</charuMACRO>",
+		"caption": "ファイルを既定のプログラムで開く",
+		"data": "<charuMACRO>$RELATE<ファイル>$RELATE</charuMACRO>",
 		"mode": 3
 	},
 	{
