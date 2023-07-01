@@ -525,7 +525,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName, CString strPlugin, std::list
 
 	if(theApp.m_ini.m_bDebug) {
 		CString strText;
-		strText.Format(_T("read charu3 data \"%s\"\n"),strFileName.GetString());
+		strText.Format(_T("read charu3 data \"%s\" %d\n"),strFileName.GetString(), tmplist->size());
 		CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 

@@ -304,7 +304,6 @@
 #define APP_MES_NEWFILE_READY           62219
 #define APP_INF_FILE_FILTER             62220
 #define APP_INF_FILE_FILTER2            62221
-#define APP_INF_FILE_FILTER3            62222
 #define APP_INF_FILE_FILTER_VISUAL_PREF 62222
 #define APP_INF_FILE_FILTER4            62223
 #define APP_INF_FILE_FILTER5            62224
@@ -323,7 +322,6 @@
 #define APP_INF_CAPTION_NEWITEM         62237
 #define APP_INF_KEY_COMBO01             62240
 #define APP_INF_KEY_COMBO02             62241
-#define APP_INF_KEY_COMBP03             62242
 #define APP_INF_KEY_COMBO03             62242
 #define APP_INF_KEY_COMBO04             62243
 #define APP_INF_KEY_LIST_CAPTION01      62250

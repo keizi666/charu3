@@ -35,22 +35,22 @@
 		"mode": 3
 	},
 	{
-		"caption": "シェル実行",
+		"caption": "シェルで実行",
 		"data": "<charuMACRO>$SHELL<実行ファイル名>$SHELL</charuMACRO>",
 		"mode": 3
 	},
 	{
-		"caption": "関連付け実行",
+		"caption": "既定のプログラムで開く",
 		"data": "<charuMACRO>$RELATE<ファイル名>$RELATE</charuMACRO>",
 		"mode": 3
 	},
 	{
-		"caption": "選択文字列",
+		"caption": "選択中のテキスト",
 		"data": "<charuMACRO>$SEL</charuMACRO>",
 		"mode": 3
 	},
 	{
-		"caption": "クリップボード",
+		"caption": "クリップボードのテキスト",
 		"data": "<charuMACRO>$CLIP</charuMACRO>",
 		"mode": 3
 	},
@@ -60,13 +60,8 @@
 		"mode": 3
 	},
 	{
-		"caption": "キー入力",
+		"caption": "キー押下",
 		"data": "<charuMACRO_KEY>キー;回数;待ち</charuMACRO_KEY>",
-		"mode": 3
-	},
-	{
-		"caption": "入力プラグイン",
-		"data": "<charuMACRO>$PLUG-IN<.\\plugin\\input.dll,タイトル>$PLUG-IN</charuMACRO>",
 		"mode": 3
 	}
 ]

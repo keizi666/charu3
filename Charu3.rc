@@ -30,9 +30,9 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x80
 BEGIN
     COMBOBOX        IDC_OPT_FONT_NAME,41,21,168,126,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_OPT_FONT_SIZE,237,21,18,13,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_OPT_ICON_FILE_NAME,66,40,160,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "参照",IDC_OPT_VS_BROWS,231,40,25,13
+    EDITTEXT        IDC_OPT_FONT_SIZE,235,21,20,13,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_ICON_FILE_NAME,82,40,136,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "参照...",IDC_OPT_VS_BROWS,221,40,35,13
     EDITTEXT        IDC_OPT_BORDER_COLOR,112,76,56,13,ES_AUTOHSCROLL
     EDITTEXT        IDC_OPT_BACKGROUND_COLOR,112,92,56,13,ES_AUTOHSCROLL
     EDITTEXT        IDC_OPT_TEXT_COLOR,112,108,56,13,ES_AUTOHSCROLL
@@ -46,8 +46,8 @@ BEGIN
     LTEXT           "ツリービュー文字色",IDC_STATIC,47,108,58,13,SS_CENTERIMAGE
     CONTROL         "",IDC_OPT_TEXT_COLOR_PAL,"Static",SS_BLACKRECT | SS_NOTIFY,171,108,18,13
     LTEXT           "フォント",IDC_STATIC,16,21,22,13,SS_CENTERIMAGE
-    LTEXT           "サイズ",IDC_STATIC,216,21,20,13,SS_CENTERIMAGE
-    LTEXT           "アイコンファイル",IDC_STATIC,16,40,48,13,SS_CENTERIMAGE
+    LTEXT           "サイズ",IDC_STATIC,214,21,20,13,SS_CENTERIMAGE
+    LTEXT           "アイコンセットファイル",IDC_STATIC,16,40,62,13,SS_CENTERIMAGE
     LTEXT           "不透明度",IDC_STATIC,16,179,35,11,SS_CENTERIMAGE
     EDITTEXT        IDC_OPACITY_TEXT,230,179,26,13,ES_RIGHT | ES_READONLY | NOT WS_TABSTOP,WS_EX_TRANSPARENT | WS_EX_RIGHT
     GROUPBOX        "基本スタイル",IDC_STATIC,7,7,260,153
@@ -85,7 +85,7 @@ BEGIN
     LTEXT           "名前",IDC_STATIC,7,89,15,13,SS_CENTERIMAGE
     LTEXT           "種類",IDC_STATIC_KIND,7,108,16,12,SS_CENTERIMAGE
     LTEXT           "アイコン",IDC_STATIC_ICON,101,108,20,12,SS_CENTERIMAGE
-    GROUPBOX        "オプション",IDC_STATIC,7,127,185,84
+    GROUPBOX        "オプショナルプロパティ",IDC_STATIC,7,127,185,84
 END
 
 IDD_SETTINGS_01_GENERAL DIALOGEX 0, 0, 280, 280
@@ -554,24 +554,26 @@ END
 
 IDD_EDIT DLGINIT
 BEGIN
-    IDC_ICON_COMBO, 0x403, 9, 0
-0xa98e, 0xae93, 0x4991, 0xf091, "\000" 
+    IDC_ICON_COMBO, 0x403, 7, 0
+0x8e28, 0x93a9, 0x29ae, "\000" 
     IDC_ICON_COMBO, 0x403, 9, 0
 0x8195, 0xca92, 0x808d, 0xda96, "\000" 
-    IDC_ICON_COMBO, 0x403, 12, 0
-0xfa93, 0x7495, 0x8e20, 0x8a9e, 0x8cd4, 0x006e, 
-    IDC_ICON_COMBO, 0x403, 13, 0
-0x7483, 0x4083, 0x4383, 0x8b83, 0xc08e, 0x738d, "\000" 
-    IDC_ICON_COMBO, 0x403, 13, 0
-0xd68a, 0x4198, 0x7495, 0xaf82, 0xc08e, 0x738d, "\000" 
     IDC_ICON_COMBO, 0x403, 11, 0
-0xb695, 0x9a8e, 0xf197, 0x4991, 0xf091, "\000" 
-    IDC_ICON_COMBO, 0x403, 15, 0
-0x4e83, 0x8a83, 0x6283, 0x7683, 0x7b83, 0x5b81, 0x6883, "\000" 
+0xfa93, 0x7495, 0x9581, 0x9e8e, 0xd48a, "\000" 
+    IDC_ICON_COMBO, 0x403, 13, 0
+0x5683, 0x4683, 0x8b83, 0xc582, 0xc08e, 0x738d, "\000" 
+    IDC_ICON_COMBO, 0x403, 23, 0
+0xf98a, 0xe892, 0xcc82, 0x7683, 0x8d83, 0x4f83, 0x8983, 0x8083, 0xc582, 
+0x4a8a, 0xad82, "\000" 
+    IDC_ICON_COMBO, 0x403, 17, 0
+0x4991, 0xf091, 0x8692, 0xcc82, 0x6583, 0x4c83, 0x5883, 0x6783, "\000" 
+    IDC_ICON_COMBO, 0x403, 25, 0
+0x4e83, 0x8a83, 0x6283, 0x7683, 0x7b83, 0x5b81, 0x6883, 0xcc82, 0x6583, 
+0x4c83, 0x5883, 0x6783, "\000" 
     IDC_ICON_COMBO, 0x403, 11, 0
 0x7683, 0x8983, 0x4f83, 0x4383, 0x9383, "\000" 
     IDC_ICON_COMBO, 0x403, 9, 0
-0x4c83, 0x5b81, 0xfc93, 0xcd97, "\000" 
+0x4c83, 0x5b81, 0x9f89, 0xba89, "\000" 
     0
 END
 
@@ -691,7 +693,7 @@ END
 STRINGTABLE
 BEGIN
     APP_MES_FAILURE_HOTKEY  "ホットキーの設定に失敗"
-    APP_MES_DELETE_OK       "%sを削除しますか？"
+    APP_MES_DELETE_OK       """%s"" を削除しますか？"
     APP_MES_NO_ENTRY_FUNC   "関数のエントリがありません。"
     APP_MES_NOT_FOUND       "%sが見つかりません。"
     APP_MES_FAILURE_DATA_SAVE "データの保存に失敗しました。ファイルがリードオンリーか確認してください。"
@@ -714,19 +716,19 @@ BEGIN
     APP_MES_NAME_EMPTY      "データの名前が空です"
     APP_MES_DATA_READY      "データファイルを設定しました\n通知領域アイコン右クリックメニューで切り替えが可能です"
     APP_MES_NEWFILE_READY   "新規データファイルを設定しました\nデータを追加または編集すると随時書き出されます"
-    APP_INF_FILE_FILTER     "Charu3データファイル(*.c3d)|*.c3d"
-    APP_INF_FILE_FILTER2    "%sデータファイル(*.%s)|*.%s|"
-    APP_INF_FILE_FILTER_VISUAL_PREF "スタイル設定ファイル(*.json)|*.json|"
-    APP_INF_FILE_FILTER4    "WAVEファイル(*.wav)|*.wav||"
+    APP_INF_FILE_FILTER     "Charu3データファイル (*.c3d)|*.c3d"
+    APP_INF_FILE_FILTER2    "%sデータファイル (*.%s)|*.%s|"
+    APP_INF_FILE_FILTER_VISUAL_PREF "スタイル設定ファイル (*.json)|*.json|"
+    APP_INF_FILE_FILTER4    "Waveファイル (*.wav)|*.wav||"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_FILE_FILTER5    "ビットマップ(*.bmp)|*.bmp||"
-    APP_INF_FILE_FILTER6    "全てのファイル(*.*)|*.*||"
-    APP_INF_FILE_FILTER_FMT_DISPLAY "%sデータファイル(*.%s)"
+    APP_INF_FILE_FILTER5    "ビットマップファイル (*.bmp)|*.bmp||"
+    APP_INF_FILE_FILTER6    "全てのファイル (*.*)|*.*||"
+    APP_INF_FILE_FILTER_FMT_DISPLAY "%sデータファイル (*.%s)"
     APP_INF_FILE_FILTER_FMT_PATTERN "*.%s"
-    APP_INF_FILE_FILTER_C3D_DISPLAY "Charu3データファイル(*.c3d)"
+    APP_INF_FILE_FILTER_C3D_DISPLAY "Charu3データファイル (*.c3d)"
     APP_INF_FILE_FILTER_C3D_PATTERN "*.c3d"
     APP_INF_TABNAME_01      "全般"
     APP_INF_TABNAME_02      "スタイル"
@@ -754,8 +756,8 @@ STRINGTABLE
 BEGIN
     APP_INF_IMPORT_FOLDERNAME "インポートデータ"
     APP_INF_2BYTESPACE      "　"
-    APP_INF_TIP_DATA01      "タイトル: "
-    APP_INF_TIP_DATA02      "\n拡張マクロ\n  "
+    APP_INF_TIP_DATA01      "名前: "
+    APP_INF_TIP_DATA02      "\nオプショナルプロパティ\n  "
 END
 
 STRINGTABLE
@@ -831,10 +833,10 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 (日本) resources
+// ニュートラル (既定) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 #pragma code_page(932)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -876,44 +878,6 @@ IDD_DATA_TREE_VIEW AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
-
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
-    "#define _AFX_NO_OLE_RESOURCES\r\n"
-    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
-    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
-    "\r\n"
-    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
-    "#ifdef _WIN32\r\n"
-    "LANGUAGE 17, 1\r\n"
-    "#pragma code_page(932)\r\n"
-    "#endif //_WIN32\r\n"
-    "#include ""res\\Charu3.rc2""  // Microsoft Visual C++ ?E?O?I?c?[???A?O?W?3?e?????\\?[?X\r\n"
-    "#include ""l.jpn\\afxres.rc""          // ?W???I?R?“?|?[?l?“?g\r\n"
-    "#endif\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -970,22 +934,22 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "041104b0"
+        BLOCK "040004b0"
         BEGIN
-            VALUE "Comments", "クリップボード入力支援ツール"
+            VALUE "Comments", "Text input assistant"
             VALUE "CompanyName", "C+ Factory / Itagaki Fumihiko"
             VALUE "FileDescription", "Charu3(Clipbord and High Amenity Routine for Utility 3) Successor Edition"
-            VALUE "FileVersion", "3.8.0 beta 2"
+            VALUE "FileVersion", "3.8.0 beta 3"
             VALUE "InternalName", "Charu3 SE"
             VALUE "LegalCopyright", "Copyright (C) 1998-2003 matsumoto keizi, 2021-2023 Itagaki Fumihiko"
             VALUE "OriginalFilename", "Charu3.EXE"
             VALUE "ProductName", "Charu3 SE"
-            VALUE "ProductVersion", "3.8.0 beta 2"
+            VALUE "ProductVersion", "3.8.0 beta 3"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x411, 1200
+        VALUE "Translation", 0x400, 1200
     END
 END
 
@@ -996,6 +960,54 @@ END
 //
 
 IDB_ICON_BITMAP         BITMAP                  "res\\itemIcon.bmp"
+
+#endif    // ニュートラル (既定) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 (日本) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 17, 1\r\n"
+    "#pragma code_page(932)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\Charu3.rc2""  // Microsoft Visual C++ ?E?O?I?c?[???A?O?W?3?e?????\\?[?X\r\n"
+    "#include ""l.jpn\\afxres.rc""          // ?W???I?R?“?|?[?l?“?g\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
 
 #endif    // 日本語 (日本) resources
 /////////////////////////////////////////////////////////////////////////////
@@ -1057,10 +1069,10 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x80
 BEGIN
-    COMBOBOX        IDC_OPT_FONT_NAME,34,21,180,126,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_OPT_FONT_SIZE,237,21,18,13,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_OPT_ICON_FILE_NAME,46,40,178,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "??",IDC_OPT_VS_BROWS,231,40,25,13
+    COMBOBOX        IDC_OPT_FONT_NAME,34,21,178,126,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_OPT_FONT_SIZE,235,21,20,13,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_ICON_FILE_NAME,56,40,156,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_OPT_VS_BROWS,216,40,40,13
     EDITTEXT        IDC_OPT_BORDER_COLOR,125,76,56,13,ES_AUTOHSCROLL
     EDITTEXT        IDC_OPT_BACKGROUND_COLOR,125,92,56,13,ES_AUTOHSCROLL
     EDITTEXT        IDC_OPT_TEXT_COLOR,125,108,56,13,ES_AUTOHSCROLL
@@ -1074,8 +1086,8 @@ BEGIN
     LTEXT           "Tree View Text",IDC_STATIC,47,108,58,13,SS_CENTERIMAGE
     CONTROL         "",IDC_OPT_TEXT_COLOR_PAL,"Static",SS_BLACKRECT | SS_NOTIFY,184,108,18,13
     LTEXT           "Font",IDC_STATIC,16,21,16,13,SS_CENTERIMAGE
-    LTEXT           "Size",IDC_STATIC,222,21,12,13,SS_CENTERIMAGE
-    LTEXT           "Icon File",IDC_STATIC,16,40,28,13,SS_CENTERIMAGE
+    LTEXT           "Size",IDC_STATIC,220,21,12,13,SS_CENTERIMAGE
+    LTEXT           "Iconset File",IDC_STATIC,16,40,36,13,SS_CENTERIMAGE
     LTEXT           "Opacity",IDC_STATIC,16,179,35,11,SS_CENTERIMAGE
     EDITTEXT        IDC_OPACITY_TEXT,230,179,26,13,ES_RIGHT | ES_READONLY | NOT WS_TABSTOP,WS_EX_TRANSPARENT | WS_EX_RIGHT
     GROUPBOX        "Style",IDC_STATIC,7,7,260,153
@@ -1087,9 +1099,9 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x80
 BEGIN
-    COMBOBOX        IDC_OPT_POPUP_POS,16,21,98,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_OPT_HoseiX,160,21,31,13,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_OPT_HoseiY,206,21,31,13,ES_RIGHT | ES_AUTOHSCROLL
+    COMBOBOX        IDC_OPT_POPUP_POS,16,21,120,100,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_OPT_HoseiX,180,21,31,13,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_OPT_HoseiY,226,21,31,13,ES_RIGHT | ES_AUTOHSCROLL
     EDITTEXT        IDC_OPT_SELECT_BY_TYPING_PERIOD,150,63,31,13,ES_RIGHT | ES_AUTOHSCROLL
     CONTROL         "Case Insensitive",IDC_OPT_SELECT_BY_TYPING_CASE_INSENSITIVE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,81,154,11
@@ -1109,9 +1121,9 @@ BEGIN
     CONTROL         "Keep Item Selection State",IDC_OPT_SELECT_SAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,232,154,11
     CONTROL         "Keep Expanded/Collapsed State of Folders",IDC_OPT_FOLDER_OPEN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,246,161,11
-    LTEXT           "Offset X",IDC_STATIC,128,21,28,13,SS_CENTERIMAGE,WS_EX_RIGHT
+    LTEXT           "Offset X",IDC_STATIC,148,21,28,13,SS_CENTERIMAGE,WS_EX_RIGHT
     LTEXT           "ms",IDC_STATIC,184,63,26,13,SS_CENTERIMAGE
-    LTEXT           "Y",IDC_STATIC,194,21,8,13,SS_CENTERIMAGE,WS_EX_RIGHT
+    LTEXT           "Y",IDC_STATIC,214,21,8,13,SS_CENTERIMAGE,WS_EX_RIGHT
     GROUPBOX        "More Options",IDC_STATIC,7,175,260,92
     GROUPBOX        "Location to Popup",IDC_STATIC,7,7,260,36
     GROUPBOX        "Select Item by Typing",IDC_STATIC,7,49,260,78
@@ -1205,7 +1217,7 @@ BEGIN
     EDITTEXT        IDC_NAME,28,89,164,13,ES_AUTOHSCROLL
     COMBOBOX        IDC_KIND_COMBO,25,108,70,55,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_ICON_COMBO,122,108,70,123,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    DEFPUSHBUTTON   "OK",IDOK,100,220,38,14
+    DEFPUSHBUTTON   "OK",IDOK,111,220,38,14
     PUSHBUTTON      "Cancel",IDCANCEL,156,220,36,14
     COMBOBOX        IDC_EDIT_MACRO_COMBO,7,7,87,139,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Pathname of a File...",IDC_EDIT_PASTE_FILE,105,7,87,13
@@ -1507,12 +1519,12 @@ BEGIN
         MENUITEM "Rename(&R)",                  IDML_RENAME
         POPUP "Switch Icon"
         BEGIN
-            MENUITEM "General",                     IDML_ICON_KEY
-            MENUITEM "Date && Time",                IDML_ICON_DATE
-            MENUITEM "Do File Execution",           IDML_ICON_EXE
-            MENUITEM "Do File Association",         IDML_ICON_RELATE
-            MENUITEM "Select Texts",                IDML_ICON_SELECT
-            MENUITEM "Clipboard",                   IDML_ICON_CLIP
+            MENUITEM "Regular",                     IDML_ICON_KEY
+            MENUITEM "Date&&Time",                  IDML_ICON_DATE
+            MENUITEM "Execute with Shell",          IDML_ICON_EXE
+            MENUITEM "Open with Default",           IDML_ICON_RELATE
+            MENUITEM "Selected Text",               IDML_ICON_SELECT
+            MENUITEM "Clipboard Text",              IDML_ICON_CLIP
             MENUITEM "Plugin",                      IDML_ICON_PLUGIN
             MENUITEM "Key Press",                   IDML_ICON_KEYMACRO
         END
@@ -1550,44 +1562,51 @@ END
 
 IDD_SETTINGS_03_DATATREE DLGINIT
 BEGIN
-    IDC_OPT_POPUP_POS, 0x403, 15, 0
-0x4c83, 0x8383, 0x8c83, 0x6283, 0x6783, 0xca88, 0x7592, "\000" 
-    IDC_OPT_POPUP_POS, 0x403, 19, 0
-0x7d83, 0x4583, 0x5883, 0x4a83, 0x5b81, 0x5c83, 0x8b83, 0xca88, 0x7592, 
-"\000" 
-    IDC_OPT_POPUP_POS, 0x403, 17, 0
-0x6683, 0x5883, 0x4e83, 0x6783, 0x6283, 0x7683, 0xb68d, 0xe38f, "\000" 
-    IDC_OPT_POPUP_POS, 0x403, 17, 0
-0x6683, 0x5883, 0x4e83, 0x6783, 0x6283, 0x7683, 0x4589, 0xe38f, "\000" 
-    IDC_OPT_POPUP_POS, 0x403, 17, 0
-0x6683, 0x5883, 0x4e83, 0x6783, 0x6283, 0x7683, 0x8692, 0x9b89, "\000" 
-    IDC_OPT_POPUP_POS, 0x403, 17, 0
-0x6683, 0x5883, 0x4e83, 0x6783, 0x6283, 0x7683, 0xb68d, 0xba89, "\000" 
-    IDC_OPT_POPUP_POS, 0x403, 17, 0
-0x6683, 0x5883, 0x4e83, 0x6783, 0x6283, 0x7683, 0x4589, 0xba89, "\000" 
+    IDC_OPT_POPUP_POS, 0x403, 13, 0
+0x7942, 0x7420, 0x6568, 0x4320, 0x7261, 0x7465, "\000" 
+    IDC_OPT_POPUP_POS, 0x403, 20, 0
+0x7942, 0x7420, 0x6568, 0x4d20, 0x756f, 0x6573, 0x4320, 0x7275, 0x6f73, 
+0x0072, 
+    IDC_OPT_POPUP_POS, 0x403, 33, 0
+0x7055, 0x6570, 0x2072, 0x654c, 0x7466, 0x4320, 0x726f, 0x656e, 0x2072, 
+0x666f, 0x7420, 0x6568, 0x4420, 0x7365, 0x746b, 0x706f, "\000" 
+    IDC_OPT_POPUP_POS, 0x403, 34, 0
+0x7055, 0x6570, 0x2072, 0x6952, 0x6867, 0x2074, 0x6f43, 0x6e72, 0x7265, 
+0x6f20, 0x2066, 0x6874, 0x2065, 0x6544, 0x6b73, 0x6f74, 0x0070, 
+    IDC_OPT_POPUP_POS, 0x403, 22, 0
+0x6543, 0x746e, 0x7265, 0x6f20, 0x2066, 0x6874, 0x2065, 0x6544, 0x6b73, 
+0x6f74, 0x0070, 
+    IDC_OPT_POPUP_POS, 0x403, 33, 0
+0x6f4c, 0x6577, 0x2072, 0x654c, 0x7466, 0x4320, 0x726f, 0x656e, 0x2072, 
+0x666f, 0x7420, 0x6568, 0x4420, 0x7365, 0x746b, 0x706f, "\000" 
+    IDC_OPT_POPUP_POS, 0x403, 34, 0
+0x6f4c, 0x6577, 0x2072, 0x6952, 0x6867, 0x2074, 0x6f43, 0x6e72, 0x7265, 
+0x6f20, 0x2066, 0x6874, 0x2065, 0x6544, 0x6b73, 0x6f74, 0x0070, 
     0
 END
 
 IDD_EDIT DLGINIT
 BEGIN
-    IDC_ICON_COMBO, 0x403, 9, 0
-0xa98e, 0xae93, 0x4991, 0xf091, "\000" 
-    IDC_ICON_COMBO, 0x403, 9, 0
-0x8195, 0xca92, 0x808d, 0xda96, "\000" 
-    IDC_ICON_COMBO, 0x403, 12, 0
-0xfa93, 0x7495, 0x8e20, 0x8a9e, 0x8cd4, 0x006e, 
-    IDC_ICON_COMBO, 0x403, 13, 0
-0x7483, 0x4083, 0x4383, 0x8b83, 0xc08e, 0x738d, "\000" 
-    IDC_ICON_COMBO, 0x403, 13, 0
-0xd68a, 0x4198, 0x7495, 0xaf82, 0xc08e, 0x738d, "\000" 
-    IDC_ICON_COMBO, 0x403, 11, 0
-0xb695, 0x9a8e, 0xf197, 0x4991, 0xf091, "\000" 
+    IDC_ICON_COMBO, 0x403, 7, 0
+0x4128, 0x7475, 0x296f, "\000" 
+    IDC_ICON_COMBO, 0x403, 8, 0
+0x6552, 0x7567, 0x616c, 0x0072, 
+    IDC_ICON_COMBO, 0x403, 10, 0
+0x6144, 0x6574, 0x5426, 0x6d69, 0x0065, 
+    IDC_ICON_COMBO, 0x403, 19, 0
+0x7845, 0x6365, 0x7475, 0x2065, 0x6977, 0x6874, 0x5320, 0x6568, 0x6c6c, 
+"\000" 
+    IDC_ICON_COMBO, 0x403, 18, 0
+0x704f, 0x6e65, 0x7720, 0x7469, 0x2068, 0x6544, 0x6166, 0x6c75, 0x0074, 
+
+    IDC_ICON_COMBO, 0x403, 14, 0
+0x6553, 0x656c, 0x7463, 0x6465, 0x5420, 0x7865, 0x0074, 
     IDC_ICON_COMBO, 0x403, 15, 0
-0x4e83, 0x8a83, 0x6283, 0x7683, 0x7b83, 0x5b81, 0x6883, "\000" 
-    IDC_ICON_COMBO, 0x403, 11, 0
-0x7683, 0x8983, 0x4f83, 0x4383, 0x9383, "\000" 
-    IDC_ICON_COMBO, 0x403, 9, 0
-0x4c83, 0x5b81, 0xfc93, 0xcd97, "\000" 
+0x6c43, 0x7069, 0x6f62, 0x7261, 0x2064, 0x6554, 0x7478, "\000" 
+    IDC_ICON_COMBO, 0x403, 7, 0
+0x6c50, 0x6775, 0x6e69, "\000" 
+    IDC_ICON_COMBO, 0x403, 10, 0
+0x654b, 0x2079, 0x7250, 0x7365, 0x0073, 
     0
 END
 
@@ -1615,6 +1634,7 @@ END
 STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "Charu3 SE"
+    APP_LOCALE              "en"
 END
 
 STRINGTABLE
@@ -1686,69 +1706,79 @@ END
 STRINGTABLE
 BEGIN
     APP_MES_FAILURE_HOTKEY  "???????????"
-    APP_MES_DELETE_OK       "%s????????"
+    APP_MES_DELETE_OK       "Delete ""%s"" ?"
     APP_MES_NO_ENTRY_FUNC   "??????????????"
-    APP_MES_NOT_FOUND       "%s?????????"
+    APP_MES_NOT_FOUND       "%s not found."
     APP_MES_FAILURE_DATA_SAVE "????????????????????????????????????"
     APP_MES_DECIDE_ICONS    "???????????????"
-    APP_MES_UNKNOWN_FORMAT  "???????????"
+    APP_MES_UNKNOWN_FORMAT  "Unknown format."
     APP_MES_ADD_OK          "%s????????"
 END
 
 STRINGTABLE
 BEGIN
     APP_MES_ADD_OK2         "%s????????"
-    APP_MES_ALL_EMPTY       "????????????????????????"
-    APP_MES_NOT_FOUND_WRITEPLUGIN "????????????????????"
-    APP_MES_NOT_FOUND_READPLUGIN "????????????????????"
-    APP_MES_NOT_FOUND_MACROPLUGIN "?????????????????????"
-    APP_MES_CANT_COPY       "????????????????"
-    APP_MES_DELETE_FOLDER   "??????????????????\n??????????????????????"
-    APP_MES_IMPORT_OK       "%d????????????"
-    APP_MES_FOLDER_CLEAR    "??????????????????\n????????"
-    APP_INF_FILE_FILTER     "Charu3???????(*.c3d)|*.c3d"
-    APP_INF_FILE_FILTER2    "%s???????(*.%s)|*.%s|"
-    APP_INF_FILE_FILTER3    "?????ini(*.ini)|*.ini|"
-    APP_INF_FILE_FILTER4    "WAVE????(*.wav)|*.wav||"
+    APP_MES_ALL_EMPTY       "Both name and data are empty."
+    APP_MES_NOT_FOUND_WRITEPLUGIN "No plugin for writing."
+    APP_MES_NOT_FOUND_READPLUGIN "No plugin for reading."
+    APP_MES_NOT_FOUND_MACROPLUGIN "No plugin to replace text."
+    APP_MES_CANT_COPY       "It cannot be copied to its descendants."
+    APP_MES_DELETE_FOLDER   "The folder is not empty. All data in the folder will be lost.\nAre you sure?"
+    APP_MES_IMPORT_OK       "Imported %d items."
+    APP_MES_FOLDER_CLEAR    "All data in the folder will be lost. Are you sure?"
+    APP_MES_NAME_EMPTY      "Name cannot be empty."
+    APP_MES_DATA_READY      "A data file has been successfully set.\nYou can switch it using the right-click menu of the notification area icon."
+    APP_MES_NEWFILE_READY   "A new data file has been successfully set up.\nData is saved each time it is added or edited."
+    APP_INF_FILE_FILTER     "Charu3 data files (*.c3d)|*.c3d"
+    APP_INF_FILE_FILTER2    "%s data files (*.%s)|*.%s|"
+    APP_INF_FILE_FILTER_VISUAL_PREF "Style Settings files (*.json)|*.json|"
+    APP_INF_FILE_FILTER4    "Wave Files (*.wav)|*.wav||"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_FILE_FILTER5    "??????(*.bmp)|*.bmp||"
-    APP_INF_FILE_FILTER6    "???????(*.*)|*.*||"
-    APP_INF_TABNAME_01      "??"
-    APP_INF_TABNAME_02      "???????"
-    APP_INF_TABNAME_03      "??????"
-    APP_INF_TABNAME_04      "?????"
-    APP_INF_TABNAME_05      "????"
+    APP_INF_FILE_FILTER5    "Bitmap Files (*.bmp)|*.bmp||"
+    APP_INF_FILE_FILTER6    "All Files (*.*)|*.*||"
+    APP_INF_FILE_FILTER_FMT_DISPLAY "%s Data Files (*.%s)"
+    APP_INF_FILE_FILTER_FMT_PATTERN "*.%s"
+    APP_INF_FILE_FILTER_C3D_DISPLAY "Charu3 Data Files (*.c3d)"
+    APP_INF_FILE_FILTER_C3D_PATTERN "*.c3d"
+    APP_INF_TABNAME_01      "General"
+    APP_INF_TABNAME_02      "Style"
+    APP_INF_TABNAME_03      "Data  Tree View"
+    APP_INF_TABNAME_04      "Stock Mode"
+    APP_INF_TABNAME_05      "Key Event"
+    APP_INF_TABNAME_06      "Advanced"
+    APP_INF_CAPTION_EDITITEM "Edit Item"
+    APP_INF_CAPTION_NEWITEM "Add Item"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_KEY_COMBO01     "????"
-    APP_INF_KEY_COMBO02     "????"
-    APP_INF_KEY_COMBP03     "??????"
-    APP_INF_KEY_COMBO04     "????"
-    APP_INF_KEY_LIST_CAPTION01 "??????"
-    APP_INF_KEY_LIST_CAPTION02 "?????"
-    APP_INF_KEY_LIST_CAPTION03 "?????"
-    APP_INF_KEY_LIST_CAPTION04 "??????"
+    APP_INF_KEY_COMBO01     "Begins"
+    APP_INF_KEY_COMBO02     "Ends"
+    APP_INF_KEY_COMBO03     "Contains"
+    APP_INF_KEY_COMBO04     "Exactly"
+    APP_INF_KEY_LIST_CAPTION01 "Window Caption"
+    APP_INF_KEY_LIST_CAPTION02 "Which"
+    APP_INF_KEY_LIST_CAPTION03 "Copy"
+    APP_INF_KEY_LIST_CAPTION04 "Paste"
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_IMPORT_FOLDERNAME "????????"
+    APP_INF_IMPORT_FOLDERNAME "Imported"
     APP_INF_2BYTESPACE      " "
-    APP_INF_TIP_DATA01      "Title: "
-    APP_INF_TIP_DATA02      "\n?????\n  "
+    APP_INF_TIP_DATA01      "Name: "
+    APP_INF_TIP_DATA02      "\nOptional Properties\n  "
 END
 
 STRINGTABLE
 BEGIN
-    APP_INF_TIP_DATA03      "\n??: "
-    APP_INF_TIP_DATA04      "\n??: "
+    APP_INF_TIP_DATA03      "\nCreated: "
+    APP_INF_TIP_DATA04      "\nModified: "
     APP_INF_COPY_APPEND     "????"
-    APP_INF_NEW_FOLDER      "??????"
+    APP_INF_NEW_FOLDER      "New folder"
     APP_INF_CLASS_HISTORY   "????"
     APP_INF_DEF_FONT        "MS P????"
     APP_INF_DEF_ICON        "??????"
@@ -1803,6 +1833,12 @@ BEGIN
     APP_INF_EXMACRO_TEMPLATE12 "????????@A@DirectCopyKey="
     APP_INF_EXMACRO_TEMPLATE13 "??????@R@DuplicationCheck="
     APP_INF_EXMACRO_TEMPLATE14 "end"
+    IDS_PREFERENCE_LOAD_VISUAL "???????????????"
+    APP_INF_DATA_PERMANENT  "Permanent Data"
+    APP_INF_DATA_ONETIME    "One-Time Data"
+    APP_INF_FOLDER_REGULAR  "Regular Folder"
+    APP_INF_FOLDER_HISTORY  "History Folder"
+    APP_INF_EXPORT_CAPTION  "Export Data to File"
 END
 
 #endif    // 英語 resources

@@ -726,7 +726,7 @@ void CCharu3App::popupTreeWindow(POINT pos, bool keepSelection, HTREEITEM hOpenI
 
 	if(m_ini.m_bDebug) {
 		CString strText;
-		strText.Format(_T("popupTreeWindow x=%d y=%d keep=%s\n"), pos.x, pos.y, keepSelection ? "true" : "false");
+		strText.Format(_T("popupTreeWindow x=%d y=%d keep=%s\n"), pos.x, pos.y, keepSelection ? _T("true") : _T("false"));
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
 
@@ -2155,6 +2155,26 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 }
 
 //---------------------------------------------------
+//関数名	OnExit()
+//機能		終了処理
+//---------------------------------------------------
+void CCharu3App::OnExit()
+{
+	stopAppendHotKey();
+	stopHotkey();
+	KillTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE);
+	KillTimer(m_pMainWnd->m_hWnd, TIMER_MOUSE);
+	if (m_hLangDll) {
+		FreeLibrary(m_hLangDll);
+	}
+	m_ini.unHookKey();
+	SaveData();
+	if (m_ini.m_bDebug) {
+		CGeneral::writeLog(m_ini.m_strDebugLog, _T("OnExit\n"), _ME_NAME_, __LINE__);
+	}
+}
+
+//---------------------------------------------------
 //関数名	OnAbout()
 //機能		Aboutダイアログ
 //---------------------------------------------------
@@ -2261,26 +2281,6 @@ void CCharu3App::OnExport()
 			strRes.LoadString(APP_MES_FAILURE_DATA_SAVE);
 			AfxMessageBox(strRes, MB_ICONEXCLAMATION, 0);
 		}
-	}
-}
-
-//---------------------------------------------------
-//関数名	OnExit()
-//機能		終了処理
-//---------------------------------------------------
-void CCharu3App::OnExit()
-{
-	stopAppendHotKey();
-	stopHotkey();
-	KillTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE);
-	KillTimer(m_pMainWnd->m_hWnd, TIMER_MOUSE);
-	if (m_hLangDll) {
-		FreeLibrary(m_hLangDll);
-	}
-	m_ini.unHookKey();
-	SaveData();
-	if (m_ini.m_bDebug) {
-		CGeneral::writeLog(m_ini.m_strDebugLog, _T("OnExit\n"), _ME_NAME_, __LINE__);
 	}
 }
 
