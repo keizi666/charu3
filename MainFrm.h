@@ -10,7 +10,6 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-
 #include "ChildView.h"
 
 #define _ME_NAME_ _T("MainFrm.cpp")
@@ -20,10 +19,9 @@
 //---------------------------------------------------
 class CMainFrame : public CFrameWnd
 {
-	
 public:
 	CMainFrame();
-protected: 
+protected:
 	DECLARE_DYNAMIC(CMainFrame)
 
 // アトリビュート

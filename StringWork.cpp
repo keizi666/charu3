@@ -19,7 +19,6 @@ int UStringWork::trim(TCHAR *strSource)
 	return nRet;
 }
 
-
 //---------------------------------------------------
 //関数名	trimFront(char *strSource)	[public]
 //機能		文字列の前のスペースを取る
@@ -199,9 +198,9 @@ bool UStringWork::isSJIS(TCHAR *szSource)
 #endif
 	if(*szSource == NULL) return isRet;
 	if(((unsigned char)*szSource >= 0x81 && (unsigned char)*szSource <= 0x9f) ||
-		((unsigned char)*szSource >= 0xe0 && (unsigned char)*szSource <= 0xef)) 
+		((unsigned char)*szSource >= 0xe0 && (unsigned char)*szSource <= 0xef))
 		if(((unsigned char)*(szSource + 1) >= 0x40 && (unsigned char)*(szSource + 1) <= 0x7e) ||
-			((unsigned char)*szSource >= 0x80 && (unsigned char)*szSource <= 0xfc)) 
+			((unsigned char)*szSource >= 0x80 && (unsigned char)*szSource <= 0xfc))
 			isRet = true;
 
 	return isRet;
@@ -241,4 +240,3 @@ int UStringWork::moveForward(TCHAR *szMovePos,int nMove)
 	*(szMovePos - nMove) = NULL;
 	return i;
 }
-

@@ -28,7 +28,6 @@ public:
 			CHotKeyCtrl::SetHotKey(wVirtualKeyCode,wModifiers | HOTKEYF_EXT);
 	};
 
-
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(CMyHotkeyCtrl)

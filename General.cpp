@@ -183,6 +183,7 @@ COLORREF CGeneral::RGB2BGR(COLORREF col)
 	ret = (R + G + B);
 	return ret;
 }
+
 //---------------------------------------------------
 //関数名	BGR2RGB(COLORREF col)
 //機能		BGRをRGBに変換
@@ -277,7 +278,7 @@ void CGeneral::getCaretPos(POINT *CaretPos,FOCUS_INFO *focusInfo)
 			CaretPos->y = gui.rcCaret.top;
 
 			ClientToScreen(hActiveWnd,CaretPos);
-			CaretPos->y += gui.rcCaret.bottom - gui.rcCaret.top;  
+			CaretPos->y += gui.rcCaret.bottom - gui.rcCaret.top;
 		}
 	}
 //	if(CaretPos->x < 0)	CaretPos->x = 0;
@@ -346,7 +347,7 @@ void CGeneral::setFocusInfo(const FOCUS_INFO *focusInfo)
 		setFocus(focusInfo->m_hActiveWnd, focusInfo->m_hFocusWnd);
 	}
 }
-	
+
 //---------------------------------------------------
 //関数名	getFocusInfo(FOCUS_INFO *focusInfo)
 //機能		フォーカス情報取得
@@ -356,12 +357,12 @@ void CGeneral::getFocusInfo(FOCUS_INFO *focusInfo,HWND hForeground)
 	//フォーカスを持つウィンドウの取得
 	if(!hForeground)
 		focusInfo->m_hActiveWnd = GetForegroundWindow();
-	else 
+	else
 		focusInfo->m_hActiveWnd = hForeground;
 
 	DWORD dwID = GetWindowThreadProcessId(focusInfo->m_hActiveWnd, NULL);
 	if(dwID) {
-		AttachThreadInput(dwID, GetCurrentThreadId(), TRUE); 
+		AttachThreadInput(dwID, GetCurrentThreadId(), TRUE);
 		focusInfo->m_hFocusWnd = GetFocus();
 		dwID = GetWindowThreadProcessId(focusInfo->m_hActiveWnd, NULL);
 		if(dwID)	AttachThreadInput(dwID, GetCurrentThreadId(), FALSE);
@@ -476,7 +477,6 @@ void CGeneral::writeLog(CString strFileName,CString strLogText,CString strSource
 #endif
 }
 
-
 //---------------------------------------------------
 //関数名	convertWareki(long lDate)
 //機能		西暦を和暦に変換
@@ -498,7 +498,7 @@ CString CGeneral::convertWareki(long lDate)
 		//今
 		setCTime(lDate,&lYear,&lMonth,&lDay);
 		dwNow = countDays(lYear,lMonth,lDay);
-	
+
 		if(dwComp > dwNow) {
 			if(i > 0)	setCTime(lDateTbl[i-1],&lGannen,&lMonth,&lDay);
 			else lGannen = 1861;
@@ -593,8 +593,7 @@ bool CGeneral::setCTime(long lDate,long *lYear,long *lMonth,long *lDay)
 	//日を割り出す
 	*lDay = (lDate - ((*lYear) * 10000 + (*lMonth) * 100));
 	if(*lDay <= 0) return isRet;
-	
+
 	isRet = true;
 	return isRet;
 }
-

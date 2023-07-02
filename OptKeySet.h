@@ -36,7 +36,6 @@ public:
 	CMyHotkeyCtrl	m_ctrlCopyKey;
 	//}}AFX_DATA
 
-
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(COptKeySet)

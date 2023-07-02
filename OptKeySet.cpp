@@ -110,7 +110,7 @@ void COptKeySet::SetListData(CHANGE_KEY sKeyData, CHANGE_KEY *dataPtr, bool isSe
 		strPaste = strPaste + _T("Shift + ");
 	}
 	strPaste = strPaste + CGeneral::getKeyName(sKeyData.m_sCopyPasteKey.m_uVK_Paste,theApp.m_ini.m_keyLayout);
-	
+
 	//コピーキー設定名を作成
 	strCopy = "";
 	uMod = sKeyData.m_sCopyPasteKey.m_uMod_Copy;
@@ -132,7 +132,7 @@ void COptKeySet::SetListData(CHANGE_KEY sKeyData, CHANGE_KEY *dataPtr, bool isSe
 	AddItem.mask = LVIF_TEXT | LVIF_PARAM;
 	for(i = 0; i <= 3; i++) {
 		AddItem.iItem = nLine;
-		AddItem.iSubItem = i; 
+		AddItem.iSubItem = i;
 		AddItem.pszText = pString[i];
 
 		//新規
@@ -226,10 +226,10 @@ BOOL COptKeySet::PreTranslateMessage(MSG* pMsg)
 //関数名	OnInitDialog()
 //機能		初期化
 //---------------------------------------------------
-BOOL COptKeySet::OnInitDialog() 
+BOOL COptKeySet::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	UINT uKey,uMod,uCopyKey,uCopyMod;
 	theApp.m_ini.getPasteHotKey(&uKey,&uMod,&uCopyKey,&uCopyMod);
 	uMod = CGeneral::mod2Hotkey(uMod);
@@ -252,7 +252,7 @@ BOOL COptKeySet::OnInitDialog()
 	std::list<CHANGE_KEY>::iterator it;
 	CHANGE_KEY key;
 	int i;
-	
+
 	for(it = theApp.m_ini.m_key.m_KeyList.begin(); it != theApp.m_ini.m_key.m_KeyList.end(); it++) {
 		m_MyKeyList.insert(m_MyKeyList.end(),*it);
 	}
@@ -260,7 +260,7 @@ BOOL COptKeySet::OnInitDialog()
 	for(i = 0,it = m_MyKeyList.begin(); it != m_MyKeyList.end(); it++,i++) {
 		SetListData(*it, &*it, false, i);
 	}
-	
+
 /*	m_ctrlCaptionCombo.ResetContent ();
 	EnumWindows(&EnumWindowTitle,(LPARAM )this);
 	m_ctrlCaptionCombo.SetCurSel(0);
@@ -269,7 +269,7 @@ BOOL COptKeySet::OnInitDialog()
 	m_ctrlCopyWaitEdit.SetWindowText(_T("100"));
 	m_ctrlPasteWaitEdit.SetWindowText(_T("100"));
 	CheckRadioButton(IDC_OPT_KEY_ACTION2_01,IDC_OPT_KEY_ACTION2_03,IDC_OPT_KEY_ACTION2_01);
-*/	
+*/
 	return TRUE;
 }
 
@@ -303,7 +303,7 @@ BOOL COptKeySet::DestroyWindow()
 }
 
 //---------------------------------------------------
-//関数名	OnOptKeyEdit() 
+//関数名	OnOptKeyEdit()
 //機能		キー設定変更
 //---------------------------------------------------
 void COptKeySet::OnOptKeyEdit()
@@ -342,7 +342,7 @@ void COptKeySet::OnOptKeyEdit()
 //関数名	OnOptKeyAdd()
 //機能		設定追加
 //---------------------------------------------------
-void COptKeySet::OnOptKeyAdd() 
+void COptKeySet::OnOptKeyAdd()
 {
 	CHANGE_KEY deffault;
 	COptKeySetEditDlg keySetEditDlg;
@@ -372,7 +372,7 @@ void COptKeySet::OnOptKeyAdd()
 //関数名	OnOptKeyDalete()
 //機能		設定削除
 //---------------------------------------------------
-void COptKeySet::OnOptKeyDalete() 
+void COptKeySet::OnOptKeyDalete()
 {
 	if(m_nSelItem > -1) {
 		CString strBuff,strCaption;
@@ -398,7 +398,7 @@ void COptKeySet::OnOptKeyDalete()
 //関数名	OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		リストの選択変更
 //---------------------------------------------------
-void COptKeySet::OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult) 
+void COptKeySet::OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 
@@ -439,7 +439,7 @@ void COptKeySet::OnItemchangedOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;*/
 }
 
-void COptKeySet::OnDblclkOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult) 
+void COptKeySet::OnDblclkOptKeyIniList(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	OnOptKeyEdit();
 	*pResult = 0;

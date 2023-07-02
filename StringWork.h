@@ -22,7 +22,7 @@ struct KANSUUJI
 //---------------------------------------------------
 //@ƒNƒ‰ƒXéŒ¾
 //---------------------------------------------------
-class UStringWork  
+class UStringWork
 {
 public:
 	static int splitString(TCHAR *strSource,TCHAR split, ...);

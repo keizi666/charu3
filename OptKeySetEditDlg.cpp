@@ -14,7 +14,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COptKeySetEditDlg ダイアログ
 
-
 COptKeySetEditDlg::COptKeySetEditDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(COptKeySetEditDlg::IDD, pParent)
 {
@@ -28,7 +27,6 @@ COptKeySetEditDlg::COptKeySetEditDlg(CWnd* pParent /*=NULL*/)
 	m_pasteWait = 0;
 	//}}AFX_DATA_INIT
 }
-
 
 void COptKeySetEditDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -127,7 +125,6 @@ BOOL CALLBACK EnumWindowTitle(HWND hwnd, LPARAM lParam)
     return TRUE;  /* 列挙を続ける */
 }
 
-
 BEGIN_MESSAGE_MAP(COptKeySetEditDlg, CDialog)
 	//{{AFX_MSG_MAP(COptKeySetEditDlg)
 	//}}AFX_MSG_MAP
@@ -136,7 +133,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // COptKeySetEditDlg メッセージ ハンドラ
 
-BOOL COptKeySetEditDlg::OnInitDialog() 
+BOOL COptKeySetEditDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	EnumWindows(&EnumWindowTitle, (LPARAM)GetDlgItem(IDC_OPT_WINCAP_COMBO));

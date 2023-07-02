@@ -103,7 +103,7 @@ BOOL COptPopup::PreTranslateMessage(MSG* pMsg)
 //関数名	OnInitDialog()
 //機能		初期化
 //---------------------------------------------------
-BOOL COptPopup::OnInitDialog() 
+BOOL COptPopup::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
@@ -125,7 +125,7 @@ void COptPopup::OnShowWindow(BOOL bShow, UINT nStatus)
 //関数名	DestroyWindow()
 //機能		設定を反映
 //---------------------------------------------------
-BOOL COptPopup::DestroyWindow() 
+BOOL COptPopup::DestroyWindow()
 {
 	CWnd *cPopupPositionSelector = GetDlgItem(IDC_OPT_POPUP_POS);
 	theApp.m_ini.m_pop.m_nPopupPos = static_cast<CComboBox*>(cPopupPositionSelector)->GetCurSel();

@@ -121,7 +121,7 @@ BOOL COptVisual::PreTranslateMessage(MSG* pMsg)
 //関数名	OnInitDialog()
 //機能		初期化
 //---------------------------------------------------
-BOOL COptVisual::OnInitDialog() 
+BOOL COptVisual::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
@@ -131,7 +131,7 @@ BOOL COptVisual::OnInitDialog()
 	hDC = ::GetDC(NULL);
 	EnumFontFamilies(hDC,NULL,(FONTENUMPROC)EnumFontProc,(LPARAM)this);
 	::ReleaseDC(NULL,hDC);
-	
+
 	SetOpacityText(theApp.m_ini.m_visual.m_nOpacity);
 	return TRUE;
 }
@@ -164,7 +164,7 @@ BOOL COptVisual::DestroyWindow()
 	edit = (CEdit*)GetDlgItem(IDC_OPT_BACKGROUND_COLOR);
 	edit->GetWindowText(strBuff);
 	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBackgroundColor);
-	
+
 	edit = (CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR);
 	edit->GetWindowText(strBuff);
 	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nTextColor);
@@ -174,7 +174,7 @@ BOOL COptVisual::DestroyWindow()
 	_stscanf_s(strBuff,_T("%x"),&theApp.m_ini.m_visual.m_nBorderColor);
 
 	int nCursel = m_ctrlFontCombo.GetCurSel();
-	if(nCursel == CB_ERR) nCursel = 0; 
+	if(nCursel == CB_ERR) nCursel = 0;
 	m_ctrlFontCombo.GetLBText(nCursel,strBuff);
 	theApp.m_ini.m_visual.m_strFontName = strBuff;
 
@@ -197,7 +197,7 @@ void COptVisual::OnOptVsBrows()
 }
 
 //---------------------------------------------------
-//関数名	OnChangeOptBorderColor() 
+//関数名	OnChangeOptBorderColor()
 //機能		枠色変更時にパレットチェンジ
 //---------------------------------------------------
 void COptVisual::OnChangeOptBorderColor()
@@ -206,7 +206,7 @@ void COptVisual::OnChangeOptBorderColor()
 }
 
 //---------------------------------------------------
-//関数名	OnChangeOptBackColor() 
+//関数名	OnChangeOptBackColor()
 //機能		背景色変更時にパレットチェンジ
 //---------------------------------------------------
 void COptVisual::OnChangeOptBackColor()
@@ -215,7 +215,7 @@ void COptVisual::OnChangeOptBackColor()
 }
 
 //---------------------------------------------------
-//関数名	OnChangeOptTextColor() 
+//関数名	OnChangeOptTextColor()
 //機能		テキスト色変更時にパレットチェンジ
 //---------------------------------------------------
 void COptVisual::OnChangeOptTextColor()
@@ -236,7 +236,7 @@ void COptVisual::OnOptBorderColorPal()
 //関数名	OnOptBackColorPal()
 //機能		背景色パレット
 //---------------------------------------------------
-void COptVisual::OnOptBackgroundColorPal() 
+void COptVisual::OnOptBackgroundColorPal()
 {
 	setPalet((CEdit*)GetDlgItem(IDC_OPT_BACKGROUND_COLOR),&m_ctrlBackgroundPal);
 }
@@ -245,7 +245,7 @@ void COptVisual::OnOptBackgroundColorPal()
 //関数名	OnOptTextColorPal()
 //機能		テキスト色パレット
 //---------------------------------------------------
-void COptVisual::OnOptTextColorPal() 
+void COptVisual::OnOptTextColorPal()
 {
 	setPalet((CEdit*)GetDlgItem(IDC_OPT_TEXT_COLOR),&m_ctrlTextPal);
 }
@@ -266,7 +266,7 @@ void COptVisual::setTextToPalet(CEdit *edit,CPaletStatic *stPal)
 	CString strBuff;
 	int nColor;
 	if(!edit || !stPal) return;
-	
+
 	edit->GetWindowText(strBuff);
 	_stscanf_s(strBuff,_T("%x"),&nColor);
 
@@ -297,7 +297,7 @@ void COptVisual::setPalet(CEdit* edit, CPaletStatic* stPal)
 }
 
 //---------------------------------------------------
-//関数名	ReadStyleFile() 
+//関数名	ReadStyleFile()
 //機能		スタイル設定を読み込み
 //---------------------------------------------------
 void COptVisual::ReadStyleFile()

@@ -30,13 +30,12 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CMyEditCtrl メッセージ ハンドラ
 
-
-BOOL CMyEditCtrl::PreTranslateMessage(MSG* pMsg) 
+BOOL CMyEditCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	if(pMsg->message == WM_KEYDOWN && pMsg->wParam == 0x41 && ::GetKeyState(VK_CONTROL) < 0){
 		this->SetSel(0,-1);
 		return TRUE;
 	}
-	
+
 	return CEdit::PreTranslateMessage(pMsg);
 }

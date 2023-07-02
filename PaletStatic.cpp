@@ -30,7 +30,6 @@ CPaletStatic::~CPaletStatic()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CPaletStatic, CStatic)
 	//{{AFX_MSG_MAP(CPaletStatic)
 	ON_WM_PAINT()
@@ -45,10 +44,10 @@ END_MESSAGE_MAP()
 //関数名	OnPaint()
 //機能		描画
 //---------------------------------------------------
-void CPaletStatic::OnPaint() 
+void CPaletStatic::OnPaint()
 {
 	CPaintDC dc(this); // 描画用のデバイス コンテキスト
-	
+
 	RECT rect;
 	GetClientRect(&rect);
 	dc.IntersectClipRect(&rect);

@@ -38,7 +38,6 @@ public:
 	CComboBox	m_ctrlFontCombo;
 	//}}AFX_DATA
 
-
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(COptVisual)

@@ -42,7 +42,6 @@ CCharu3Tree::~CCharu3Tree()
 	if(m_ImageList)	delete m_ImageList;
 }
 
-
 BEGIN_MESSAGE_MAP(CCharu3Tree, CTreeCtrl)
 	//{{AFX_MSG_MAP(CCharu3Tree)
 	ON_WM_MOUSEMOVE()
@@ -99,7 +98,6 @@ void CCharu3Tree::setPlugin(CString strPath)
 							strText.Format(_T("plugin setting \"%s\"\n"), plugin.m_strPluginFilePath.GetString());
 							CGeneral::writeLog(theApp.m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 						}
-						
 					}
 				}
 				FreeLibrary(hDLL);
@@ -130,10 +128,10 @@ void CCharu3Tree::setImageList(POINT posSize,CString strFileName,CString strPath
 		m_ImageList->Create(bitMap.bmHeight,bitMap.bmHeight,ILC_COLOR16 | ILC_MASK,22,2);
 
 		m_ImageList->Add(&Bitmap,RGB(0,255,0));
-		Bitmap.DeleteObject();		
+		Bitmap.DeleteObject();
 		SetImageList(m_ImageList,TVSIL_NORMAL);
 	}
-}	
+}
 
 //---------------------------------------------------
 //関数名	checkRedundancyID(int nID)
@@ -200,7 +198,7 @@ HTREEITEM CCharu3Tree::searchParentOption(HTREEITEM hStartItem,CString strOption
 	HTREEITEM hRet = nullptr;
 	STRING_DATA data;
 	int nFound;
-	
+
 	strOption.MakeLower();
 	hRet = hStartItem;
 	while(hRet) {
@@ -261,7 +259,7 @@ bool CCharu3Tree::saveDataToFile(CString strFileName,CString strPlugin,HTREEITEM
 	fwrite(DAT_FORMAT,strlen(DAT_FORMAT),1,fFile);//データ識別子
 #endif
 	for (std::list<STRING_DATA>::iterator it = tmplist.begin(); it != tmplist.end(); it++) {
-		
+
 		if(it->m_cKind & KIND_ONETIME) {//ノーマル項目以外を保存
 			continue;
 		}
@@ -358,7 +356,7 @@ bool CCharu3Tree::loadDataFileDef(CString strFileName,CString strPlugin) {
 	CWnd::UnlockWindowUpdate();
 
 	return isRet;
-}	
+}
 
 //---------------------------------------------------
 //関数名	loadDataFile(CString strFileName,CString strPlugin)
@@ -409,7 +407,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName, CString strPlugin, std::list
 	}
 
 	strMBCS[strlen(DAT_FORMAT)] = '\0';
-	
+
 	if(strcmp(strMBCS,DAT_FORMAT) != 0) {
 		nVersion = 1;
 		if(strcmp(strMBCS,DAT_FORMAT2) != 0) {
@@ -505,7 +503,7 @@ bool CCharu3Tree::loadDataFile(CString strFileName, CString strPlugin, std::list
 		readList.insert(readList.end(),data);//リストに追加
 	}
 
-	//本リストに登録	
+	//本リストに登録
 	tmplist->clear();
 	std::list<STRING_DATA>::iterator stit;
 
@@ -639,7 +637,7 @@ bool CCharu3Tree::LoadDataWithPlugin(CString strFileName, CString strPlugin, std
 			}
 			pEndDLL();//メモリを開放
 
-			//本リストに登録	
+			//本リストに登録
 			tmplist->clear();
 			normalizationID(&readList,ROOT);//IDを正規化
 			for(stit = readList.begin(); stit != readList.end(); stit++) {
@@ -741,7 +739,7 @@ void CCharu3Tree::copyData(int nParentID, HTREEITEM hParentTreeItem, std::list<S
 
 	//ツリーデータ
 	TV_INSERTSTRUCT TreeCtrlItem;
-	
+
 	//データを処理
 	for (it = pList->begin(); it != pList->end(); it++) {
 		//親IDと同じのだけ処理
@@ -804,10 +802,9 @@ void CCharu3Tree::moveChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 			moveChildren(hFromItem,hInsertItem);
 		}
 		hFromItem = GetNextItem(hFromItem,TVGN_NEXT);
-
-
 	}while(hFromItem);
 }
+
 //---------------------------------------------------
 //関数名	copyChildren(HTREEITEM hFromItem,HTREEITEM hToItem)
 //機能		フォルダからフォルダに子供たちをコピー
@@ -1080,7 +1077,7 @@ void CCharu3Tree::data2TreeStruct(TV_INSERTSTRUCT *pTreeCtrlItem, std::list<STRI
 	pTreeCtrlItem->item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
 	STRING_DATA data;
 	data.m_strTitle = it->m_strTitle;
-	
+
 	//アイコンを設定
 	int nIcon = getIconNumber(it->m_cKind,it->m_cIcon);
 	pTreeCtrlItem->item.iImage = nIcon;
@@ -1236,7 +1233,7 @@ void CCharu3Tree::cleanupOneTimeItems(HTREEITEM hStartItem, int nKind /*KIND_LOC
 	}while(hItem);
 }
 
-void CCharu3Tree::changeIcon(HTREEITEM hTreeItem,int nID) 
+void CCharu3Tree::changeIcon(HTREEITEM hTreeItem,int nID)
 {
 	STRING_DATA data = getData(hTreeItem);
 	data.m_cIcon = nID;
@@ -1444,7 +1441,6 @@ void CCharu3Tree::allIconCheck()
 	}
 }
 
-
 //---------------------------------------------------
 //関数名	decideIcon(CString strData)
 //機能		アイコンを決定
@@ -1491,7 +1487,6 @@ char CCharu3Tree::decideIcon(CString strData)
 	return cIcon;
 }
 
-
 //---------------------------------------------------
 //関数名	makeTitle(CString strData)
 //機能		保存文字列からタイトルを作る
@@ -1513,7 +1508,6 @@ CString CCharu3Tree::makeTitle(CString strData,int nTitleLength)
 
 	return strBuff;
 }
-
 
 //---------------------------------------------------
 //関数名	getOneTimeText(bool isFirst)
@@ -1776,7 +1770,7 @@ void CCharu3Tree::classHistoryFolder(HTREEITEM hTreeItem,int nRirekiCount)
 			AddTreeCtrlItem.item.lParam = TreeCtrlItem.lParam;
 			AddTreeCtrlItem.hInsertAfter = TVI_FIRST;
 			AddTreeCtrlItem.hParent = hFirstFolder;
-	
+
 			data.m_nParentID = dataTarget.m_nMyID;
 			editData(hLastChild,data);
 			InsertItem(&AddTreeCtrlItem);
@@ -1862,8 +1856,6 @@ int CCharu3Tree::getChildCount(HTREEITEM hTreeItem,bool isBrotherOnly)
 		if(dataPtr->m_cKind & KIND_DATA_ALL)	nChildren++;
 		hTreeItem = GetNextItem(hTreeItem,TVGN_NEXT);
 	}while(hTreeItem);
-
-
 
 	return nChildren;
 }
@@ -1984,7 +1976,7 @@ void CCharu3Tree::checkOut(HTREEITEM hItem)
 //関数名	Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 //機能		クリエイト処理
 //---------------------------------------------------
-BOOL CCharu3Tree::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext) 
+BOOL CCharu3Tree::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 	BOOL isRet = CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 	return isRet;
@@ -1994,7 +1986,7 @@ BOOL CCharu3Tree::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 //関数名	OnMouseMove(UINT nFlags, CPoint point)
 //機能		マウスカーソル移動
 //---------------------------------------------------
-void CCharu3Tree::OnMouseMove(UINT nFlags, CPoint point) 
+void CCharu3Tree::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (IsDragging()) {
 		CPoint ptTree(point);
@@ -2085,7 +2077,7 @@ void CCharu3Tree::OnMouseMove(UINT nFlags, CPoint point)
 //関数名	OnBegindrag(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		ドラッグ開始
 //---------------------------------------------------
-void CCharu3Tree::OnBegindrag(NMHDR* pNMHDR, LRESULT* pResult) 
+void CCharu3Tree::OnBegindrag(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 	m_hDragItem = pNMTreeView->itemNew.hItem;
@@ -2114,10 +2106,10 @@ void CCharu3Tree::OnBegindrag(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 //---------------------------------------------------
-//関数名	OnLButtonUp(UINT nFlags, CPoint point) 
+//関数名	OnLButtonUp(UINT nFlags, CPoint point)
 //機能		ボタンを離した
 //---------------------------------------------------
-void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point) 
+void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	if(!IsDragging()) return;
 
@@ -2194,10 +2186,10 @@ void CCharu3Tree::OnLButtonUp(UINT nFlags, CPoint point)
 }
 
 //---------------------------------------------------
-//関数名	OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult) 
+//関数名	OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		フォルダ開閉処理
 //---------------------------------------------------
-void CCharu3Tree::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult) 
+void CCharu3Tree::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 
@@ -2214,7 +2206,7 @@ void CCharu3Tree::OnItemexpanding(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CCharu3Tree::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult) 
+void CCharu3Tree::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 
@@ -2226,7 +2218,7 @@ void CCharu3Tree::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CCharu3Tree::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos) 
+void CCharu3Tree::OnWindowPosChanging(WINDOWPOS FAR* lpwndpos)
 {
 	if(lpwndpos) {
 		CTreeCtrl::OnWindowPosChanging(lpwndpos);
@@ -2264,7 +2256,7 @@ void CCharu3Tree::setScrollBar()
 //関数名	OnMouseWheel
 //機能		ホイール処理
 //---------------------------------------------------
-BOOL CCharu3Tree::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
+BOOL CCharu3Tree::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	if(zDelta < 0)
 		SendMessage(WM_KEYDOWN,VK_DOWN,0);
@@ -2273,10 +2265,10 @@ BOOL CCharu3Tree::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-void CCharu3Tree::OnItemexpanded(NMHDR* pNMHDR, LRESULT* pResult) 
+void CCharu3Tree::OnItemexpanded(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 	setScrollBar();
-	
+
 	*pResult = 0;
 }

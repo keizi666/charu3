@@ -118,7 +118,6 @@ struct COPYPASTE_KEY
 	int  m_nMessage;	//メッセージ方式
 	UINT m_uMod_Paste;	//貼り付け特殊キー
 	UINT m_uVK_Paste;	//貼り付けキー
-	
 	UINT m_uMod_Copy;	//コピー特殊キー
 	UINT m_uVK_Copy;	//コピーキー
 
@@ -242,7 +241,7 @@ struct MACRO_STRUCT
 //---------------------------------------------------
 // クラス定義
 //---------------------------------------------------
-class CInit  
+class CInit
 {
 public:
 	CInit();

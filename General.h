@@ -13,10 +13,10 @@
 #include "stdafx.h"
 #include "nlomann/json.hpp"
 
-#if !defined(SPI_GETFOREGROUNDLOCKTIMEOUT) 
-   #define SPI_GETFOREGROUNDLOCKTIMEOUT          0x2000 
-   #define SPI_SETFOREGROUNDLOCKTIMEOUT          0x2001 
-#endif 
+#if !defined(SPI_GETFOREGROUNDLOCKTIMEOUT)
+   #define SPI_GETFOREGROUNDLOCKTIMEOUT          0x2000
+   #define SPI_SETFOREGROUNDLOCKTIMEOUT          0x2001
+#endif
 //フォーカス情報
 struct FOCUS_INFO {
 	HWND m_hActiveWnd;
@@ -26,7 +26,7 @@ struct FOCUS_INFO {
 //---------------------------------------------------
 // クラス定義
 //---------------------------------------------------
-class CGeneral  
+class CGeneral
 {
 public:
 	CGeneral();

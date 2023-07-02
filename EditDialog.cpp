@@ -42,7 +42,7 @@ void CEditDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CEditDialog)
-	
+
 	if (GetDlgItem(IDC_EDIT_DATA))
 		DDX_Control(pDX, IDC_EDIT_DATA, m_ctrlDataEdit);
 	if (GetDlgItem(IDC_NAME))
@@ -77,7 +77,7 @@ END_MESSAGE_MAP()
 // CEditDialog メッセージ ハンドラ
 //---------------------------------------------------
 
-void CEditDialog::OnEditPasteFile() 
+void CEditDialog::OnEditPasteFile()
 {
 	CFileDialog* pFileDialog;
 	CString strRes;
@@ -222,7 +222,7 @@ void CEditDialog::OnOK()
 //関数名	OnSelchangeEditMacroCombo()
 //機能		マクロコンボボックス変更
 //---------------------------------------------------
-void CEditDialog::OnSelchangeEditMacroCombo() 
+void CEditDialog::OnSelchangeEditMacroCombo()
 {
 	if(m_vctMacro) {
 		int nSelect = m_ctrlMacro.GetItemData(m_ctrlMacro.GetCurSel());
@@ -231,7 +231,7 @@ void CEditDialog::OnSelchangeEditMacroCombo()
 			macro = m_vctMacro->at(nSelect);
 			InsertText(m_ctrlDataEdit, macro.m_strMacro);
 		}
-	}	
+	}
 }
 
 void CEditDialog::OnKindChanged()
@@ -249,7 +249,7 @@ void CEditDialog::OnKindChanged()
 //関数名	OnSelchangeEditDataMacroCombo()
 //機能		マクロコンボボックス変更
 //---------------------------------------------------
-void CEditDialog::OnSelchangeEditDataMacroCombo() 
+void CEditDialog::OnSelchangeEditDataMacroCombo()
 {
 	if(m_vctDataMacro) {
 		int nSelect = m_ctrlDataMacro.GetItemData(m_ctrlDataMacro.GetCurSel());
@@ -258,7 +258,7 @@ void CEditDialog::OnSelchangeEditDataMacroCombo()
 			macro = m_vctDataMacro->at(nSelect);
 			InsertText(m_ctrlMacroEdit, macro.m_strMacro);
 		}
-	}	
+	}
 }
 
 //---------------------------------------------------

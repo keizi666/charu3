@@ -26,7 +26,6 @@ COptMainDialog::COptMainDialog(CWnd* pParent /*=NULL*/,int nPage) : CDialog(COpt
 	m_nPage = nPage;
 }
 
-
 //---------------------------------------------------
 //関数名	DoDataExchange(CDataExchange* pDX)
 //機能		データエクスチェンジ
@@ -39,7 +38,6 @@ void COptMainDialog::DoDataExchange(CDataExchange* pDX)
 		DDX_Control(pDX, IDC_OPT_TAB, m_ctrlTab);
 	//}}AFX_DATA_MAP
 }
-
 
 BEGIN_MESSAGE_MAP(COptMainDialog, CDialog)
 	//{{AFX_MSG_MAP(COptMainDialog)
@@ -57,10 +55,10 @@ END_MESSAGE_MAP()
 //関数名	OnInitDialog()
 //機能		初期化
 //---------------------------------------------------
-BOOL COptMainDialog::OnInitDialog() 
+BOOL COptMainDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	TC_ITEM    item;
 	int i;
     item.mask = TCIF_TEXT;
@@ -109,14 +107,14 @@ BOOL COptMainDialog::OnInitDialog()
 //関数名	OnSelchangeOptTab(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		タブ切り替え処理
 //---------------------------------------------------
-void COptMainDialog::OnSelchangeOptTab(NMHDR* pNMHDR, LRESULT* pResult) 
+void COptMainDialog::OnSelchangeOptTab(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	for(int i = 0; i <= MAX_OPT_PAGE; i++)
 	    m_OptionPage[i]->ShowWindow(SW_HIDE);
 
 	m_nPage = m_ctrlTab.GetCurSel();
     m_OptionPage[m_nPage]->ShowWindow(SW_SHOW);
-  	
+
 	*pResult = 0;
 }
 
@@ -124,7 +122,7 @@ void COptMainDialog::OnSelchangeOptTab(NMHDR* pNMHDR, LRESULT* pResult)
 //関数名	DestroyWindow()
 //機能		ウィンドウ破棄処理
 //---------------------------------------------------
-BOOL COptMainDialog::DestroyWindow() 
+BOOL COptMainDialog::DestroyWindow()
 {
 	if (theApp.m_pTreeDlg->IsWindowVisible()) {
 		theApp.m_pTreeDlg->RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
@@ -136,22 +134,20 @@ BOOL COptMainDialog::DestroyWindow()
 	}
 	theApp.m_ini.m_nOptionPage = m_nPage;
 
-	
 	return CDialog::DestroyWindow();
 }
 
-void COptMainDialog::OnShowWindow(BOOL bShow, UINT nStatus) 
+void COptMainDialog::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
-	
+
 	SetWindowPos(&wndTopMost,0,0,0,0,SWP_NOMOVE | SWP_NOSIZE);
-	
 }
 
 //---------------------------------------------------
 // メッセージ前処理
 //---------------------------------------------------
-BOOL COptMainDialog::PreTranslateMessage(MSG* pMsg) 
+BOOL COptMainDialog::PreTranslateMessage(MSG* pMsg)
 {
 	if( pMsg->message == WM_KEYDOWN) {
 		if(pMsg->wParam == VK_PRIOR) {
@@ -165,12 +161,11 @@ BOOL COptMainDialog::PreTranslateMessage(MSG* pMsg)
 			m_ctrlTab.SetCurFocus(m_nPage);
 		}
 	}
-	
+
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-
-void COptMainDialog::OnKeydownOptTab(NMHDR* pNMHDR, LRESULT* pResult) 
+void COptMainDialog::OnKeydownOptTab(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	TC_KEYDOWN* pTCKeyDown = (TC_KEYDOWN*)pNMHDR;
 	if(pTCKeyDown->wVKey == VK_TAB && ::GetKeyState(VK_CONTROL) < 0){

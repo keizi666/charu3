@@ -37,7 +37,6 @@ public:
 	//}}AFX_DATA
 	friend BOOL CALLBACK EnumWindowTitle(HWND hwnd, LPARAM lParam);
 
-
 	void setKeyInfo(CHANGE_KEY keyInfo) {
 		m_key = keyInfo;
 	}

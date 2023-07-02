@@ -428,7 +428,7 @@ COPYPASTE_KEY CInit::getAppendKeyInit(CString strWinName,int nNumber)
 		if(key.m_nMatch != MATCH_PHRASE) {
 			nFindPoint = strWinName.Find(key.m_strTitle);
 		}
-		
+
 		// ‘O•ûˆê’v
 		if(key.m_nMatch == MATCH_FORWARD) {
 			if(nFindPoint == 0)	isMatch = true;
@@ -445,7 +445,7 @@ COPYPASTE_KEY CInit::getAppendKeyInit(CString strWinName,int nNumber)
 		else if(key.m_nMatch == MATCH_EXACT) {
 			if(strWinName == key.m_strTitle)	isMatch = true;
 		}
-		
+
 		if(isMatch) {		//Œ©‚Â‚©‚Á‚½
 			if(nNumber > 0) {
 				nNumber--;
@@ -480,7 +480,7 @@ CHANGE_KEY CInit::getAppendKeyInit2(CString strWinName)
 		if(key.m_nMatch != MATCH_EXACT) {
 			nFindPoint = strWinName.Find(key.m_strTitle);
 		}
-		
+
 		// ‘O•ûˆê’v
 		if(key.m_nMatch == MATCH_FORWARD) {
 			if(nFindPoint == 0)	isMatch = true;
@@ -497,7 +497,7 @@ CHANGE_KEY CInit::getAppendKeyInit2(CString strWinName)
 		else if(key.m_nMatch == MATCH_EXACT) {
 			if(strWinName == key.m_strTitle)	isMatch = true;
 		}
-		
+
 		if(isMatch) {		//Œ©‚Â‚©‚Á‚½
 			return key;
 		}
@@ -506,4 +506,3 @@ CHANGE_KEY CInit::getAppendKeyInit2(CString strWinName)
 	key.m_nMatch = -1;
 	return key;
 }
-

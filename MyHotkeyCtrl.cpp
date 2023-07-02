@@ -23,7 +23,6 @@ CMyHotkeyCtrl::~CMyHotkeyCtrl()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CMyHotkeyCtrl, CHotKeyCtrl)
 	//{{AFX_MSG_MAP(CMyHotkeyCtrl)
 		// メモ - ClassWizard はこの位置にマッピング用のマクロを追加または削除します。
@@ -33,7 +32,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CMyHotkeyCtrl メッセージ ハンドラ
 
-BOOL CMyHotkeyCtrl::PreTranslateMessage(MSG* pMsg) 
+BOOL CMyHotkeyCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	if(this->GetFocus() == this) {
 		if(!(pMsg->lParam & 0x40000000) && (pMsg->message == WM_KEYDOWN || pMsg->message == WM_SYSKEYDOWN)) {
@@ -56,6 +55,5 @@ BOOL CMyHotkeyCtrl::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 
-	
 	return CHotKeyCtrl::PreTranslateMessage(pMsg);
 }

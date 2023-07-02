@@ -211,7 +211,7 @@ BOOL CCharu3App::InitInstance()
 	}
 }
 
-int CCharu3App::ExitInstance() 
+int CCharu3App::ExitInstance()
 {
 	if(m_hLangDll) {
 		FreeLibrary(m_hLangDll);
@@ -520,7 +520,7 @@ void CCharu3App::stopHotkey()
 //関数名	setAppendHotKey()
 //機能		追加ホットキーを設定
 //---------------------------------------------------
-void CCharu3App::setAppendHotKey() 
+void CCharu3App::setAppendHotKey()
 {
 	HOT_KEY_CODE keyData;
 	std::list<STRING_DATA>::iterator it;
@@ -580,7 +580,7 @@ void CCharu3App::setAppendHotKey()
 //関数名	stopAppendHotKey()
 //機能		追加ホットキーをすべて止める
 //---------------------------------------------------
-void CCharu3App::stopAppendHotKey() 
+void CCharu3App::stopAppendHotKey()
 {
 	UnregisterHotKey(NULL,HOTKEY_PASTE);
 	int nSize = m_hotkeyVector.size();
@@ -655,9 +655,9 @@ int CCharu3App::getKeycode(TCHAR *szKeyName)
 
 	int i,nRet = 0;
 
-	if(strTmp.Find(_T("0X")) >= 0) 
+	if(strTmp.Find(_T("0X")) >= 0)
 		_stscanf_s(szKeyName,_T("0x%2x"),&nRet);
-	
+
 	if(!nRet) {
 		if(_tcsclen(szKeyName) == 1) {
 			SHORT code = VkKeyScanEx(*szKeyName,m_ini.m_keyLayout);
@@ -699,7 +699,7 @@ bool CCharu3App::setAppendKeyInit(HWND hTopWindow,COPYPASTE_KEY *keySet)
 		strText.Format(_T("setAppendKeyInit %s %d %d %d %d %d\n"),strWinName.GetString(),keySet->m_uMod_Copy,keySet->m_uVK_Copy,keySet->m_uMod_Paste,keySet->m_uVK_Paste,keySet->m_nMessage);
 		CGeneral::writeLog(m_ini.m_strDebugLog,strText,_ME_NAME_,__LINE__);
 	}
-	
+
 	isRet = true;
 	return isRet;
 }
@@ -806,8 +806,6 @@ void CCharu3App::adjustLocation(POINT *pos)
 		pos->y = DeskTopSize.top;
 	if(pos->x < DeskTopSize.left)
 		pos->x = DeskTopSize.left;
-
-
 }
 
 //---------------------------------------------------
@@ -899,7 +897,6 @@ void CCharu3App::closeTreeWindow(int nRet)
 		m_hSelectItemBkup = NULL;
 	}
 
-	
 	//データを保存
 	SaveData();
 	m_ini.writeEnvInitData();//環境設定を保存
@@ -908,7 +905,7 @@ void CCharu3App::closeTreeWindow(int nRet)
 	if (m_isStockMode && m_ini.m_nWindowCheckInterval > 0) {
 		SetTimer(m_pMainWnd->m_hWnd, TIMER_ACTIVE, m_ini.m_nWindowCheckInterval, NULL);
 	}
-	
+
 	setAppendHotKey();//追加ホットキーを設定
 	m_ini.setHookKey(m_hSelfWnd);
 
@@ -1117,7 +1114,7 @@ void CCharu3App::playHotItem(int nTarget)
 
 					strSelect = getSelectString(m_keySet,m_focusInfo.m_hFocusWnd);//選択文字取得
 					strPaste = convertMacro(&data,strSelect,strClip,strMacro);//マクロ変換
-					
+
 					if(m_ini.m_bDebug) {
 						CString strText;
 						strText.Format(_T("Direct paste data %s active:%x focus:%x\n"),strPaste.GetString(),m_focusInfo.m_hActiveWnd,m_focusInfo.m_hFocusWnd);
@@ -1281,7 +1278,7 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 		strKeyMacro = m_pTree->getDataOptionStr(macroDataPtr->m_strMacro,_T("beforkey"));
 		if(strKeyMacro != "") execKeyMacro(strKeyMacro);
 	}
-	
+
 	//マクロを置換
 	strPaste.Replace(_T("<charu2MACRO_KEY>"),MACRO_START_KEY);
 	strPaste.Replace(_T("</charu2MACRO_KEY>"),MACRO_END_KEY);
@@ -1307,7 +1304,7 @@ void CCharu3App::execData(CString strPaste,COPYPASTE_KEY key,HTREEITEM hTargetIt
 		if(strCut != _T("")) {
 //			pasteData(strCut,key,hWnd);//貼り付け
 //			m_strlClipBackup = strCut;
-			
+
 			TCHAR strWindowName[1024];
 			*strWindowName = (char)NULL;
 			CString strWinName;
@@ -1387,7 +1384,7 @@ void CCharu3App::keyUpDown(UINT uMod,UINT uVKCode,int nFlag)
 			keybd_event(VK_CONTROL, (BYTE)MapVirtualKey(VK_CONTROL, 0), KEYEVENTF_EXTENDEDKEY, 0);
 		if(uMod & MOD_SHIFT)
 			keybd_event(VK_SHIFT, (BYTE)MapVirtualKey(VK_SHIFT, 0), KEYEVENTF_EXTENDEDKEY, 0);
-		
+
 		keybd_event(uVKCode,0,KEYEVENTF_EXTENDEDKEY,0);
 	}
 	if(nFlag & KEY_UP) {
@@ -1412,7 +1409,7 @@ void CCharu3App::keyUpDownC2(UINT uMod,UINT uVKCode,int nFlag)
 		if(uMod & MOD_ALT)		keybd_event(VK_MENU,0,NULL,0);
 		if(uMod & MOD_CONTROL)	keybd_event(VK_CONTROL,0,NULL,0);
 		if(uMod & MOD_SHIFT)	keybd_event(VK_SHIFT,0,NULL,0);
-		
+
 		keybd_event(uVKCode,0,NULL,0);
 	}
 	else if(nFlag & KEY_UP) {
@@ -1460,7 +1457,7 @@ CString CCharu3App::convertMacro(STRING_DATA* SourceData, CString strSelect, CSt
 		if(m_pTree->convertMacroPlugin(SourceData, &strSourceData, strSelect, strClip, strSoftName))
 			return strSourceData;
 	}
-	
+
 	int nStart,nEnd,nMove,nTagStart,nTagEnd;
 
 	CString strTag,strTagEnd,strBuff,strBuff2,strTime;
@@ -1727,7 +1724,6 @@ CString CCharu3App::convertMacro(STRING_DATA* SourceData, CString strSelect, CSt
 			}
 		}
 
-		
 		nMove = strBuff2.GetLength();// - strBuff.GetLength();
 		strSourceData.Delete(nStart,strBuff.GetLength());
 		strSourceData.Insert(nStart,strBuff2);
@@ -2014,7 +2010,7 @@ void  CCharu3App::resetTreeDialog()
 //関数名	PreTranslateMessage(MSG* pMsg)
 //機能		メッセージ前処理
 //---------------------------------------------------
-BOOL CCharu3App::PreTranslateMessage(MSG* pMsg) 
+BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 {
 	//キーフック処理
 	if(pMsg->message == WM_KEY_HOOK) {
@@ -2058,7 +2054,7 @@ BOOL CCharu3App::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-	
+
 	if(m_nPhase == PHASE_IDOL && pMsg->message == WM_TIMER) {
 		// 監視タイマー処理（ウィンドウが切り替わっていたらストックモードのペーストキーを切り替える）
 		if(pMsg->wParam == TIMER_ACTIVE && m_isStockMode) {
@@ -2178,7 +2174,7 @@ void CCharu3App::OnExit()
 //関数名	OnAbout()
 //機能		Aboutダイアログ
 //---------------------------------------------------
-void CCharu3App::OnAbout() 
+void CCharu3App::OnAbout()
 {
 	CAboutDlg aboutDlg;
 	aboutDlg.DoModal();
@@ -2193,7 +2189,7 @@ END_MESSAGE_MAP()
 //関数名	OnHelp()
 //機能		ヘルプ
 //---------------------------------------------------
-void CCharu3App::OnHelp() 
+void CCharu3App::OnHelp()
 {
 	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE/wiki"), NULL, NULL, SW_SHOWNORMAL);
 }
@@ -2202,7 +2198,7 @@ void CCharu3App::OnHelp()
 //関数名	OnOption()
 //機能		設定
 //---------------------------------------------------
-void CCharu3App::OnOption() 
+void CCharu3App::OnOption()
 {
 	if(m_nPhase != PHASE_IDOL && m_nPhase != PHASE_POPUP) return;
 	int nPhase = m_nPhase;
@@ -2263,7 +2259,7 @@ void CCharu3App::OnOption()
 //関数名	OnChangData()
 //機能		データファイル切り替え
 //---------------------------------------------------
-void CCharu3App::OnChangData() 
+void CCharu3App::OnChangData()
 {
 	SelectFile();
 }
@@ -2288,7 +2284,7 @@ void CCharu3App::OnExport()
 //関数名	OnAddData()
 //機能		データ追加
 //---------------------------------------------------
-void CCharu3App::OnAddData() 
+void CCharu3App::OnAddData()
 {
 	STRING_DATA data;
 	CEditDialog editDialog(NULL, &data, true);
@@ -2302,7 +2298,7 @@ void CCharu3App::OnAddData()
 //関数名	OnStockStop()
 //機能		ストックモード切替
 //---------------------------------------------------
-void CCharu3App::OnStockStop() 
+void CCharu3App::OnStockStop()
 {
 	toggleStockMode(); // Toggle stock mode by main menu
 }
@@ -2311,7 +2307,7 @@ void CCharu3App::OnStockStop()
 //関数名	resetTreeDialog()
 //機能		ツリー再構築
 //---------------------------------------------------
-void CCharu3App::OnResetTree() 
+void CCharu3App::OnResetTree()
 {
 	resetTreeDialog();//ツリー再構築
 }

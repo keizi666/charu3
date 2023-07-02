@@ -28,7 +28,6 @@ public:
 	enum { IDD = IDD_SETTINGS_03_DATATREE };
 	//}}AFX_DATA
 
-
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
 	//{{AFX_VIRTUAL(COptPopup)

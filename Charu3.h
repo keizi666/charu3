@@ -18,7 +18,6 @@
 #pragma comment(linker, "/entry:\"wWinMainCRTStartup\"")
 #endif
 
-
 #define ROOT -1
 
 #include "resource.h"       // ÉÅÉCÉì ÉVÉìÉ{Éã
@@ -150,7 +149,7 @@ struct HOT_KEY_CODE
 	UINT m_uModKey;
 	UINT m_uVkCode;
 	bool m_isDoubleClick;
-	HTREEITEM m_hItem;	
+	HTREEITEM m_hItem;
 	int  m_nDataID;
 	DWORD m_dwDoubleKeyTime;
 	CString m_strMacroName;

@@ -152,14 +152,14 @@ public:
 		}
 		return *m_nMaxID;
 	}
-		
+
 	void setInitInfo(int *nMaxID,int *nSelectID,int *nRecNumber){
 		m_nMaxID = nMaxID;
 		m_nSelectID = nSelectID;
 		m_nRecNumber = nRecNumber;
 	}
 	void setSelectID(int nID){*m_nSelectID = nID;}
-	
+
 	bool checkRedundancyID(int nID);
 	bool checkMyChild(HTREEITEM hMeItem,HTREEITEM hChildItem);
 	HTREEITEM searchMyRoots(HTREEITEM hStartItem);

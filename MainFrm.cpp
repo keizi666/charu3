@@ -135,7 +135,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	cs.style = WS_TILED | WS_MINIMIZEBOX | WS_SYSMENU;
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.lpszClass = AfxRegisterWndClass(0);
-	
+
 	return TRUE;
 }
 
@@ -218,10 +218,10 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 
 //---------------------------------------------------
-//関数名	WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+//関数名	WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 //機能		メッセージ処理
 //---------------------------------------------------
-LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// tasktray messages
 	if (WM_TASKTRAY == message && theApp.getPhase() == PHASE_IDOL) {
@@ -270,20 +270,20 @@ LRESULT CMainFrame::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 //関数名	OnExit()
 //機能		終了処理
 //---------------------------------------------------
-void CMainFrame::OnExit() 
+void CMainFrame::OnExit()
 {
 	theApp.OnExit();
 	Shell_NotifyIcon(NIM_DELETE,&m_nIcon);
 	CFrameWnd::DestroyWindow();
 }
 
-BOOL CMainFrame::OnQueryEndSession() 
+BOOL CMainFrame::OnQueryEndSession()
 {
 	if (!CFrameWnd::OnQueryEndSession()) {
 		return FALSE;
 	}
 	theApp.OnExit();
 	Shell_NotifyIcon(NIM_DELETE,&m_nIcon);
-	
+
 	return TRUE;
 }

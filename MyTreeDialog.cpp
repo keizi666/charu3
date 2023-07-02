@@ -172,7 +172,7 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keep
 	m_pTreeCtrl->OnWindowPosChanging(NULL);
 	m_toolTip.SetDelayTime(theApp.m_ini.m_nToolTipDelay);
 	m_toolTip.SetDelayTime(TTDT_AUTOPOP,theApp.m_ini.m_nToolTipTime);
-	
+
 	m_pTreeCtrl->SetBkColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackgroundColor)));
 	m_pTreeCtrl->SetTextColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nTextColor)));
 	m_pTreeCtrl->SetInsertMarkColor(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor)));
@@ -223,7 +223,7 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keep
 	}
 	if(m_brBack.m_hObject == NULL)
 		m_brBack.CreateSolidBrush(COLORREF(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBackgroundColor)));
-	
+
 	CGeneral::setAbsoluteForegroundWindow(theApp.m_pMainFrame->m_hWnd);
 	m_pTreeCtrl->SetFocus();
 
@@ -264,7 +264,7 @@ void CMyTreeDialog::OnNcPaint()
 //関数名	OnSize(UINT nType, int cx, int cy)
 //機能		リサイズ
 //---------------------------------------------------
-void CMyTreeDialog::OnSize(UINT nType, int cx, int cy) 
+void CMyTreeDialog::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 	if(m_pTreeCtrl->m_hWnd) {
@@ -277,17 +277,17 @@ void CMyTreeDialog::OnSize(UINT nType, int cx, int cy)
 //関数名	DestroyWindow()
 //機能		ウィンド破棄時処理
 //---------------------------------------------------
-BOOL CMyTreeDialog::DestroyWindow() 
+BOOL CMyTreeDialog::DestroyWindow()
 {
 	m_toolTip.DelTool(m_pTreeCtrl);
 	return CDialog::DestroyWindow();
 }
 
 //---------------------------------------------------
-//関数名	OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
+//関数名	OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		キー押下処理
 //---------------------------------------------------
-void CMyTreeDialog::OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
+void CMyTreeDialog::OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	TV_KEYDOWN* pTVKeyDown = (TV_KEYDOWN*)pNMHDR;
 
@@ -297,23 +297,23 @@ void CMyTreeDialog::OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 //---------------------------------------------------
-//関数名	OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
+//関数名	OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		右ボタン押下処理
 //---------------------------------------------------
-void CMyTreeDialog::OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
+void CMyTreeDialog::OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if(m_isModal || m_pTreeCtrl->IsDragging()) return;
 	POINT point;
 	::GetCursorPos(&point);
-	popupMenu(point);	
+	popupMenu(point);
 	*pResult = 0;
 }
 
 //---------------------------------------------------
-//関数名	OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
+//関数名	OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		左ボタン押下処理
 //---------------------------------------------------
-void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult) 
+void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	RECT TreeRect,ItemRect;
 	POINT pCursolPos;
@@ -394,7 +394,7 @@ void CMyTreeDialog::OnShowWindow(BOOL bShow, UINT nStatus)
 		GetWindowRect(&rect);
 		theApp.m_ini.m_DialogSize.x = rect.right - rect.left;
 		theApp.m_ini.m_DialogSize.y = rect.bottom - rect.top;
-		//		if(m_cOlgFont) m_pTreeCtrl->SetFont(m_cOlgFont,FALSE);	
+		//		if(m_cOlgFont) m_pTreeCtrl->SetFont(m_cOlgFont,FALSE);
 		delete m_cFont;
 	}
 	CDialog::OnShowWindow(bShow, nStatus);
@@ -977,7 +977,7 @@ void CMyTreeDialog::OnCheckItem()
 //関数名	OnCopyData()
 //機能		選択データをコピー
 //---------------------------------------------------
-void CMyTreeDialog::OnCopyData() 
+void CMyTreeDialog::OnCopyData()
 {
 	HTREEITEM hTreeItem;
 	hTreeItem = m_pTreeCtrl->GetSelectedItem();
@@ -990,7 +990,7 @@ void CMyTreeDialog::OnCopyData()
 //関数名	OnDataPaste()
 //機能		コピーデータを貼り付け
 //---------------------------------------------------
-void CMyTreeDialog::OnDataPaste() 
+void CMyTreeDialog::OnDataPaste()
 {
 	if(m_hCopyData && !m_isModal) {
 		HTREEITEM hTreeItem = m_pTreeCtrl->GetSelectedItem();
@@ -1001,7 +1001,7 @@ void CMyTreeDialog::OnDataPaste()
 		if(m_pTreeCtrl->ItemHasChildren(m_hCopyData)) {
 			if(!m_pTreeCtrl->checkMyChild(m_hCopyData,hTreeItem)) {
 				hTreeItem = m_pTreeCtrl->addData(hTreeItem,data);
-				m_pTreeCtrl->copyChildren(m_hCopyData,hTreeItem);	
+				m_pTreeCtrl->copyChildren(m_hCopyData,hTreeItem);
 			}
 			else {
 				m_isModal = true;
@@ -1022,7 +1022,7 @@ void CMyTreeDialog::OnDataPaste()
 //関数名	OnImport()
 //機能		インポート処理
 //---------------------------------------------------
-void CMyTreeDialog::OnImport() 
+void CMyTreeDialog::OnImport()
 {
 	if (m_isModal) {
 		return;
@@ -1088,7 +1088,7 @@ void CMyTreeDialog::OnImport()
 //関数名	OnExport()
 //機能		エクスポート処理
 //---------------------------------------------------
-void CMyTreeDialog::OnExport() 
+void CMyTreeDialog::OnExport()
 {
 	if (m_isModal) {
 		return;
@@ -1113,7 +1113,7 @@ void CMyTreeDialog::OnExport()
 //関数名	OnOption()
 //機能		設定
 //---------------------------------------------------
-void CMyTreeDialog::OnOption() 
+void CMyTreeDialog::OnOption()
 {
 	if(m_isModal) return;
 	m_isModal = true;
