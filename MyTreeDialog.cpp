@@ -1177,7 +1177,12 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 	m_toolTip.Activate(FALSE);
 	if (theApp.m_ini.m_visual.m_nToolTip == 0) {
 		(void)strRes.LoadString(APP_INF_TIP_DATA01);
-		strTip += strRes + data.m_strTitle;
+		CString s = data.m_strTitle;
+		int max = 100;
+		if (s.GetLength() > max) {
+			s = s.Left(max - 3) + _T("...");
+		}
+		strTip += strRes + s;
 		gap = true;
 	}
 	if (theApp.m_ini.m_visual.m_nToolTip != 2) {
@@ -1185,6 +1190,10 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 			if (gap) strTip += _T("\n\n");
 			CString s = data.m_strData;
 			(void)s.Replace(_T("\t"), _T("    "));
+			int max = 500;
+			if (s.GetLength() > max) {
+				s = s.Left(max - 3) + _T("...");
+			}
 			strTip += s;
 			gap = true;
 		}
@@ -1193,6 +1202,10 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 			CString s = data.m_strMacro;
 			(void)s.Replace(_T("\t"), _T("    "));
 			(void)s.Replace(_T("\n"), _T("\n  "));
+			int max = 300;
+			if (s.GetLength() > max) {
+				s = s.Left(max - 3) + _T("...");
+			}
 			if (gap) strTip += _T("\n");
 			strTip += strRes + s;
 			gap = true;
@@ -1205,7 +1218,7 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 		(void)strRes.LoadString(APP_INF_TIP_DATA04);
 		strTip += strRes + CTime(data.m_timeEdit).Format(_T("%x %X"));
 	}
-	m_toolTip.UpdateTipText(strTip, m_pTreeCtrl);
+	m_toolTip.UpdateTipText(strTip, m_pTreeCtrl); // NOTE: Experiments have shown that if strTip exceeds 1024 characters, the app will crash after MFC fails with Debug Assertion Failed.
 	m_toolTip.Activate(TRUE);
 }
 
