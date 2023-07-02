@@ -183,6 +183,9 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keep
 	else {
 		m_pTreeCtrl->ModifyStyle(TVS_SINGLEEXPAND,NULL,NULL);
 	}
+
+#if false
+	// I thought about displaying the pathname of the data above the data tree.But decided not to.
 	CWnd* cpDataName = GetDlgItem(IDC_DATA_NAME);
 	if (cpDataName) {
 		TCHAR buf[MAX_PATH];
@@ -190,6 +193,7 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keep
 		GetFullPathName(theApp.m_ini.m_strDataPath.GetString(), MAX_PATH, buf, &pFileName);
 		cpDataName->SetWindowText(pFileName);
 	}
+#endif
 
 	HTREEITEM hSelectItem = m_pTreeCtrl->GetSelectedItem();
 	if (!keepSelection) {

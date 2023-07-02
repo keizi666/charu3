@@ -25,7 +25,7 @@ public:
 
 // ダイアログ データ
 	//{{AFX_DATA(COptPopup)
-	enum { IDD = IDD_OPT_POPUP };
+	enum { IDD = IDD_SETTINGS_03_DATATREE };
 	//}}AFX_DATA
 
 

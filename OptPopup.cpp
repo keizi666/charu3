@@ -62,10 +62,10 @@ void COptPopup::DoDataExchange(CDataExchange* pDX)
 	if (GetDlgItem(IDC_OPT_SELECT_BY_TYPING_AUTO_EXPAND))
 		DDX_Check(pDX, IDC_OPT_SELECT_BY_TYPING_AUTO_EXPAND, m_nSelectByTypingAutoExpand);
 
-	if (GetDlgItem(IDC_OPT_SCROLBAR1))
-		DDX_Check(pDX, IDC_OPT_SCROLBAR1, m_nScrollVertical);
-	if (GetDlgItem(IDC_OPT_SCROLBAR2))
-		DDX_Check(pDX, IDC_OPT_SCROLBAR2, m_nScrollHorizontal);
+	if (GetDlgItem(IDC_OPT_SCROLLBAR_VERTICAL))
+		DDX_Check(pDX, IDC_OPT_SCROLLBAR_VERTICAL, m_nScrollVertical);
+	if (GetDlgItem(IDC_OPT_SCROLLBAR_HORIZONTAL))
+		DDX_Check(pDX, IDC_OPT_SCROLLBAR_HORIZONTAL, m_nScrollHorizontal);
 	if (GetDlgItem(IDC_OPT_SINGLE_EXPAND))
 		DDX_Check(pDX, IDC_OPT_SINGLE_EXPAND, m_nSingleExpand);
 	if (GetDlgItem(IDC_OPT_SELECT_SAVE))

@@ -28,7 +28,7 @@ public:
 
 // ダイアログ データ
 	//{{AFX_DATA(COptVisual)
-	enum { IDD = IDD_OPT_VISUAL };
+	enum { IDD = IDD_SETTINGS_02_STYLE };
 	CString	m_strBorderColor;
 	CPaletStatic m_ctrlBorderPal;
 	CString	m_strBackgroundColor;

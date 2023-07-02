@@ -39,7 +39,7 @@ public:
 
 // ダイアログ データ
 	//{{AFX_DATA(COptMainDialog)
-	enum { IDD = IDD_PREFERENCES };
+	enum { IDD = IDD_SETTINGS };
 	CTabCtrl	m_ctrlTab;
 	//}}AFX_DATA
 

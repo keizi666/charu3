@@ -26,7 +26,7 @@ public:
 
 // ダイアログ データ
 	//{{AFX_DATA(COptEtc)
-	enum { IDD = IDD_PREF_01_GENERAL };
+	enum { IDD = IDD_SETTINGS_01_GENERAL };
 	CMyHotkeyCtrl	m_ctrlFifoKey;
 	CMyHotkeyCtrl	m_ctrlPopupKey;
 	//}}AFX_DATA

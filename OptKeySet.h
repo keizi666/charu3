@@ -28,7 +28,7 @@ public:
 	CHANGE_KEY windouToKeyOption();
 // ダイアログ データ
 	//{{AFX_DATA(COptKeySet)
-	enum { IDD = IDD_OPT_KEYSET };
+	enum { IDD = IDD_SETTINGS_05_KEYS };
 	CEdit	m_ctrlCopyWaitEdit;
 	CEdit	m_ctrlPasteWaitEdit;
 	CMyHotkeyCtrl	m_ctrlPasteKey;
