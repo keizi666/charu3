@@ -7,6 +7,7 @@
 #include "MyTreeDialog.h"
 #include "EditDialog.h"
 #include "SerchDialog.h"
+#include "General.h"
 #include "Charu3.h"
 
 #include <list>
@@ -19,6 +20,57 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 extern CCharu3App theApp;
+
+namespace {
+	//---------------------------------------------------
+	//ä÷êîñº	DrawLline(CDC* pDC, CPoint* point, COLORREF color)
+	//ã@î\		ê¸Çï`Ç≠
+	//---------------------------------------------------
+	void DrawLline(CDC* pDC, CPoint* point, COLORREF color)
+	{
+		CPen pen(PS_SOLID, 1, color);
+		CPen* old_pen = pDC->SelectObject(&pen);
+		pDC->MoveTo(point[0]);
+		pDC->LineTo(point[1]);
+		pDC->LineTo(point[2]);
+		pDC->SelectObject(old_pen);
+	}
+
+	//---------------------------------------------------
+	//ä÷êîñº	DrawFrame(CDC* pDC, CRect& rect, COLORREF color)
+	//ã@î\		ògÇï`Ç≠
+	//---------------------------------------------------
+	void DrawFrame(CDC* pDC, CRect& rect, COLORREF color)
+	{
+		CPoint point[3];
+		COLORREF colRD[5];
+		COLORREF colLU[5];
+
+		colRD[1] = colLU[0] = CGeneral::upDownLight(color, 1.2);
+		colRD[2] = colLU[1] = color;
+		colRD[0] = colLU[2] = CGeneral::upDownLight(color, 0.8);
+
+		for (int i = 1; i <= 3; i++) {
+			point[0].x = rect.left + i;
+			point[0].y = rect.bottom - i;
+			point[1].x = rect.right - i;
+			point[1].y = rect.bottom - i;
+			point[2].x = rect.right - i;
+			point[2].y = rect.top + i - 1;
+			DrawLline(pDC, point, colRD[i - 1]);
+		}
+
+		for (int i = 0; i <= 2; i++) {
+			point[0].x = rect.left + i;
+			point[0].y = rect.bottom - i - 1;
+			point[1].x = rect.left + i;
+			point[1].y = rect.top + i;
+			point[2].x = rect.right - i;
+			point[2].y = rect.top + i;
+			DrawLline(pDC, point, colLU[i]);
+		}
+	}
+} // anonymous namespace
 
 //---------------------------------------------------
 //ä÷êîñº	CMyTreeDialog
@@ -214,8 +266,6 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keep
 	if (hOpenItem) m_pTreeCtrl->Expand(hOpenItem, TVE_EXPAND);
 
 	m_colFrame   = CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor);
-	m_colFrameL  = CGeneral::upDownLight(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor),1.2);
-	m_colFrameD  = CGeneral::upDownLight(CGeneral::RGB2BGR(theApp.m_ini.m_visual.m_nBorderColor),0.8);
 
 	if(m_brBack.GetSafeHandle()) {
 		m_brBack.DeleteObject();
@@ -247,16 +297,26 @@ BOOL CMyTreeDialog::showWindowPos(POINT pos, POINT size, int nCmdShow, bool keep
 void CMyTreeDialog::OnNcPaint()
 {
 	CDialog::OnNcPaint();
-	// set scrollbars
+	// Set scrollbars
 	m_pTreeCtrl->setScrollBar();
-	// draw border
+	// Draw border
 	{
 		CRect rect;
 		GetWindowRect(rect);
 		CRect localRect = rect - rect.TopLeft();
 		CDC* pDC = GetWindowDC();
-		drawFrame(pDC, localRect);
+		DrawFrame(pDC, localRect, m_colFrame);
 		ReleaseDC(pDC);
+	}
+	// Workaround for the problem where the border is overwritten
+	{
+		DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
+		DwmSetWindowAttribute(m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
+		BOOL allow = FALSE;
+		DwmSetWindowAttribute(m_hWnd, DWMWA_ALLOW_NCPAINT, &allow, sizeof allow);
+		// Even with this countermeasure, there are still occasional cases where the
+		// border is hidden by overwriting. In such cases, I used the workaround of
+		// calling RedrawWindow there.
 	}
 }
 
@@ -1218,69 +1278,4 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 	}
 	m_toolTip.UpdateTipText(strTip, m_pTreeCtrl); // NOTE: Experiments have shown that if strTip exceeds 1024 characters, the app will crash after MFC fails with Debug Assertion Failed.
 	m_toolTip.Activate(TRUE);
-}
-
-//---------------------------------------------------
-//ä÷êîñº	drawFrame(CDC* pDC, CRect& rect)
-//ã@î\		ògÇï`Ç≠
-//---------------------------------------------------
-void CMyTreeDialog::drawFrame(CDC* pDC, CRect& rect)
-{
-	CPoint point[3];
-	COLORREF colRD[5];
-	COLORREF colLU[5];
-
-	colLU[0] = m_colFrameL;
-	colLU[1] = m_colFrame;
-	colLU[2] = m_colFrameD;
-
-	colRD[0] = m_colFrameD;
-	colRD[1] = m_colFrameL;
-	colRD[2] = m_colFrame;
-	for (int i = 1; i <= 3; i++) {
-		point[0].x = rect.left + i;
-		point[0].y = rect.bottom - i;
-		point[1].x = rect.right - i;
-		point[1].y = rect.bottom - i;
-		point[2].x = rect.right - i;
-		point[2].y = rect.top + i - 1;
-		drawLline(pDC, point, colRD[i - 1]);
-	}
-
-	for (int i = 0; i <= 2; i++) {
-		point[0].x = rect.left + i;
-		point[0].y = rect.bottom - i - 1;
-		point[1].x = rect.left + i;
-		point[1].y = rect.top + i;
-		point[2].x = rect.right - i;
-		point[2].y = rect.top + i;
-		drawLline(pDC, point, colLU[i]);
-	}
-	{
-		// Countermeasure for the problem of not being able to draw borders in
-		// Vista or later
-
-		// -- Even with this countermeasure, there are still occasional cases
-		// where the border is hidden by overwriting. In such cases, I have
-		// taken the countermeasure of calling RedrawWindow.
-
-		DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
-		DwmSetWindowAttribute(m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
-		BOOL allow = FALSE;
-		DwmSetWindowAttribute(m_hWnd, DWMWA_ALLOW_NCPAINT, &allow, sizeof allow);
-	}
-}
-
-//---------------------------------------------------
-//ä÷êîñº	drawLline(CDC* pDC, CPoint* point, COLORREF col)
-//ã@î\		ê¸Çï`Ç≠
-//---------------------------------------------------
-void CMyTreeDialog::drawLline(CDC* pDC, CPoint* point, COLORREF col)
-{
-	CPen pen(PS_SOLID, 1, col);
-	CPen* old_pen = pDC->SelectObject(&pen);
-	pDC->MoveTo(point[0]);
-	pDC->LineTo(point[1]);
-	pDC->LineTo(point[2]);
-	pDC->SelectObject(old_pen);
 }

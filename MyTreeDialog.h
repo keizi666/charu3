@@ -69,7 +69,7 @@ protected:
 	CBrush m_brBack;
 	CMenu m_PopupMenu;
 	HTREEITEM m_hCopyData;
-	COLORREF m_colFrameL,m_colFrame,m_colFrameD;
+	COLORREF m_colFrame;
 
 	DWORD m_dwStartTime;
 	CString m_strQuickKey;
@@ -119,8 +119,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	void drawFrame(CDC* pDC, CRect& rect);
-	void drawLline(CDC* pDC, CPoint* point, COLORREF col);
 	void popupMenu(CPoint point);
 	void changeTipString(STRING_DATA data);
 	bool selectByTyping(UINT uKeyCode);
