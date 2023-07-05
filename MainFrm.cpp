@@ -155,7 +155,7 @@ void CMainFrame::changeClip()
 	if(theApp.m_ini.m_etc.m_bShowClipboardInTooltipOfNofifyIcon) {
 		// 通知領域のツールチップを変更
 		strClipBord = strClipBord.Left(1024);
-		strClipBord.Replace(_T("	"),_T("･"));//タブを置換
+		strClipBord.Replace(_T("	"),_T(" "));//タブを置換
 		_tcscpy_s(m_nIcon.szTip,strClipBord.Left(63));
 		if(!Shell_NotifyIcon(NIM_MODIFY,&m_nIcon)){
 			Shell_NotifyIcon(NIM_ADD,&m_nIcon);

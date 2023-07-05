@@ -94,7 +94,7 @@ BEGIN_MESSAGE_MAP(CMyTreeDialog, CDialog)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_MY_TREE, OnBeginlabeleditMyTree)
 	ON_NOTIFY(TVN_ENDLABELEDIT, IDC_MY_TREE, OnEndlabeleditMyTree)
 	ON_WM_SHOWWINDOW()
-    ON_WM_NCPAINT()
+	ON_WM_NCPAINT()
 	ON_WM_CTLCOLOR()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -290,8 +290,6 @@ BOOL CMyTreeDialog::DestroyWindow()
 void CMyTreeDialog::OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	TV_KEYDOWN* pTVKeyDown = (TV_KEYDOWN*)pNMHDR;
-
-
 
 	*pResult = 0;
 }
@@ -1189,7 +1187,7 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 		if (data.m_strData != _T("")) {
 			if (gap) strTip += _T("\n\n");
 			CString s = data.m_strData;
-			(void)s.Replace(_T("\t"), _T("    "));
+			(void)s.Replace(_T("\t"), _T(" "));
 			int max = 500;
 			if (s.GetLength() > max) {
 				s = s.Left(max - 3) + _T("...");
@@ -1200,7 +1198,7 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 		if (data.m_strMacro != _T("")) {
 			(void)strRes.LoadString(APP_INF_TIP_DATA02);
 			CString s = data.m_strMacro;
-			(void)s.Replace(_T("\t"), _T("    "));
+			(void)s.Replace(_T("\t"), _T(" "));
 			(void)s.Replace(_T("\n"), _T("\n  "));
 			int max = 300;
 			if (s.GetLength() > max) {
@@ -1257,6 +1255,19 @@ void CMyTreeDialog::drawFrame(CDC* pDC, CRect& rect)
 		point[2].x = rect.right - i;
 		point[2].y = rect.top + i;
 		drawLline(pDC, point, colLU[i]);
+	}
+	{
+		// Countermeasure for the problem of not being able to draw borders in
+		// Vista or later
+
+		// -- Even with this countermeasure, there are still occasional cases
+		// where the border is hidden by overwriting. In such cases, I have
+		// taken the countermeasure of calling RedrawWindow.
+
+		DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
+		DwmSetWindowAttribute(m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
+		BOOL allow = FALSE;
+		DwmSetWindowAttribute(m_hWnd, DWMWA_ALLOW_NCPAINT, &allow, sizeof allow);
 	}
 }
 

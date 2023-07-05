@@ -182,20 +182,6 @@ BOOL CCharu3App::InitInstance()
     m_pTreeDlg->Create(IDD_DATA_TREE_VIEW, this->m_pMainWnd);
 //	::SetForegroundWindow(hActiveWnd);
 
-	{
-		// Countermeasure for the problem of not being able to draw borders in
-		// Vista or later
-
-		// -- Even with this countermeasure, there are still occasional cases
-		// where the border is hidden by overwriting. In such cases, I have
-		// taken the countermeasure of calling RedrawWindow.
-
-		DWMNCRENDERINGPOLICY policy = DWMNCRP_DISABLED;
-		DwmSetWindowAttribute(m_pTreeDlg->m_hWnd, DWMWA_NCRENDERING_POLICY, &policy, sizeof policy);
-		BOOL allow = FALSE;
-		DwmSetWindowAttribute(m_pTreeDlg->m_hWnd, DWMWA_ALLOW_NCPAINT, &allow, sizeof allow);
-	}
-
 	if (init()) {
 		CGeneral::setFocusInfo(&m_focusInfo);
 		//	setAppendKeyInit(m_focusInfo.m_hActiveWnd,&m_keySet);//ÉLÅ[ê›íËÇïœçX
