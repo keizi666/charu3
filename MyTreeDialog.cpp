@@ -1191,29 +1191,33 @@ bool CMyTreeDialog::selectByTyping(UINT uKeyCode)
 
 	char strbuff[16];
 	//キーを文字に変換 API使用
-	if(ToAsciiEx(uKeyCode,0,byteKey,(LPWORD)strbuff,0,theApp.m_ini.m_keyLayout) == 1) {
+	if (ToAsciiEx(uKeyCode,0,byteKey,(LPWORD)strbuff,0,theApp.m_ini.m_keyLayout) == 1) {
 		strbuff[1] = NULL;
 		DWORD span = timeGetTime() - m_dwStartTime;
 		m_dwStartTime = timeGetTime();
-		if(span >= static_cast<DWORD>(theApp.m_ini.m_pop.m_nSelectByTypingFinalizePeriod)) {
-			m_strQuickKey = "";//キー、タイマーを再設定
+		m_hQuickItem = m_pTreeCtrl->GetSelectedItem();
+		if (span >= static_cast<DWORD>(theApp.m_ini.m_pop.m_nSelectByTypingFinalizePeriod)) {
+			// Reset findkey, find from the next item onward, and reset timer
+			m_strQuickKey = "";
+			if (m_hQuickItem) {
+				m_hQuickItem = m_pTreeCtrl->getTrueNextItem(m_hQuickItem);
+			}
 			if (theApp.m_ini.m_pop.m_bSelectByTypingAutoPaste || theApp.m_ini.m_pop.m_bSelectByTypingAutoExpand) {
 				this->KillTimer(CHARU_QUICK_TIMER);
-				this->SetTimer(CHARU_QUICK_TIMER, theApp.m_ini.m_pop.m_nSelectByTypingFinalizePeriod, NULL);//タイマーセット
+				this->SetTimer(CHARU_QUICK_TIMER, theApp.m_ini.m_pop.m_nSelectByTypingFinalizePeriod, NULL);
 			}
 		}
-		CString strKey;
-		strKey = strbuff;
+		CString strKey = CString(strbuff);
 		if (theApp.m_ini.m_pop.m_bSelectByTypingCaseInsensitive) {
 			strKey.MakeLower();
 		}
-		m_strQuickKey = m_strQuickKey + strKey;
-		m_hQuickItem = m_pTreeCtrl->GetSelectedItem();//選択位置を基準に検索
-		if(!m_hQuickItem) m_hQuickItem = m_pTreeCtrl->GetRootItem();
-
-		if(m_hQuickItem) {
-			m_hQuickItem = m_pTreeCtrl->searchTitle(m_hQuickItem, m_strQuickKey, theApp.m_ini.m_pop.m_bSelectByTypingCaseInsensitive);//検索
-			if(m_hQuickItem) {
+		m_strQuickKey += strKey;
+		if (!m_hQuickItem) {
+			m_hQuickItem = m_pTreeCtrl->GetRootItem();
+		}
+		if (m_hQuickItem) {
+			m_hQuickItem = m_pTreeCtrl->searchTitle(m_hQuickItem, m_strQuickKey, theApp.m_ini.m_pop.m_bSelectByTypingCaseInsensitive);
+			if (m_hQuickItem) {
 				m_pTreeCtrl->SelectItem(m_hQuickItem);
 				isRet = true;//標準のインクリメンタルサーチをキャンセル
 			}

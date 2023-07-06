@@ -1346,27 +1346,25 @@ HTREEITEM CCharu3Tree::searchItem(int nKind,int nLogic,CString strKey,HTREEITEM 
 //関数名	HTREEITEM serchTitle(HTREEITEM hStartItem,CString strKey)
 //機能		タイトル検索(前方一致)
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::searchTitle(HTREEITEM hStartItem,CString strKey, bool caseInsensitive)
+HTREEITEM CCharu3Tree::searchTitle(HTREEITEM hStartItem, CString strKey, bool makeLower)
 {
-	HTREEITEM hRetItem = nullptr;
-
-	if(!hStartItem) return nullptr;
-	std::list<STRING_DATA>::iterator it;
-	STRING_DATA data;
 	HTREEITEM hItem = hStartItem;
-	hItem = getTrueNextItem(hItem);
-	while(hItem && hStartItem != hItem) {
-		data = getData(hItem);
-		if (caseInsensitive) data.m_strTitle.MakeLower();
-		if(data.m_strTitle.Find(strKey) == 0) {//発見
-			hRetItem = hItem;
+	int count = 0;
+	while (hItem) {
+		if (hItem == hStartItem && count > 0) {
+			return nullptr;
+		}
+		++count;
+		CString itemName = getDataPtr(hItem)->m_strTitle;
+		if (makeLower) {
+			itemName.MakeLower();
+		}
+		if (itemName.Find(strKey) == 0) {
 			break;
 		}
 		hItem = getTrueNextItem(hItem);
 	}
-	if(hStartItem == hItem)	hRetItem = hItem;
-
-	return hRetItem;
+	return hItem;
 }
 
 //---------------------------------------------------

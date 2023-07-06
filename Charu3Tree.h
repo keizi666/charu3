@@ -112,7 +112,7 @@ public:
 	STRING_DATA* getDataPtr(HTREEITEM hTreeItem);
 
 	HTREEITEM searchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem);
-	HTREEITEM searchTitle(HTREEITEM hStartItem, CString strKey, bool caseInsensitive = false);
+	HTREEITEM searchTitle(HTREEITEM hStartItem, CString strKey, bool makeLower = false);
 	HTREEITEM getTrueNextItem(HTREEITEM hTreeItem);
 	HTREEITEM getLastVisibleItem();
 	HTREEITEM getFirstFolder(HTREEITEM hStartItem);
