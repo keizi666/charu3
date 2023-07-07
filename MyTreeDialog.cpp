@@ -656,7 +656,7 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 		// F3 : Find Next
 		else if (pMsg->wParam == VK_F3 && !m_pTreeCtrl->IsDragging() && !m_isModal) {
 			HTREEITEM hSearchItem = m_pTreeCtrl->GetSelectedItem();
-			hSearchItem = m_pTreeCtrl->searchItem(theApp.m_ini.m_nSearchTarget, theApp.m_ini.m_nSearchLogic, theApp.m_ini.m_strSearchKeywords, hSearchItem);
+			hSearchItem = m_pTreeCtrl->searchItem(hSearchItem);
 			if (hSearchItem) {
 				m_pTreeCtrl->SelectItem(hSearchItem);
 			}
@@ -1016,7 +1016,7 @@ void CMyTreeDialog::OnListSearch()
 		theApp.m_ini.m_nSearchLogic = SearchDlg.GetSearchLogic();
 		theApp.m_ini.m_strSearchKeywords = SearchDlg.m_strSearchKeywords;
 
-		HTREEITEM hSearchItem = m_pTreeCtrl->searchItem(theApp.m_ini.m_nSearchTarget, theApp.m_ini.m_nSearchLogic, theApp.m_ini.m_strSearchKeywords, NULL);
+		HTREEITEM hSearchItem = m_pTreeCtrl->searchItem(nullptr);
 		if (hSearchItem) {
 			m_pTreeCtrl->SelectItem(hSearchItem);
 		}

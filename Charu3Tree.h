@@ -111,7 +111,7 @@ public:
 	STRING_DATA getData(HTREEITEM hTreeItem);
 	STRING_DATA* getDataPtr(HTREEITEM hTreeItem);
 
-	HTREEITEM searchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem);
+	HTREEITEM searchItem(HTREEITEM hStartItem);
 	HTREEITEM searchTitle(HTREEITEM hStartItem, CString strKey, bool makeLower = false);
 	HTREEITEM getTrueNextItem(HTREEITEM hTreeItem);
 	HTREEITEM getLastVisibleItem();

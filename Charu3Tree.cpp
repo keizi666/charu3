@@ -24,6 +24,27 @@ static char THIS_FILE[] = __FILE__;
 
 extern CCharu3App theApp;
 
+namespace {
+
+	bool findKeywords(CString text, std::vector<CString> words)
+	{
+		bool found = (theApp.m_ini.m_nSearchLogic == SEARCH_LOGIC_AND);
+		for (std::vector<CString>::iterator it = words.begin(); it != words.end(); it++) {
+			bool matched = (text.Find(*it) != -1);
+			if (!matched && theApp.m_ini.m_nSearchLogic == SEARCH_LOGIC_AND) {
+				found = false;
+				break;
+			}
+			if (matched && theApp.m_ini.m_nSearchLogic == SEARCH_LOGIC_OR) {
+				found = true;
+				break;
+			}
+		}
+		return found;
+	}
+
+} // anonymous namespace
+
 //---------------------------------------------------
 //関数名	CCharu3Tree
 //機能		コンストラクタ
@@ -1258,83 +1279,50 @@ STRING_DATA *CCharu3Tree::getDataPtr(HTREEITEM hTreeItem)
 //関数名	searchItem()
 //機能		指定のアイテムを検索し、選択する
 //---------------------------------------------------
-HTREEITEM CCharu3Tree::searchItem(int nKind,int nLogic,CString strKey,HTREEITEM hStartItem)
+HTREEITEM CCharu3Tree::searchItem(HTREEITEM hStartItem)
 {
-	std::vector<CString> m_keyVector;//検索キー
-	std::vector<CString>::iterator keyIT;
-	int nEnd;
-	bool foundInName = false, isDataFound = false;
-	STRING_DATA parentData;
-	HTREEITEM hTreeItem;
+	std::vector<CString> words;
 
-	//余分を切り取り
-	strKey.TrimLeft();
-	strKey.TrimRight();
+	// Split strKeywords into words
+	{
+		CString& strKeywords = theApp.m_ini.m_strSearchKeywords;
+		CString tokens, resToken;
+		tokens.LoadString(APP_INF_2BYTESPACE);
+		tokens += _T(" \t\n\v\f\r");
+		int curPos = 0;
+		resToken = strKeywords.Tokenize(tokens, curPos);
+		while (resToken != _T("")) {
+			words.push_back(resToken);
+			resToken = strKeywords.Tokenize(tokens, curPos);
+		}
+	}
 
-	//キーワードをスペースで切り出し
-	CString strRes;
-	strRes.LoadString(APP_INF_2BYTESPACE);
-	strKey.Replace(strRes,_T(" "));
-	while (true) {
-		nEnd = strKey.Find(_T(" "));//空白で区切る
-		if (nEnd == -1) {
+	// Find
+	HTREEITEM hTreeItem = hStartItem ? getTrueNextItem(hStartItem) : GetRootItem();
+	HTREEITEM hEndItem = hTreeItem;
+	bool found = false;
+	while (hTreeItem) {
+		STRING_DATA* data = getDataPtr(hTreeItem);
+		if (theApp.m_ini.m_nSearchTarget & SEARCH_TARGET_NAME) {
+			found = findKeywords(data->m_strTitle, words);
+			if (found) {
+				break;
+			}
+		}
+		if (theApp.m_ini.m_nSearchTarget & SEARCH_TARGET_DATA) {
+			found = findKeywords(data->m_strData + data->m_strMacro, words);
+			if (found) {
+				break;
+			}
+		}
+		hTreeItem = getTrueNextItem(hTreeItem);
+		if (hTreeItem == hEndItem) {
 			break;
 		}
-		m_keyVector.insert(m_keyVector.end(),strKey.Left(nEnd));//配列に追加
-		strKey = strKey.Right(strKey.GetLength() - nEnd);//追加した文を切り取り
-		strKey.TrimLeft();
 	}
-	m_keyVector.insert(m_keyVector.end(),strKey);//配列に追加
 
-	//検索
-	if(!hStartItem) {
-		hStartItem = GetRootItem();
-	}
-	bool found = false;
-	for (hTreeItem = getTrueNextItem(hStartItem); hTreeItem && hTreeItem != hStartItem; hTreeItem = getTrueNextItem(hTreeItem)) {
-		STRING_DATA data = getData(hTreeItem);
-		data.m_strData = data.m_strData + data.m_strMacro;//マクロも検索対象にする
-		//名前
-		if (nKind & SEARCH_TARGET_NAME) {
-			found = (nLogic == SEARCH_LOGIC_AND);
-			for (keyIT = m_keyVector.begin(); keyIT != m_keyVector.end(); keyIT++) {
-				bool matched = (data.m_strTitle.Find(*keyIT) != -1);
-				//AND検索
-				if (!matched && nLogic == SEARCH_LOGIC_AND) {
-					found = false;
-					break;
-				}
-				//OR検索
-				if (matched && nLogic == SEARCH_LOGIC_OR) {
-					found = true;
-					break;
-				}
-			}
-			if (found) {
-				break;
-			}
-		}
-		//データ
-		if(nKind & SEARCH_TARGET_DATA) {
-			found = (nLogic == SEARCH_LOGIC_AND);
-			for (keyIT = m_keyVector.begin(); keyIT != m_keyVector.end(); keyIT++) {
-				bool matched = (data.m_strData.Find(*keyIT) != -1);
-				if (!matched && nLogic == SEARCH_LOGIC_AND) {
-					found = false;
-					break;
-				}
-				if(matched && nLogic == SEARCH_LOGIC_OR) {
-					found = true;
-					break;
-				}
-			}
-			if (found) {
-				break;
-			}
-		}
-	}
 	if (found && hTreeItem) {
-		SelectItem(hTreeItem);//見つかったら選択
+		SelectItem(hTreeItem);
 	}
 	else {
 		hTreeItem = nullptr;
