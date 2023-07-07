@@ -6,6 +6,7 @@
 #include "stdafx.h"
 #include "Charu3.h"
 #include "SerchDialog.h"
+#include "General.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,6 +34,7 @@ CSearchDialog::CSearchDialog(CWnd* pParent /*=NULL*/)	: CDialog(CSearchDialog::I
 	m_nSearchByName = (theApp.m_ini.m_nSearchTarget & SEARCH_TARGET_NAME) ? 1 : 0;
 	m_nSearchByData = (theApp.m_ini.m_nSearchTarget & SEARCH_TARGET_DATA) ? 1 : 0;
 	m_nSearchLogic = theApp.m_ini.m_nSearchLogic;
+	m_nCaseInsensitive = CGeneral::BoolToInt(theApp.m_ini.m_bSearchCaseInsensitive);
 	m_strSearchKeywords = _T("");
 	//}}AFX_DATA_INIT
 }
@@ -50,6 +52,8 @@ void CSearchDialog::DoDataExchange(CDataExchange* pDX)
 		DDX_Check(pDX, IDC_SEARCH_DATA, m_nSearchByData);
 	if(GetDlgItem(IDC_RADIO_AND))
 		DDX_Radio(pDX, IDC_RADIO_AND, m_nSearchLogic);
+	if (GetDlgItem(IDC_SEARCH_CASE_INSENSITIVE))
+		DDX_Check(pDX, IDC_SEARCH_CASE_INSENSITIVE, m_nCaseInsensitive);
 	if(GetDlgItem(IDC_SEARCH_TEXT))
 		DDX_Text(pDX, IDC_SEARCH_TEXT, m_strSearchKeywords);
 	//}}AFX_DATA_MAP
@@ -63,4 +67,9 @@ int CSearchDialog::GetTarget()
 int CSearchDialog::GetSearchLogic()
 {
 	return m_nSearchLogic;
+}
+
+bool CSearchDialog::GetCaseInsensitive()
+{
+	return m_nCaseInsensitive != 0;
 }

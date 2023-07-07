@@ -26,11 +26,13 @@ public:
 	int m_nSearchByName;
 	int m_nSearchByData;
 	int m_nSearchLogic;
+	int m_nCaseInsensitive;
 	CString	m_strSearchKeywords;
 	//}}AFX_DATA
 
 	int GetTarget();
 	int GetSearchLogic();
+	bool GetCaseInsensitive();
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。

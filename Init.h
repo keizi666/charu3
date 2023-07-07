@@ -297,6 +297,7 @@ public:
 	int m_nSearchTarget;
 	int m_nSearchLogic;
 	CString m_strSearchKeywords;
+	bool m_bSearchCaseInsensitive;
 	int m_nSelectID;
 	int m_nTreeID;
 	int m_nRecNumber;

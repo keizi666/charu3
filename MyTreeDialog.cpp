@@ -1014,6 +1014,7 @@ void CMyTreeDialog::OnListSearch()
 	if (nRet == IDOK) {
 		theApp.m_ini.m_nSearchTarget = SearchDlg.GetTarget();
 		theApp.m_ini.m_nSearchLogic = SearchDlg.GetSearchLogic();
+		theApp.m_ini.m_bSearchCaseInsensitive = SearchDlg.GetCaseInsensitive();
 		theApp.m_ini.m_strSearchKeywords = SearchDlg.m_strSearchKeywords;
 
 		HTREEITEM hSearchItem = m_pTreeCtrl->searchItem(nullptr);

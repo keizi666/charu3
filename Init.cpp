@@ -124,6 +124,7 @@ void CInit::initialize()
 	m_DialogSize.y = static_cast<LONG>(CGeneral::getSettingNumber(m_state, "treeview.height", 350));
 	m_nSearchTarget = static_cast<int>(CGeneral::getSettingNumber(m_state, "find.target", SEARCH_TARGET_NAME));
 	m_nSearchLogic = static_cast<int>(CGeneral::getSettingNumber(m_state, "find.logic", SEARCH_TARGET_DATA));
+	m_bSearchCaseInsensitive = CGeneral::getSettingBool(m_state, "find.caseInsensitive", true);
 	m_strSearchKeywords = CGeneral::getSettingCString(m_state, "find.keywords", _T(""));
 	m_nSelectID = static_cast<int>(CGeneral::getSettingNumber(m_state, "internal.selectId", -1));
 	{
@@ -315,6 +316,7 @@ void CInit::writeEnvInitData()
 	m_state["treeview.height"] = m_DialogSize.y;
 	m_state["find.target"] = m_nSearchTarget;
 	m_state["find.logic"] = m_nSearchLogic;
+	m_state["find.caseInsensitive"] = m_bSearchCaseInsensitive;
 	m_state["find.keywords"] = CGeneral::ConvertUnicodeToUTF8(m_strSearchKeywords);
 	m_state["internal.selectId"] = m_nSelectID;
 	m_state["internal.treeId"] = m_nTreeID;

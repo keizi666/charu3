@@ -28,6 +28,9 @@ namespace {
 
 	bool findKeywords(CString text, std::vector<CString> words)
 	{
+		if (theApp.m_ini.m_bSearchCaseInsensitive) {
+			text.MakeLower();
+		}
 		bool found = (theApp.m_ini.m_nSearchLogic == SEARCH_LOGIC_AND);
 		for (std::vector<CString>::iterator it = words.begin(); it != words.end(); it++) {
 			bool matched = (text.Find(*it) != -1);
@@ -1292,6 +1295,9 @@ HTREEITEM CCharu3Tree::searchItem(HTREEITEM hStartItem)
 		int curPos = 0;
 		resToken = strKeywords.Tokenize(tokens, curPos);
 		while (resToken != _T("")) {
+			if (theApp.m_ini.m_bSearchCaseInsensitive) {
+				resToken.MakeLower();
+			}
 			words.push_back(resToken);
 			resToken = strKeywords.Tokenize(tokens, curPos);
 		}
