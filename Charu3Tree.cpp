@@ -1348,23 +1348,25 @@ HTREEITEM CCharu3Tree::searchItem(int nKind,int nLogic,CString strKey,HTREEITEM 
 //---------------------------------------------------
 HTREEITEM CCharu3Tree::searchTitle(HTREEITEM hStartItem, CString strKey, bool makeLower)
 {
+	if (!hStartItem) {
+		return nullptr;
+	}
+
 	HTREEITEM hItem = hStartItem;
-	int count = 0;
-	while (hItem) {
-		if (hItem == hStartItem && count > 0) {
-			return nullptr;
-		}
-		++count;
+	do {
 		CString itemName = getDataPtr(hItem)->m_strTitle;
 		if (makeLower) {
 			itemName.MakeLower();
 		}
 		if (itemName.Find(strKey) == 0) {
-			break;
+			return hItem; // matched
 		}
+		// try next
 		hItem = getTrueNextItem(hItem);
-	}
-	return hItem;
+	} while (hItem && hItem != hStartItem);
+
+	// not found
+	return nullptr;
 }
 
 //---------------------------------------------------
