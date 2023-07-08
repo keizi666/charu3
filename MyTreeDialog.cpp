@@ -789,6 +789,10 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 
 void CMyTreeDialog::closePopup()
 {
+	if (m_bFind) {
+		m_findDialog->DestroyWindow();
+		m_bFind = false;
+	}
 	::PostMessage(theApp.getAppWnd(), WM_TREE_CLOSE, IDCANCEL, NULL);
 	m_isInitOK = false;
 	KillTimer(CHARU_QUICK_TIMER);
@@ -800,6 +804,10 @@ void CMyTreeDialog::closePopup()
 //---------------------------------------------------
 void CMyTreeDialog::enterData(STRING_DATA* dataPtr)
 {
+	if (m_bFind) {
+		m_findDialog->DestroyWindow();
+		m_bFind = false;
+	}
 	m_selectDataPtr = dataPtr;
 	::PostMessage(theApp.getAppWnd(), WM_TREE_CLOSE, IDOK, NULL);
 	m_isInitOK = false;
