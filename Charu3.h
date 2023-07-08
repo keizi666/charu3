@@ -79,6 +79,10 @@
 #define WM_TREE_CLOSE  (WM_USER+102)
 #define WM_TIPS_CHANGE (WM_USER+103)
 #define WM_KEY_HOOK    (WM_USER+104)
+#define WM_FIND_CLOSE  (WM_USER+105)
+#define WM_FIND_NEXT   (WM_USER+106)
+#define WM_FIND_PREV   (WM_USER+107)
+#define WM_FIND_ONCE   (WM_USER+108)
 
 //ポップアップ位置種別
 #define POPUP_POS_CARET	0

@@ -12,6 +12,7 @@
 // MyTreeDialog.h : ヘッダー ファイル
 #include "resource.h"
 #include "Charu3Tree.h"
+#include "SerchDialog.h"
 
 //---------------------------------------------------
 // CMyTreeDialog ダイアログ
@@ -77,8 +78,8 @@ protected:
 
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CMyTreeDialog)
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL OnInitDialog();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnEdit();
 	afx_msg void OnDelete();
 	afx_msg void OnRename();
@@ -108,7 +109,8 @@ protected:
 	afx_msg void OnRclickMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeydownMyTree(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnKillFocusMyTree(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSetFocusMyTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnNcPaint();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
@@ -122,8 +124,12 @@ private:
 	void popupMenu(CPoint point);
 	void changeTipString(STRING_DATA data);
 	bool selectByTyping(UINT uKeyCode);
+	void GetFindParam();
+	void FindNext();
 
 	bool m_bCheckbox;
+	bool m_bFind;
+	CSearchDialog* m_findDialog;
 };
 
 //{{AFX_INSERT_LOCATION}}

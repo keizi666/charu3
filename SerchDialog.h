@@ -23,16 +23,18 @@ public:
 // ダイアログ データ
 	//{{AFX_DATA(CSerchDialog)
 	enum { IDD = IDD_SEARCH };
-	int m_nSearchByName;
-	int m_nSearchByData;
-	int m_nSearchLogic;
-	int m_nCaseInsensitive;
-	CString	m_strSearchKeywords;
+	CEdit	m_ctrlSearchText;
+	CButton m_ctrlSearchByName;
+	CButton m_ctrlSearchByData;
+	CButton m_ctrlSearchAnd;
+	CButton m_ctrlSearchOr;
+	CButton m_ctrlCaseInsensitive;
 	//}}AFX_DATA
 
 	int GetTarget();
 	int GetSearchLogic();
 	bool GetCaseInsensitive();
+	CString GetSearchText();
 
 // オーバーライド
 	// ClassWizard は仮想関数のオーバーライドを生成します。
@@ -45,8 +47,15 @@ public:
 protected:
 	// 生成されたメッセージ マップ関数
 	//{{AFX_MSG(CSerchDialog)
+	virtual BOOL OnInitDialog();
+	virtual void OnCancel();
+	virtual void OnOK();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	void OnFindNext();
 };
 
 //{{AFX_INSERT_LOCATION}}

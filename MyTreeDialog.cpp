@@ -90,6 +90,8 @@ CMyTreeDialog::CMyTreeDialog(CWnd* pParent /*=NULL*/)
     , m_cOlgFont(nullptr)
     , m_strQuickKey("")
     , m_bCheckbox(false)
+	, m_bFind(false)
+	, m_findDialog(nullptr)
 	{
 	//{{AFX_DATA_INIT(CMyTreeDialog)
 	//}}AFX_DATA_INIT
@@ -141,7 +143,8 @@ BEGIN_MESSAGE_MAP(CMyTreeDialog, CDialog)
 	ON_COMMAND(IDML_OPTION, OnOption)
 	ON_NOTIFY(NM_RCLICK, IDC_MY_TREE, OnRclickMyTree)
 	ON_NOTIFY(NM_CLICK, IDC_MY_TREE, OnClickMyTree)
-	ON_NOTIFY(NM_KILLFOCUS, IDC_MY_TREE, OnKillfocusMyTree)
+	ON_NOTIFY(NM_KILLFOCUS, IDC_MY_TREE, OnKillFocusMyTree)
+	ON_NOTIFY(NM_SETFOCUS, IDC_MY_TREE, OnSetFocusMyTree)
 	ON_NOTIFY(TVN_KEYDOWN, IDC_MY_TREE, OnKeydownMyTree)
 	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_MY_TREE, OnBeginlabeleditMyTree)
 	ON_NOTIFY(TVN_ENDLABELEDIT, IDC_MY_TREE, OnEndlabeleditMyTree)
@@ -159,6 +162,8 @@ BOOL CMyTreeDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	m_pTreeCtrl->ModifyStyle(NULL, TVS_SHOWSELALWAYS);
+
 	m_toolTip.Create(this, TTS_ALWAYSTIP);
 	m_toolTip.SetMaxTipWidth(400);
 
@@ -169,6 +174,9 @@ BOOL CMyTreeDialog::OnInitDialog()
 	m_hDLL = ::LoadLibrary(_T("user32"));
 	m_pExStyle = m_hDLL != 0 ? (PFUNC)::GetProcAddress(m_hDLL, "SetLayeredWindowAttributes") : NULL;
 	m_PopupMenu.LoadMenu(MAKEINTRESOURCE(IDR_LISTMENU));//メニュークラスにメニューを読む
+	if (!m_findDialog) {
+		m_findDialog = new CSearchDialog(this);
+	}
 	return TRUE;
 }
 
@@ -340,6 +348,10 @@ void CMyTreeDialog::OnSize(UINT nType, int cx, int cy)
 BOOL CMyTreeDialog::DestroyWindow()
 {
 	m_toolTip.DelTool(m_pTreeCtrl);
+	if (m_findDialog) {
+		delete m_findDialog;
+		m_findDialog = nullptr;
+	}
 	return CDialog::DestroyWindow();
 }
 
@@ -407,19 +419,24 @@ void CMyTreeDialog::OnClickMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 //---------------------------------------------------
-//関数名	OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+//関数名	OnKillFocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 //機能		ツリーのフォーカスが外れたら隠す
 //---------------------------------------------------
-void CMyTreeDialog::OnKillfocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+void CMyTreeDialog::OnKillFocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
 
-	if (m_isInitOK && !m_isModal) {
+	if (m_isInitOK && !m_isModal && !m_bFind) {
 		::PostMessage(theApp.getAppWnd(), WM_TREE_CLOSE, IDCANCEL, NULL);
 		KillTimer(CHARU_QUICK_TIMER);
 		m_isInitOK = false;
 	}
 	*pResult = 0;
+}
+
+void CMyTreeDialog::OnSetFocusMyTree(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
 }
 
 //---------------------------------------------------
@@ -551,6 +568,30 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 		//		return true;
 	}
 
+	if (pMsg->message == WM_FIND_CLOSE) {
+		if (m_bFind) {
+			GetFindParam();
+			m_findDialog->DestroyWindow();
+			m_bFind = false;
+			RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+		}
+	}
+	else if (pMsg->message == WM_FIND_ONCE) {
+		if (m_bFind) {
+			GetFindParam();
+			FindNext();
+			m_findDialog->DestroyWindow();
+			m_bFind = false;
+			RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
+		}
+	}
+	else if (pMsg->message == WM_FIND_NEXT) {
+		if (m_bFind) {
+			GetFindParam();
+			FindNext();
+		}
+	}
+
 	if (pMsg->message == WM_KEYDOWN) {
 		if (!m_pTreeCtrl->IsDragging()) {
 			MSG msg;
@@ -655,11 +696,10 @@ BOOL CMyTreeDialog::PreTranslateMessage(MSG* pMsg)
 		}
 		// F3 : Find Next
 		else if (pMsg->wParam == VK_F3 && !m_pTreeCtrl->IsDragging() && !m_isModal) {
-			HTREEITEM hSearchItem = m_pTreeCtrl->GetSelectedItem();
-			hSearchItem = m_pTreeCtrl->searchItem(hSearchItem);
-			if (hSearchItem) {
-				m_pTreeCtrl->SelectItem(hSearchItem);
+			if (m_bFind) {
+				GetFindParam();
 			}
+			FindNext();
 		}
 		// Ctrl+F : Open Find dialog
 		else if (::GetKeyState(VK_CONTROL) < 0 && pMsg->wParam == 'F' && !m_pTreeCtrl->IsDragging() && !m_isModal) {
@@ -1003,26 +1043,12 @@ void CMyTreeDialog::OnCloseAll()
 //---------------------------------------------------
 void CMyTreeDialog::OnListSearch()
 {
-	if (m_isModal) {
+	if (m_isModal || m_bFind || !m_findDialog) {
 		return;
 	}
-	m_isModal = true;
-	CSearchDialog SearchDlg(this);
-	SearchDlg.m_strSearchKeywords = theApp.m_ini.m_strSearchKeywords;
-	int nRet = SearchDlg.DoModal();
-	RedrawWindow(NULL, NULL, RDW_FRAME | RDW_INVALIDATE);
-	if (nRet == IDOK) {
-		theApp.m_ini.m_nSearchTarget = SearchDlg.GetTarget();
-		theApp.m_ini.m_nSearchLogic = SearchDlg.GetSearchLogic();
-		theApp.m_ini.m_bSearchCaseInsensitive = SearchDlg.GetCaseInsensitive();
-		theApp.m_ini.m_strSearchKeywords = SearchDlg.m_strSearchKeywords;
-
-		HTREEITEM hSearchItem = m_pTreeCtrl->searchItem(nullptr);
-		if (hSearchItem) {
-			m_pTreeCtrl->SelectItem(hSearchItem);
-		}
-	}
-	m_isModal = false;
+	m_bFind = true;
+	m_findDialog->Create(IDD_SEARCH, this);
+	m_findDialog->ShowWindow(SW_SHOW);
 }
 
 void CMyTreeDialog::OnCheckItem()
@@ -1283,4 +1309,25 @@ void CMyTreeDialog::changeTipString(STRING_DATA data)
 	}
 	m_toolTip.UpdateTipText(strTip, m_pTreeCtrl); // NOTE: Experiments have shown that if strTip exceeds 1024 characters, the app will crash after MFC fails with Debug Assertion Failed.
 	m_toolTip.Activate(TRUE);
+}
+
+void CMyTreeDialog::GetFindParam()
+{
+	if (m_findDialog) {
+		theApp.m_ini.m_nSearchTarget = m_findDialog->GetTarget();
+		theApp.m_ini.m_nSearchLogic = m_findDialog->GetSearchLogic();
+		theApp.m_ini.m_bSearchCaseInsensitive = m_findDialog->GetCaseInsensitive();
+		theApp.m_ini.m_strSearchKeywords = m_findDialog->GetSearchText();
+		theApp.m_ini.writeEnvInitData();
+	}
+}
+
+void CMyTreeDialog::FindNext()
+{
+	HTREEITEM hSearchItem = m_pTreeCtrl->GetSelectedItem();
+	hSearchItem = m_pTreeCtrl->searchItem(hSearchItem);
+	if (hSearchItem) {
+		m_pTreeCtrl->SelectItem(hSearchItem);
+		//SetFocus();
+	}
 }

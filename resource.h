@@ -86,6 +86,9 @@
 #define IDC_OPT_TOUMEI_SLIDER           1041
 #define IDC_OPT_SELECT_BY_TYPING_AUTO_EXPAND 1041
 #define IDC_SEARCH_CASE_INSENSITIVE     1041
+#define IDC_FIND_CLOSE                  1042
+#define IDC_FIND_NEXT                   1043
+#define IDC_FIND_PREV                   1044
 #define IDC_EDIT_MACRO_COMBO            1048
 #define IDC_EDIT_DATA_MACRO_COMBO       1049
 #define IDC_OPT_POPUP_POS               1054
@@ -118,6 +121,7 @@
 #define IDC_OPT_TOOLTIP_01              1087
 #define IDC_OPT_TOOLTIP_02              1088
 #define IDC_OPT_TOOLTIP_03              1089
+#define IDC_SEARCH_LOGIC                1090
 #define IDM_EXIT                        32771
 #define IDM_OPTION                      32772
 #define IDM_ABOUT                       32773
@@ -257,7 +261,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        175
 #define _APS_NEXT_COMMAND_VALUE         32818
-#define _APS_NEXT_CONTROL_VALUE         1041
+#define _APS_NEXT_CONTROL_VALUE         1091
 #define _APS_NEXT_SYMED_VALUE           105
 #endif
 #endif
