@@ -1336,6 +1336,8 @@ void CMyTreeDialog::FindNext()
 	hSearchItem = m_pTreeCtrl->searchItem(hSearchItem);
 	if (hSearchItem) {
 		m_pTreeCtrl->SelectItem(hSearchItem);
-		//SetFocus();
+	}
+	else {
+		PlaySound((LPCTSTR)SND_ALIAS_SYSTEMASTERISK, NULL, SND_ASYNC | SND_ALIAS_ID);
 	}
 }
