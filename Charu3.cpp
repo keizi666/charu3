@@ -1814,16 +1814,10 @@ void CCharu3App::changeClipBord(CString strClipBord)
 //---------------------------------------------------
 void CCharu3App::fifoClipbord()
 {
-	if (!m_isStockMode || m_nPhase != PHASE_IDOL) {
+	if (!m_isStockMode) {
 		return;
 	}
 
-	if (m_ini.m_bDebug) {
-		CGeneral::writeLog(m_ini.m_strDebugLog, _T("fifoClipbord\n"), _ME_NAME_, __LINE__);
-	}
-
-	UnregisterHotKey(NULL, HOTKEY_PASTE);
-	m_nPhase = PHASE_LOCK;
 	if (m_ini.m_fifo.m_nFifo) {
 		CString text;
 		HTREEITEM hItem = m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo);
@@ -1848,32 +1842,20 @@ void CCharu3App::fifoClipbord()
 			}
 		}
 	}
-	//仮想的にCtrl+Vを押す
-	UINT uVkCode = NULL;
-	if(m_keySet.m_nMessage == 1) {//Charu2Pro方式イベント方式
-		keyUpDownC2(m_keySet.m_uMod_Paste,m_keySet.m_uVK_Paste,KEY_DOWN);
 
-	}
-	else {
-		keyUpDown(m_keySet.m_uMod_Paste,m_keySet.m_uVK_Paste,KEY_DOWN);
-	}
-	//キーを離す処理をする
-	if(::GetAsyncKeyState(VK_RCONTROL) < 0 || ::GetAsyncKeyState(VK_LCONTROL) < 0 || ::GetAsyncKeyState(VK_CONTROL) < 0)
-		uVkCode |= VK_CONTROL;
-	if(::GetAsyncKeyState(VK_RSHIFT) < 0 || ::GetAsyncKeyState(VK_LSHIFT) < 0 || ::GetAsyncKeyState(VK_SHIFT) < 0)
-		uVkCode |= VK_SHIFT;
-	if(::GetAsyncKeyState(VK_RMENU) < 0 || ::GetAsyncKeyState(VK_LMENU) < 0 || ::GetAsyncKeyState(VK_MENU) < 0)
-		uVkCode |= VK_MENU;
-
-	keybd_event(uVkCode, (BYTE)MapVirtualKey(uVkCode, 0), KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-
-	RegisterHotKey(NULL,HOTKEY_PASTE,m_keySet.m_uMod_Paste,m_keySet.m_uVK_Paste);//ペーストキー
+	// It comes in here by pressing the paste key, which is registered as a
+	// hotkey. So this key combination should be currently held down.
+	// Thus, if we leave the modifier key as it isand send events that
+	// release the main keyand press it again, the target window will
+	// recognize that the paste key is pressed.
+	UnregisterHotKey(NULL, HOTKEY_PASTE);
+	keybd_event(m_keySet.m_uVK_Paste, 0, KEYEVENTF_KEYUP, 0);
+	keybd_event(m_keySet.m_uVK_Paste, 0, 0, 0);
+	RegisterHotKey(NULL, HOTKEY_PASTE, m_keySet.m_uMod_Paste, m_keySet.m_uVK_Paste);
 
 	if (m_ini.m_fifo.m_bAutoOff && !m_pTree->getOneTimeText(m_ini.m_fifo.m_nFifo)) {
 		toggleStockMode(); // Turn off stock mode due to one-time item is gone
 	}
-
-	m_nPhase = PHASE_IDOL;
 }
 
 //---------------------------------------------------
