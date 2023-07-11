@@ -229,9 +229,11 @@ public:
 public:
 	//{{AFX_MSG(CCharu3App)
 	afx_msg void OnExit();
-	afx_msg void OnOption();
 	afx_msg void OnAbout();
-	afx_msg void OnHelp();
+	afx_msg void OnIssues();
+	afx_msg void OnDiscussions();
+	afx_msg void OnWiki();
+	afx_msg void OnOption();
 	afx_msg void OnAddData();
 	afx_msg void OnChangData();
 	afx_msg void OnExport();

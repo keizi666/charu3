@@ -86,7 +86,6 @@
 #define IDC_OPT_TOUMEI_SLIDER           1041
 #define IDC_OPT_SELECT_BY_TYPING_AUTO_EXPAND 1041
 #define IDC_SEARCH_CASE_INSENSITIVE     1041
-#define IDC_FIND_CLOSE                  1042
 #define IDC_FIND_NEXT                   1043
 #define IDC_FIND_PREV                   1044
 #define IDC_EDIT_MACRO_COMBO            1048
@@ -128,8 +127,10 @@
 #define IDM_STOCK_STOP                  32774
 #define IDM_DATA_SAVE                   32775
 #define IDM_RESET_TREE                  32781
-#define IDM_HELP                        32796
 #define IDM_ADD_DATA                    32797
+#define IDM_WIKI                        32818
+#define IDM_ISSUES                      32819
+#define IDM_DISCUSSIONS                 32821
 #define IDM_CHANG_DATA                  32825
 #define IDML_EDIT                       38000
 #define IDML_DELETE                     38001
@@ -260,7 +261,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        175
-#define _APS_NEXT_COMMAND_VALUE         32818
+#define _APS_NEXT_COMMAND_VALUE         32822
 #define _APS_NEXT_CONTROL_VALUE         1091
 #define _APS_NEXT_SYMED_VALUE           105
 #endif

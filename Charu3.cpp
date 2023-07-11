@@ -54,9 +54,11 @@ BOOL CALLBACK MonitorEnumFunc(HMONITOR hMonitor,HDC hdc,LPRECT rect,LPARAM lPara
 BEGIN_MESSAGE_MAP(CCharu3App, CWinApp)
 	//{{AFX_MSG_MAP(CCharu3App)
 	//ON_COMMAND(IDM_EXIT, OnExit)
-	ON_COMMAND(IDM_OPTION, OnOption)
 	ON_COMMAND(IDM_ABOUT, OnAbout)
-	ON_COMMAND(IDM_HELP, OnHelp)
+	ON_COMMAND(IDM_ISSUES, OnIssues)
+	ON_COMMAND(IDM_DISCUSSIONS, OnDiscussions)
+	ON_COMMAND(IDM_WIKI, OnWiki)
+	ON_COMMAND(IDM_OPTION, OnOption)
 	ON_COMMAND(IDM_STOCK_STOP, OnStockStop)
 	ON_COMMAND(IDM_ADD_DATA, OnAddData)
 	ON_COMMAND(IDM_CHANG_DATA, OnChangData)
@@ -2154,10 +2156,17 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
 //---------------------------------------------------
-//ä÷êîñº	OnHelp()
-//ã@î\		ÉwÉãÉv
-//---------------------------------------------------
-void CCharu3App::OnHelp()
+void CCharu3App::OnIssues()
+{
+	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE/issues"), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void CCharu3App::OnDiscussions()
+{
+	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE/discussions"), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void CCharu3App::OnWiki()
 {
 	ShellExecute(NULL, NULL, _T("https://github.com/itagagaki/charu3-SE/wiki"), NULL, NULL, SW_SHOWNORMAL);
 }

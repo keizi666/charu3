@@ -542,7 +542,9 @@ BEGIN
         MENUITEM "設定...",                       IDM_OPTION
         POPUP "ヘルプ(&H)"
         BEGIN
-            MENUITEM "ヘルプ(&H)",                     IDM_HELP
+            MENUITEM "問題の報告・閲覧(&I)",                IDM_ISSUES
+            MENUITEM "ディスカッション(&D)",                IDM_DISCUSSIONS
+            MENUITEM "ウィキ(&W)",                     IDM_WIKI
             MENUITEM "バージョン情報(&V)",                 IDM_ABOUT
         END
         MENUITEM "終了(&X)",                      IDM_EXIT
@@ -1509,7 +1511,9 @@ BEGIN
         MENUITEM "Settings...",                 IDM_OPTION
         POPUP "Help(&H)"
         BEGIN
-            MENUITEM "Help(&H)",                    IDM_HELP
+            MENUITEM "Issues(&I)",                  IDM_ISSUES
+            MENUITEM "Discussions(&D)",             IDM_DISCUSSIONS
+            MENUITEM "Wiki(&W)",                    IDM_WIKI
             MENUITEM "About Charu3 SE(&V)",         IDM_ABOUT
         END
         MENUITEM "Exit(&X)",                    IDM_EXIT
